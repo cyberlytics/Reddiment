@@ -1,0 +1,109 @@
+%\documentclass[letterpaper, 10 pt, conference]{ieeeconf}
+\documentclass[a4paper, 10pt, conference]{ieeeconf}
+
+\overrideIEEEmargins
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage[ngerman]{babel}
+\usepackage[style=ieee]{biblatex} 
+
+\addbibresource{references.bib}
+
+\graphicspath{ {./images/} }  
+
+\title{\LARGE \bf
+Reddiment: Reddit Sentiment Analyse
+}
+
+\author{Tobias Bauer, Fabian Beer,  Daniel Holl,  Adrian Imeraj,  Konrad Schweiger,  Philipp Stangl, und Wolfgang Weigl
+}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\pagestyle{empty}
+
+\section{Einleitung}
+
+Die GameStop (NYSE: GME) Aktie hat Anfang 2021 eine längere Periode mit schnellen, drastischen Kursschwankungen erlebt. Der Subreddit,  ein Unterforum von Reddit,  r/wallstreetbets spielte dabei eine Rolle. r/wallstreetbets, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren. Dieser Fall wurde von \citeauthor{wang2021} \cite{wang2021} anhand von Sentiment Analyse betrachtet. Häufig wird Sentiment Analyse dazu verwendet, ob ein Text negative, positive oder neutrale Emotionen enthält. Im Rahmen der Modularbeit in \textit{Big Data and Cloud Computing} stellen wir Reddiment vor - eine webbasiertes Dashboard zur Sentiment Analyse von Subreddits.  
+
+Die weiteren Abschnitte des Konzeptpapiers sind wie folgt aufgebaut: In Abschnitt~\ref{s:verwandte_arbeiten} wird eine Auswahl verwandter Arbeiten vorgestellt.  In Abschnitt~\ref{s:anforderungen} werden die Anforderungen in Form von User Stories wiedergegeben.  Abschließend wird kurz auf die Methoden in Abschnitt~\ref{s:methoden} eingegangen, gefolgt von den Literaturverzeichnis am Ende. 
+
+\section{Verwandte Arbeiten} \label{s:verwandte_arbeiten}
+
+Beispielsweise hat sich \citeauthor{lubitz2017} \cite{lubitz2017} mit möglichen Treibern von Kapitalmärkten beschäftigt. Anhand von Sentiment Analyse wurden Finanznews die auf Reddit und Financial Times erschienen sind verglichen.  Die Vorhersagekraft von Reddit auf künftige Marktbewegungen ist etwas besser als bei der Analyse von Zeitungen. 
+
+Die kommerzielle Plattform Brandwatch \cite{brandwatch} ermöglicht die Analyse vom Volumen der Gespräche bis zum Sentiment anhand eines Dashboards. So kann man sehen, welche Themen am häufigsten besprochen werden oder welcher Subreddit am aktivsten ist. Es lassen sich Abfragen zu beliebigen Begriffen aufsetzen und mithilfe der Booleschen Operatoren können die Abfragen umfassend und spezifisch sein. 
+
+\section{Anforderungen} \label{s:anforderungen}
+
+In der Anforderungsanlyse wurden drei Stakeholder identifiziert: Benutzer, Entwickler, und DevOps Engineer.  Deren Anforderungen werden in diesem Abschnitt in Form von User Stories beschrieben. 
+
+\subsection{Subreddit Suche}
+
+Als Benutzer möchte ich Subreddits nach Schlagwörtern durchsuchen können,  damit ich .  Akzeptanzkriterien sind:
+\begin{itemize}
+\item Weboberfläche mit Suchfelder
+\item TODO
+\end{itemize}
+
+\subsection{Hypeverlauf}
+
+Als Benutzer möchte ich einen Graph zum Hyperverlauf,  damit ich \dots.  Akzeptanzkriterien sind:
+\begin{itemize}
+\item TODO
+\item Überlagerung des Hypeverlaufes mit dem Aktienkurs.
+\end{itemize}
+
+\subsection{Anomalieerkennung}
+
+Als Benutzer möchte ich benachrichtigt werden wenn Anomalien in bestimmten Themen auftreten,  damit ich \dots.  Akzeptanzkriterien sind:
+\begin{itemize}
+\item TODO
+\end{itemize}
+
+\subsection{Monorepo}
+
+Als Entwickler möchte ich ein Monorepo, damit ich zu jeder Zeit einen konsistenten Stand des Gesamtprojekts habe.  Akzeptanzkriterien sind:
+\begin{itemize}
+\item Der Code von Backend und Frontend liegt vollständig im Repository vor.
+\item Building-,Test- und Linting-Tools sind konfiguiert und funktionieren.
+\item Im Repository ist eine Anleitung zur lokalen Projekteinrichtung hinterlegt.
+\end{itemize}
+
+\subsection{Entwicklungsdatenbank}
+
+Als Entwickler möchte ich eine Entwicklungsdatenbank, damit ich die Funktionalität abgesondert von der Produktionsumgebung umsetzen, als auch evaluieren kann.  Akzeptanzkriterien sind:
+\begin{itemize}
+\item Das Datenschema der Entwicklungsdatenbank entspricht der in der Produktion eingesetzten Datenbank.
+\item Die Entwicklungsdatenbank wird mit realen Reddit Daten populiert. 
+\end{itemize}
+
+\subsection{Cloud-Kompatibilität}
+
+Als DevOps-Engineer möchte ich eine Cloud-kompatible Anwendung für eine Bereitstellung der Anwendung.  Akzeptanzkriterien sind:
+\begin{itemize}
+\item Die einzelnen Teile der Anwendung sind in Containern.
+\item Eine grundlegende Secrets-Verwaltung zur sicheren Aufbewahrung von Zugangsinformationen ist eingerichtet.
+\item (Optional) Die prinzipielle Erreichbarkeit ist sichergestellt,  sodass bei der Abschlusspräsentation eine Demo der Anwendung in der Cloud möglich ist.
+\item (Optional) Die eingeschränkte Erreichbarkeit des Spiels in der Cloud ist dokumentiert.
+\end{itemize}
+
+\subsection{Testabdeckung}
+
+Als Entwickler möchte ich eine ausreichende Testabdeckung,  damit Fehler frühzeitig erkannt werden.  Akzeptanzkriterien sind:
+\begin{itemize}
+\item Die Abdeckungsrate liegt bei mindestens 50\%.
+\item TODO
+\end{itemize}
+
+\section{Methoden} \label{s:methoden}
+Für die Repräsentation der Anwendung im client-seitigen Frontend wird ein geeignetes Framework verwendet.  Zur Speicherung der Daten kommt voraussichtlich ElasticSearch zum Einsatz. Zwischen den beiden Instanzen befindet sich ExpressJS, mit Node.js als Laufzeitumgebung, im server-seitigen Backend.  Die Kommunikation zwischen Frontend und Backend wird über eine RESTful-API abgewickelt. Um eine fehlerfreie Anwendung zu entwickeln wird zum einen TypeScript als projektweite Programmiersprache verwendet.  Dadurch sollen Fehler bereits zur Kompilierzeit identifiziert werden können.  Zum Anderen wird ein geeignetes Test-Framework für Unit-Tests verwendet. 
+
+\printbibliography
+
+\end{document}
