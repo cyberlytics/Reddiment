@@ -29,39 +29,39 @@ Reddiment: Reddit Sentiment-Analyse
 
 \section{Einleitung}
 
-Die GameStop-Aktie (NYSE: GME) hatte Anfang 2021 eine längere Periode mit schnellen, drastischen Kursschwankungen erlebt. Der Subreddit,  ein Unterforum von Reddit,  \texttt{r/wallstreetbets} spielte dabei eine Rolle. \texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren. Im Fall der GameStop-Aktie wurde der Subreddit von \citeauthor{wang2021}~\cite{wang2021} in Bezug auf Vorhersagen durch Sentiment-Analyse betrachtet. Häufig wird Sentiment-Analyse dazu verwendet, um zu bestimmen, ob ein Text negative, positive oder neutrale Emotionen enthält.
+Die GameStop-Aktie (NYSE: GME) hatte Anfang 2021 eine längere Periode mit schnellen, drastischen Kursschwankungen erlebt. Der Subreddit \texttt{r/wallstreetbets}, ein Unterforum von Reddit, spielte dabei eine Rolle. \texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren. Im Fall der GameStop-Aktie wurde der Subreddit von \citeauthor{wang2021}~\cite{wang2021} in Bezug auf Vorhersagen durch Sentiment-Analyse betrachtet. Häufig wird Sentiment-Analyse dazu verwendet, um zu bestimmen, ob ein Text negative, positive oder neutrale Emotionen enthält.
 
-In den weiteren Abschnitten des Konzeptpapiers stellen wir \textit{Reddiment} vor -- ein webbasiertes Dashboard zur Sentiment-Analyse von Subreddits. In Abschnitt~\ref{s:verwandte_arbeiten} wird eine Auswahl verwandter Arbeiten vorgestellt.  In Abschnitt~\ref{s:anforderungen} werden die Anforderungen in Form von User Stories wiedergegeben.  Abschließend wird kurz auf die Methoden in Abschnitt~\ref{s:methoden} eingegangen, gefolgt vom Literaturverzeichnis am Ende.
+In den weiteren Abschnitten des Konzeptpapiers stellen wir \textit{Reddiment} vor -- ein webbasiertes Dashboard zur Sentiment-Analyse von Subreddits. In Abschnitt~\ref{s:verwandte_arbeiten} wird eine Auswahl verwandter Arbeiten vorgestellt. In Abschnitt~\ref{s:anforderungen} werden die Anforderungen in Form von User Stories wiedergegeben. Abschließend wird kurz auf die Methoden in Abschnitt~\ref{s:methoden} eingegangen, gefolgt vom Literaturverzeichnis am Ende.
 
 
 \section{Verwandte Arbeiten} \label{s:verwandte_arbeiten}
 
-Beispielsweise hat sich \citeauthor{lubitz2017}~\cite{lubitz2017} mit möglichen Treibern von Kapitalmärkten beschäftigt. Anhand von Sentiment-Analyse wurden Finanznews, die auf Reddit und Financial Times erschienen sind, verglichen. Die Vorhersagekraft von Beiträgen auf Reddit in Bezug auf künftige Marktbewegungen ist etwas besser als bei der Analyse von Zeitungen.
+\citeauthor{lubitz2017}~\cite{lubitz2017} hat sich beispielsweise mit möglichen Treibern von Kapitalmärkten beschäftigt. Anhand von Sentiment-Analyse wurden Finanznews verglichen, die auf Reddit und in der Financial Times erschienen sind. Die Vorhersagekraft von Beiträgen auf Reddit in Bezug auf künftige Marktbewegungen sei \citeauthor{lubitz2017} zufolge etwas besser als bei der Analyse von Zeitungen.
 
 Die kommerzielle Plattform Brandwatch~\cite{brandwatch} ermöglicht die Analyse des Volumens der Gespräche bis hin zum Sentiment über ein Dashboard. So kann man sehen, welche Themen häufig besprochen werden oder welcher Subreddit aktiv ist. Es lassen sich Abfragen zu beliebigen Begriffen erstellen und mithilfe von booleschen Operatoren können diese Abfragen umfassend und spezifisch sein.
 
 
 \section{Anforderungen} \label{s:anforderungen}
 
-In der Anforderungsanalyse wurden drei Stakeholder identifiziert: Benutzer, Entwickler, und DevOps Engineer.  Deren Anforderungen werden in diesem Abschnitt in Form von User Stories beschrieben.
+In der Anforderungsanalyse wurden drei Stakeholder identifiziert: Benutzer, Entwickler, und DevOps-Engineer. Deren Anforderungen werden in diesem Abschnitt in Form von User Stories beschrieben.
 
 \subsection{Selektion von Subreddits}
 
-Als Benutzer möchte ich Subreddits auswählen können, damit ich basierend auf der Selektion weitere Operationen ausführen kann. Akzeptanzkriterien sind:
+Als Benutzer möchte ich Subreddits auswählen können, damit ich basierend auf der Selektion spezifischere Operationen ausführen kann. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Eingabefeld für Subreddits
-\item Subreddits werden als Namen oder URL des Subreddits eingegeben
-\item Button für Suchauftrag
+\item Eingabefeld für Subreddits.
+\item Subreddits werden als Namen oder URL des Subreddits eingegeben.
+\item Button zur Bestätigung der Selektion.
 \end{itemize}
 
 \subsection{Eingrenzung der Suche}
 
 Als Benutzer möchte ich Schlagwörter spezifizieren können, welche den Suchauftrag eingrenzen. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Eingabefeld für Schlagwörter
-\item Schlagwörter können als beliebige Strings eingegeben werden
-\item Suchauftrag agiert ausschließlich mit diesen Schlagwörter
-\item Zeitliche Eingrenzung der Suche durch vordefinierte Zeitintervalle (z. B. 7 Tage).
+\item Eingabefeld für Schlagwörter.
+\item Schlagwörter können als beliebige Strings eingegeben werden.
+\item Suchauftrag agiert ausschließlich mit diesen Schlagwörter.
+\item Zeitliche Eingrenzung der Suche durch vordefinierte Zeitintervalle (z.B.~7 Tage).
 \end{itemize}
 
 \subsection{Zeitlicher Verlauf des Hypes}
@@ -71,52 +71,51 @@ Als Benutzer möchte ich einen Graph zum Hypeverlauf, damit ich die Zunahme bzw.
 \item Die Aktualität muss sich einstellen lassen auf 1 Tag, 1 Woche, 1 Monat, 3 Monate, 6 Monate.
 \item Die y-Skala muss als absoluten und prozentualen Wert einstellbar sein.
 \item Der Graph muss so skaliert sein, dass der Platz (mind. 90\% vom Graph-Feld) ausreichend genutzt wird.
-\item Die Aktualität wird jede Stunde abgefragt.
 \item Aggregierter Verlauf des Hypes (Zusammengesetzt aus Erwähungsrate und Sentiment der Erwähungen).
 \end{itemize}
 
 \subsection{Verknüpfung mit Aktienkurs}
 
-Als Benutzer möchte ich den zeitlichen Verlauf des Hypes mit dem Aktienkurs verknüpft haben, damit 
+Als Benutzer möchte ich, dass der zeitliche Verlauf des Hypes mit dem Aktienkurs verknüpft dargestellt wird, damit
 \begin{itemize}
 \item Überlagerung des Hypeverlaufes mit dem Aktienkurs.
 \end{itemize}
 
 \subsection{Entwicklungsdatenbank}
 
-Als Entwickler möchte ich eine Entwicklungsdatenbank, damit ich die Funktionalität abgesondert von der Produktionsumgebung umsetzen, als auch evaluieren kann.  Akzeptanzkriterien sind:
+Als Entwickler möchte ich eine Entwicklungsdatenbank, damit ich die Funktionalität abgesondert von der Produktionsumgebung umsetzen und evaluieren kann. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Das Datenschema der Entwicklungsdatenbank entspricht der in der Produktion eingesetzten Datenbank.
-\item Die Entwicklungsdatenbank wird mit realen Reddit Daten populiert.
+\item Das Datenschema der Entwicklungsdatenbank ist mit dem der in der Produktion eingesetzten Datenbank identisch.
+\item Die Entwicklungsdatenbank wird mit realen Reddit-Daten populiert.
 \end{itemize}
 
 \subsection{Testabdeckung}
 
-Als Entwickler möchte ich eine ausreichende Testabdeckung,  damit Fehler frühzeitig erkannt werden.  Akzeptanzkriterien sind:
+Als Entwickler möchte ich eine ausreichende Testabdeckung, damit Fehler frühzeitig erkannt werden.  Akzeptanzkriterien sind:
 \begin{itemize}
 \item Die Abdeckungsrate liegt bei mindestens 50\%.
 \end{itemize}
 
 \subsection{Cloud-Kompatibilität}
 
-Als DevOps-Engineer möchte ich eine Cloud-kompatible Anwendung für eine Bereitstellung der Anwendung.  Akzeptanzkriterien sind:
+Als DevOps-Engineer möchte ich eine Cloud-kompatible Anwendung für eine einfachere Bereitstellung und Skalierung der Anwendung. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Die einzelnen Teile der Anwendung sind in Containern.
+\item Die einzelnen Teile der Anwendung laufen in Containern.
 \item Eine grundlegende Secrets-Verwaltung zur sicheren Aufbewahrung von Zugangsinformationen ist eingerichtet.
 \end{itemize}
 
 \subsection{(Optional) Bereitstellung in der Cloud}
 
-Als DevOps-Engineer möchte ich die Cloud-kompatible Anwendung in der  Bereitstellung der Anwendung.  Akzeptanzkriterien sind:
+Als DevOps-Engineer möchte ich die Cloud-kompatible Anwendung bei einem Cloud-Anbieter bereitstellen.  Akzeptanzkriterien sind:
 \begin{itemize}
-\item Die prinzipielle Erreichbarkeit ist sichergestellt,  sodass bei der Abschlusspräsentation eine Demo der Anwendung in der Cloud möglich ist.
-\item Die eingeschränkte Erreichbarkeit der Awendung in der Cloud ist dokumentiert.
+\item Die prinzipielle Erreichbarkeit ist sichergestellt, sodass bei der Abschlusspräsentation eine Demo der Anwendung in der Cloud möglich ist.
+\item Die eingeschränkte Erreichbarkeit der Anwendung in der Cloud ist dokumentiert.
 \end{itemize}
 
 
 \section{Methoden} \label{s:methoden}
 
-Für die Repräsentation der Anwendung im Client-seitigen Frontend wird ein geeignetes Framework verwendet.  Zur Speicherung der Daten kommt voraussichtlich Elasticsearch zum Einsatz. Ein Node.js-Webserver mit ExpressJS im Server-seitigen Backend stellt die Funktionalität der im Frontend angebotenen Aktionen bereit.  Die Kommunikation zwischen Frontend und Backend wird über eine RESTful-API abgewickelt. Um eine fehlerfreie Anwendung zu entwickeln, wird zum einen TypeScript als projektweite Programmiersprache verwendet. Dadurch sollen Fehler bereits zur Kompilierzeit identifiziert werden können. Zum Anderen wird ein geeignetes Test-Framework für Unit-Tests verwendet.
+Für die Repräsentation der Anwendung im Client-seitigen Frontend wird ein geeignetes Framework verwendet. Zur Speicherung der Daten kommt voraussichtlich Elasticsearch zum Einsatz. Ein Node.js-Webserver mit ExpressJS im Server-seitigen Backend stellt die Funktionalität der im Frontend angebotenen Aktionen bereit. Die Kommunikation zwischen Frontend und Backend wird über eine RESTful-API abgewickelt. Um eine fehlerfreie Anwendung zu entwickeln, wird zum einen TypeScript als projektweite Programmiersprache verwendet. Dadurch sollen Fehler bereits zur Kompilierzeit identifiziert werden können. Zum anderen wird ein geeignetes Test-Framework für Unit-Tests verwendet.
 
 \printbibliography
 
