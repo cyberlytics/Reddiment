@@ -1,7 +1,6 @@
-%\documentclass[letterpaper, 10 pt, conference]{ieeeconf}
-\documentclass[a4paper, 10pt, conference]{ieeeconf}
+\documentclass[a4paper, 10pt, conference]{IEEEtran}
 
-\overrideIEEEmargins
+\IEEEoverridecommandlockouts
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -14,14 +13,21 @@
 
 \graphicspath{ {./images/} }
 
+\begin{document}
+
 \title{\LARGE \bf
 Reddiment: Reddit Sentiment-Analyse
 }
 
-\author{Tobias Bauer, Fabian Beer,  Daniel Holl,  Ardian Imeraj,  Konrad Schweiger,  Philipp Stangl und Wolfgang Weigl
+\author{
+\IEEEauthorblockN{Tobias Bauer}     \IEEEauthorblockA{\textit{t.bauer@oth-aw.de}}\and
+\IEEEauthorblockN{Fabian Beer}      \IEEEauthorblockA{\textit{f.beer@oth-aw.de}}\and
+\IEEEauthorblockN{Daniel Holl}      \IEEEauthorblockA{\textit{d.holl@oth-aw.de}}\and\and[\\\>]\and
+\IEEEauthorblockN{Ardian Imeraj}    \IEEEauthorblockA{\textit{a.imeraj@oth-aw.de}}\and
+\IEEEauthorblockN{Konrad Schweiger} \IEEEauthorblockA{\textit{k.schweiger@oth-aw.de}}\and
+\IEEEauthorblockN{Philipp Stangl}   \IEEEauthorblockA{\textit{p.stangl1@oth-aw.de}}\and
+\IEEEauthorblockN{Wolfgang Weigl}   \IEEEauthorblockA{\textit{w.weigl@oth-aw.de}}\and
 }
-
-\begin{document}
 
 \maketitle
 \thispagestyle{empty}
@@ -60,74 +66,74 @@ Als Benutzer möchte ich Schlagwörter spezifizieren können, welche den Suchauf
 \begin{itemize}
 \item Eingabefeld für Schlagwörter.
 \item Schlagwörter können als beliebige Strings eingegeben werden.
-\item Suchauftrag agiert ausschließlich mit diesen Schlagwörter.
+\item Suchauftrag agiert ausschließlich mit diesen Schlagwörtern.
 \item Zeitliche Eingrenzung der Suche durch vordefinierte Zeitintervalle (z.B.~7 Tage).
 \end{itemize}
 
-\subsection{Visuelle Darstellung der Erwähungung}
+\subsection{Visuelle Darstellung der Erwähnung}
 
-Als Benutzer möchte ich einen Graph der Erwähungsrate der gewälten Begriffe, damit ich die Zunahme bzw. Abnahme des Interesses daran visuell erfassen kann. Akzeptanzkriterien sind:
+Als Benutzer möchte ich einen Graph der Erwähnungsrate der gewählten Begriffe, damit ich die Zunahme bzw. Abnahme des Interesses daran visuell erfassen kann. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Die Aktualität wird über der x-Achse aufgetragen.
-\item Die Aktualität kann variiert werden durch vordefinierte Zeitintervalle (z.B. 7 Tage).
-\item Die Erwähnungsrate der eingegebenen Begriffe wird auf der y-Achse aufgetragen.
-\item Die Erwähnungsrate wird als absoluter Wert dargestellt.
-\item Der Graph muss so skaliert sein, dass das Graph-Feld ausreichend genutzt wird (mind. 90\% Ausnutzung des Platzes).
+\item Zeit wird über die x-Achse aufgetragen.
+\item Visualisiertes Zeitintervall kann aus vordefinierten Zeitintervalle (z.B.~7 Tage) ausgewählt werden.
+\item Erwähnungsrate der eingegebenen Begriffe wird auf der y-Achse aufgetragen.
+\item Erwähnungsrate wird als absoluter Wert dargestellt.
+\item Graph muss so skaliert sein, dass das Graph-Feld ausreichend genutzt wird (Die Platznutzung liegt bei mindestens 90\%).
 \end{itemize}
 
 \subsection{Visuelle Darstellung des Sentiment}
 
-Als Benutzer möchte ich eine grafische Auswertung zum Sentiment, damit ich visuell Erkennen kann, ob die Stimmung zu den von mir gewählten Begriffe sich über die Zeit bessert oder sinkt. Akzeptanzkriterien sind:
+Als Benutzer möchte ich eine grafische Auswertung zum Sentiment, damit ich visuell erkennen kann, ob sich die Stimmung gegenüber den von mir gewählten Begriffen über die Zeit bessert oder verschlechtert. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Dieser Graph soll auf den selben Achsen dargestellt werden, wie der Graph zur Erwähnungsrate.
-\item Das Sentiment wird als absoluter Wert über die Zeit dargestellt.
-\end{itemize}
-
-\subsection{Verknüpfung mit Aktienkurs}
-
-Als Benutzer möchte ich eine grafische Dartellung eines wählbaren Aktienkurses, damit ich eine visuelle Möglichkeit vorhandenen Graphen mit dem Aktienkurs zu vergleichen. Akzeptanzkriterien sind:
-\begin{itemize}
-\item Eingabefeld für einen Aktiennamen
-\item Aktienname kann als beliebiger String eingegeben werden.
-\item Button zur Bestätigung der Aktienname
-\item Benachrichtung, wenn Aktienname nicht gefunden wurde.
-\item Vorschläge für weitere Aktiennamen
-\item Überlagerung der Metriken mit dem Aktienkurs.
-\item Darstellung des Aktienverlaufen über den selben Zeitbereich, wie die Auswertung der Erwähnungsrate.
+\item Dieser Graph soll auf denselben Achsen dargestellt werden wie der Graph zur Erwähnungsrate.
+\item Sentiment wird als absoluter Wert über die Zeit dargestellt.
 \end{itemize}
 
 \subsection{Entwicklungsdatenbank}
 
-Als Entwickler möchte ich eine Entwicklungsdatenbank, damit ich die Funktionalität abgesondert von der Produktionsumgebung umsetzen und evaluieren kann. Akzeptanzkriterien sind:
+Als Entwickler möchte ich eine Entwicklungsdatenbank, damit ich die Funktionalität getrennt von der Produktionsumgebung umsetzen und evaluieren kann. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Das Datenschema der Entwicklungsdatenbank ist mit dem der in der Produktion eingesetzten Datenbank identisch.
-\item Die Entwicklungsdatenbank wird mit realen Reddit-Daten populiert.
+\item Datenschema der Entwicklungsdatenbank ist mit dem der in der Produktion eingesetzten Datenbank identisch.
+\item Entwicklungsdatenbank wird mit realen Reddit-Daten populiert.
 \end{itemize}
 
 \subsection{Testabdeckung}
 
 Als Entwickler möchte ich eine ausreichende Testabdeckung, damit Fehler frühzeitig erkannt werden.  Akzeptanzkriterien sind:
 \begin{itemize}
-\item Die Abdeckungsrate liegt bei mindestens 50\%.
+\item Backend-Code wird durch ein geeignetes Werkzeug getestet, beispielsweise \texttt{istanbul/nyc}.
+\item Testabdeckungsrate liegt bezüglich Backend-Routinen bei mindestens 50\%.
+\item Frontent-Code wird durch ein geeignetes Werkzeug getestet, das abhängig von der Wahl des Frontend-Frameworks ausgewählt wird.
 \end{itemize}
 
 \subsection{Cloud-Kompatibilität}
 
 Als DevOps-Engineer möchte ich eine Cloud-kompatible Anwendung für eine einfachere Bereitstellung und Skalierung der Anwendung. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Die einzelnen Teile der Anwendung laufen in Containern.
-\item Eine grundlegende Secrets-Verwaltung zur sicheren Aufbewahrung von Zugangsinformationen ist eingerichtet.
+\item Alle Teile der Anwendung laufen einzeln in Docker-Containern.
+\item Grundlegende Secrets-Verwaltung zur sicheren Aufbewahrung von Zugangsinformationen ist eingerichtet.
 \end{itemize}
 
 \subsection{(Optional) Bereitstellung in der Cloud}
 
 Als DevOps-Engineer möchte ich die Cloud-kompatible Anwendung bei einem Cloud-Anbieter bereitstellen.  Akzeptanzkriterien sind:
 \begin{itemize}
-\item Die prinzipielle Erreichbarkeit ist sichergestellt, sodass bei der Abschlusspräsentation eine Demo der Anwendung in der Cloud möglich ist.
-\item Die eingeschränkte Erreichbarkeit der Anwendung in der Cloud ist dokumentiert.
+\item Prinzipielle Erreichbarkeit ist sichergestellt, sodass bei der Abschlusspräsentation eine Demonstration der Anwendung in der Cloud möglich ist.
+\item Dokumentation der eingeschränkte Erreichbarkeit der Anwendung in der Cloud.
 \end{itemize}
 
+\subsection{(Optional) Verknüpfung mit Aktienkurs}
 
+Als Benutzer möchte ich eine grafische Darstellung eines wählbaren Aktienkurses, damit ich eine visuelle Möglichkeit bekomme, die vorhandenen Graphen mit dem Verlauf des Aktienkurses zu vergleichen. Akzeptanzkriterien sind:
+\begin{itemize}
+\item Eingabefeld für einen Aktiennamen.
+\item Eingabe des Aktiennamen als beliebiger String.
+\item Button zur Bestätigung des Aktiennamens.
+\item Fehlermeldung, wenn Aktienname nicht gefunden wurde.
+\item Darstellung des Aktienverlaufen über denselben Zeitbereich wie die Auswertung der Erwähnungsrate.
+\end{itemize}
+
+\newpage
 \section{Methoden} \label{s:methoden}
 
 Für die Repräsentation der Anwendung im Client-seitigen Frontend wird ein geeignetes Framework verwendet. Zur Speicherung der Daten kommt voraussichtlich Elasticsearch zum Einsatz. Ein Node.js-Webserver mit ExpressJS im Server-seitigen Backend stellt die Funktionalität der im Frontend angebotenen Aktionen bereit. Die Kommunikation zwischen Frontend und Backend wird über eine RESTful-API abgewickelt. Um eine fehlerfreie Anwendung zu entwickeln, wird zum einen TypeScript als projektweite Programmiersprache verwendet. Dadurch sollen Fehler bereits zur Kompilierzeit identifiziert werden können. Zum anderen wird ein geeignetes Test-Framework für Unit-Tests verwendet.
