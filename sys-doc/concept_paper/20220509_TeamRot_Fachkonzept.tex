@@ -64,23 +64,36 @@ Als Benutzer möchte ich Schlagwörter spezifizieren können, welche den Suchauf
 \item Zeitliche Eingrenzung der Suche durch vordefinierte Zeitintervalle (z.B.~7 Tage).
 \end{itemize}
 
-\subsection{Zeitlicher Verlauf des Hypes}
+\subsection{Visuelle Darstellung der Erwähungung}
 
-Als Benutzer möchte ich einen Graph zum Hypeverlauf, damit ich die Zunahme bzw. Abnahme an Interesse an einem Thema visuell erfassen kann. Akzeptanzkriterien sind:
+Als Benutzer möchte ich einen Graph der Erwähungsrate der gewälten Begriffe, damit ich die Zunahme bzw. Abnahme des Interesses daran visuell erfassen kann. Akzeptanzkriterien sind:
 \begin{itemize}
 \item Die Aktualität wird über der x-Achse aufgetragen.
 \item Die Aktualität kann variiert werden durch vordefinierte Zeitintervalle (z.B. 7 Tage).
-\item Die Hypestärke wird über die y-Achse aufgetragen.
-\item Die Hypestärke wird als absoluter Wert dargestellt.
+\item Die Erwähnungsrate der eingegebenen Begriffe wird auf der y-Achse aufgetragen.
+\item Die Erwähnungsrate wird als absoluter Wert dargestellt.
 \item Der Graph muss so skaliert sein, dass das Graph-Feld ausreichend genutzt wird (mind. 90\% Ausnutzung des Platzes).
-\item Aggregierter Verlauf des Hypes (Zusammengesetzt aus Erwähungsrate und Sentiment der Erwähungen).
+\end{itemize}
+
+\subsection{Visuelle Darstellung des Sentiment}
+
+Als Benutzer möchte ich eine grafische Auswertung zum Sentiment, damit ich visuell Erkennen kann, ob die Stimmung zu den von mir gewählten Begriffe sich über die Zeit bessert oder sinkt. Akzeptanzkriterien sind:
+\begin{itemize}
+\item Dieser Graph soll auf den selben Achsen dargestellt werden, wie der Graph zur Erwähnungsrate.
+\item Das Sentiment wird als absoluter Wert über die Zeit dargestellt.
 \end{itemize}
 
 \subsection{Verknüpfung mit Aktienkurs}
 
-Als Benutzer möchte ich, dass der zeitliche Verlauf des Hypes mit dem Aktienkurs verknüpft dargestellt wird, damit
+Als Benutzer möchte ich eine grafische Dartellung eines wählbaren Aktienkurses, damit ich eine visuelle Möglichkeit vorhandenen Graphen mit dem Aktienkurs zu vergleichen. Akzeptanzkriterien sind:
 \begin{itemize}
-\item Überlagerung des Hypeverlaufes mit dem Aktienkurs.
+\item Eingabefeld für einen Aktiennamen
+\item Aktienname kann als beliebiger String eingegeben werden.
+\item Button zur Bestätigung der Aktienname
+\item Benachrichtung, wenn Aktienname nicht gefunden wurde.
+\item Vorschläge für weitere Aktiennamen
+\item Überlagerung der Metriken mit dem Aktienkurs.
+\item Darstellung des Aktienverlaufen über den selben Zeitbereich, wie die Auswertung der Erwähnungsrate.
 \end{itemize}
 
 \subsection{Entwicklungsdatenbank}
