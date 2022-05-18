@@ -20,18 +20,23 @@ Reddiment: Reddit Sentiment-Analyse
 }
 
 \author{
-\IEEEauthorblockN{Tobias Bauer}     \IEEEauthorblockA{\textit{t.bauer@oth-aw.de}}\and
-\IEEEauthorblockN{Fabian Beer}      \IEEEauthorblockA{\textit{f.beer1@oth-aw.de}}\and
-\IEEEauthorblockN{Daniel Holl}      \IEEEauthorblockA{\textit{d.holl1@oth-aw.de}}\and\and[\\\>]\and
-\IEEEauthorblockN{Ardian Imeraj}    \IEEEauthorblockA{\textit{a.imeraj@oth-aw.de}}\and
+\IEEEauthorblockN{Tobias Bauer} \IEEEauthorblockA{\textit{t.bauer@oth-aw.de}}\and
+\IEEEauthorblockN{Fabian Beer} \IEEEauthorblockA{\textit{f.beer1@oth-aw.de}}\and
+\IEEEauthorblockN{Daniel Holl} \IEEEauthorblockA{\textit{d.holl1@oth-aw.de}}\and\and[\\]\and
+\IEEEauthorblockN{Ardian Imeraj} \IEEEauthorblockA{\textit{a.imeraj@oth-aw.de}}\and
 \IEEEauthorblockN{Konrad Schweiger} \IEEEauthorblockA{\textit{k.schweiger@oth-aw.de}}\and
-\IEEEauthorblockN{Philipp Stangl}   \IEEEauthorblockA{\textit{p.stangl1@oth-aw.de}}\and
-\IEEEauthorblockN{Wolfgang Weigl}   \IEEEauthorblockA{\textit{w.weigl@oth-aw.de}}\and
+\IEEEauthorblockN{Philipp Stangl} \IEEEauthorblockA{\textit{p.stangl1@oth-aw.de}}\and
+\IEEEauthorblockN{Wolfgang Weigl} \IEEEauthorblockA{\textit{w.weigl@oth-aw.de}}\and
 }
 
 \maketitle
 \thispagestyle{empty}
 \pagestyle{empty}
+
+\begin{abstract}
+Wir beschäftigen uns mit dem Zusammenhang von Reddit-Posts und Aktienverläufen.
+Dazu entwickeln wir \textit{Reddiment} -- ein webbasiertes Dashboard zur Sentiment-Analyse von Subreddits. 
+\end{abstract}
 
 \section{Einleitung}
 
@@ -62,7 +67,7 @@ Als Benutzer möchte ich Subreddits auswählen können, damit ich basierend auf 
 
 \subsection{Eingrenzung der Suche}
 
-Als Benutzer möchte ich Schlagwörter spezifizieren können, welche den Suchauftrag eingrenzen. Akzeptanzkriterien sind:
+Als Benutzer möchte ich Schlagwörter spezifizieren können, damit ich den Suchauftrag eingrenzen kann. Akzeptanzkriterien sind:
 \begin{itemize}
 \item Eingabefeld für Schlagwörter.
 \item Schlagwörter können als beliebige Strings eingegeben werden.
@@ -133,7 +138,6 @@ Als Benutzer möchte ich eine grafische Darstellung eines wählbaren Aktienkurse
 \item Darstellung des Aktienverlaufs über denselben Zeitbereich wie die Auswertung der Erwähnungsrate.
 \end{itemize}
 
-\newpage
 \section{Methoden} \label{s:methoden}
 
 Für die Repräsentation der Anwendung im Client-seitigen Frontend wird ein geeignetes Framework verwendet. Zur Speicherung der Daten kommt voraussichtlich Elasticsearch zum Einsatz. Ein Node.js-Webserver mit ExpressJS im Server-seitigen Backend stellt die Funktionalität der im Frontend angebotenen Aktionen bereit. Die Kommunikation zwischen Frontend und Backend wird über eine RESTful-API abgewickelt. Um eine fehlerfreie Anwendung zu entwickeln, wird zum einen TypeScript als projektweite Programmiersprache verwendet. Dadurch sollen Fehler bereits zur Kompilierzeit identifiziert werden können. Zum anderen wird ein geeignetes Test-Framework für Unit-Tests verwendet.
