@@ -1,0 +1,44 @@
+node_modules
+/node_modules
+/.svelte
+/.svelte-kit
+/build
+*.log
+
+# Ignore the xml
+static/sitemap.xml
+static/feed.xml
+static/rss.xml
+
+# OS generated files #
+######################
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Coverage files #
+#############################
+coverage
+coverage/*
+
+# KDE/Linux generated files #
+#############################
+.directory
+
+# Runtime data #
+################
+pids
+*.pid
+*.seed
+*.pid.lock
+*.eslintcache
+
+# environment files #
+#####################
+/.env
+/.env.*
+/.env.local
+/.env.*.local
