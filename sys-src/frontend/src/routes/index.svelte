@@ -1,2 +1,6 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<article class="prose lg:prose-xl">
+    <h1 class="text-orange-600">Reddiment</h1>
+    <p>
+        A dashboard for sentiment analysis of Subreddits.
+    </p>
+</article>
