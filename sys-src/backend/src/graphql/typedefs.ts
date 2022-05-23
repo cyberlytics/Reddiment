@@ -1,12 +1,20 @@
 import { gql } from "apollo-server-core";
 
 const typeDefs = gql`
-    type Test {
+    scalar Date
+
+    type Subreddit {
+        name: String!
+        hype(keywords: [String!]!, from: Date, to: Date): Hype
+    }
+
+    type Hype {
         dummy: String
     }
 
     type Query {
-        test: Test
+        subreddit(nameOrUrl: String!): Subreddit
+        subreddits: [String!]!
     }
 `;
 
