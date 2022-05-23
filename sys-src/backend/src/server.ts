@@ -31,15 +31,20 @@ async function createApolloServer(httpServer: http.Server, app: express.Express,
 }
 
 async function startServer(): Promise<void> {
+    // Port is defined in Dockerfile (with fallback to 4000)
     const port = process.env.PORT || 4000;
 
+    // ExpressJS middleware
     const app = express();
+    // Activate HTTP compression
     app.use(compression());
+    // Create server
     const httpServer = http.createServer(app);
-
+    // Create Apollo-Server endpoint
     const apolloServer = await createApolloServer(httpServer, app, typeDefs, resolvers);
 
-    httpServer.listen({ port: port }, () => console.log(`🚀 Server ready at http://localhost:4000${apolloServer.graphqlPath}`));
+    // Start server
+    httpServer.listen({ port: port }, () => console.log(`🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`));
 }
 
 startServer();
