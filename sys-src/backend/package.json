@@ -5,7 +5,8 @@
   "main": "src/server.ts",
   "scripts": {
     "test": "nyc mocha",
-    "start": "ts-node src/server.ts"
+    "start": "ts-node src/server.ts",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
