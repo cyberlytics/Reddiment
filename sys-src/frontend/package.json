@@ -41,6 +41,8 @@
   },
   "type": "module",
   "dependencies": {
-    "@sveltejs/adapter-static": "^1.0.0-next.31"
+    "@sveltejs/adapter-static": "^1.0.0-next.31",
+    "apexcharts": "^3.35.2",
+    "svelte-apexcharts": "^1.0.2"
   }
 }
