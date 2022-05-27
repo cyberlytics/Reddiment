@@ -5,11 +5,15 @@ const typeDefs = gql`
 
     type Subreddit {
         name: String!
-        hype(keywords: [String!]!, from: Date, to: Date): Hype
+        sentiment(keywords: [String!]!, from: Date, to: Date): [Sentiment!]!
     }
 
-    type Hype {
-        dummy: String
+    type Sentiment {
+        time: Date!
+        positive: Int!
+        negative: Int!
+        neutral: Int!
+        sum: Int!
     }
 
     type Query {
