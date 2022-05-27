@@ -1,0 +1,7 @@
+version: "1.0"
+services:
+  sentiment:
+    build: ./app
+    container_name: sentiment
+    ports:
+      - "8000:8000"
