@@ -1,0 +1,19 @@
+version: "3.7"
+services: 
+  backend:
+    build: ./backend
+    restart: always
+    container_name: backend
+    hostname: backend
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build: ./frontend
+    restart: always
+    container_name: frontend
+    hostname: frontend
+    environment:
+      - BACKEND_ADDR=backend:4000
+    ports:
+      - "80:80"
