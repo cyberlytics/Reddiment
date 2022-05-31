@@ -1,12 +1,16 @@
-import express from 'express';
-import { ApolloServer } from 'apollo-server-express';
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core';
+import { ApolloServer } from 'apollo-server-express';
 import compression from 'compression';
-import http from 'http';
-import typeDefs from './graphql/typedefs';
+import express from 'express';
 import { DocumentNode } from 'graphql';
+import http from 'http';
+import Context from './graphql/context';
 import resolvers from './graphql/resolvers';
+import typeDefs from './graphql/typedefs';
+import DbMock from './util/dbmock';
 
+const globalDbMock = new DbMock();
+globalDbMock.initDummy();
 
 async function createApolloServer(httpServer: http.Server, app: express.Express, typeDefs: DocumentNode, resolvers: any): Promise<ApolloServer> {
     // ApolloServer initialization plus the drain plugin.
@@ -15,6 +19,11 @@ async function createApolloServer(httpServer: http.Server, app: express.Express,
         resolvers,
         csrfPrevention: true,
         plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+        context: ({ req }): Context => {
+            return {
+                db: globalDbMock,
+            };
+        },
     });
 
     // More required logic for integrating with Express

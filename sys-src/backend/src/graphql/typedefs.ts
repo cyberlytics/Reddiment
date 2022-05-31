@@ -16,9 +16,22 @@ const typeDefs = gql`
         sum: Int!
     }
 
+    input Comment {
+        subredditName: String!
+        text: String!
+        timestamp: Date!
+        commentId: String!
+        userId: String
+        articleId: String,
+    }
+
     type Query {
         subreddit(nameOrUrl: String!): Subreddit
         subreddits: [String!]!
+    }
+
+    type Mutation {
+        addComment(comment: Comment!): Boolean!
     }
 `;
 
