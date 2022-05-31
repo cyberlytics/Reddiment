@@ -1,0 +1,5 @@
+query Subreddit($nameOrUrl: String!) {
+    subreddit(nameOrUrl: $nameOrUrl) {
+        name
+    }
+}
