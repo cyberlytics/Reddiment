@@ -1,0 +1,19 @@
+{
+  "name": "reddit-crawler",
+  "version": "1.0.0",
+  "description": "Crawler service for reddiment",
+  "main": "src/crawler.ts",
+  "scripts": {
+    "start": "ts-node src/crawler.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.8.0",
+    "typescript": "^4.7.2"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "snoowrap": "^1.23.0"
+  }
+}
