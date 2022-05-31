@@ -32,9 +32,9 @@ ENV PATH="/.venv/bin:$PATH"
 WORKDIR /app
 COPY . /app
 
-EXPOSE 5000
+EXPOSE 80
 # run application 
 
-CMD ["flask", "run", "-h", "0.0.0.0", "-p", "5000"]
+CMD ["flask", "run", "-h", "0.0.0.0", "-p", "80"]
 #ENTRYPOINT [ "python" ]
 #CMD [ "app.py" ]
