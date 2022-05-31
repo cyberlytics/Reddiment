@@ -1,4 +1,5 @@
 import { ASTNode, GraphQLScalarType, Kind } from "graphql";
+import { aggregate, groupby } from "../util/list";
 import date from "../util/time";
 import Context from "./context";
 
@@ -6,7 +7,7 @@ import Context from "./context";
 type Info = {
     name: string,
     description?: string,
-}
+};
 
 // Type for raw sentiment data
 type SentimentRaw = {
@@ -14,7 +15,17 @@ type SentimentRaw = {
     positive: number,
     negative: number,
     neutral: number
-}
+};
+
+// Type for crawler data
+type Comment = {
+    subredditName: string,
+    text: string,
+    timestamp: Date,
+    commentId: string,
+    userId?: string,
+    articleId?: string,
+};
 
 // GraphQL does not know about any "Date" type so we create one
 const dateScalar = new GraphQLScalarType({
@@ -40,13 +51,28 @@ const resolvers = {
             return parent.name;
         },
         sentiment: (parent: { name: string }, args: { keywords: Array<string>, from?: Date, to?: Date }, context: Context, info: Info) => {
-            const s = dummyData.subreddits.find(s => s.name == parent.name);
-            if (typeof (s) !== 'undefined') {
-                const to = args.to ?? date("9999-12-31Z");
-                const from = args.from ?? date("0000-01-01Z");
-                return dummySentimentData.filter(d => d.time >= from && d.time <= to);
-            }
-            return [];
+            const sentiments = context.db.getSentiments(parent.name);
+            const to = args.to ?? date("9999-12-31Z");
+            const from = args.from ?? date("0000-01-01Z");
+            const grouped = groupby(sentiments.filter(d => d.time >= from && d.time <= to), s => s.time.valueOf());
+            const agg = aggregate(grouped,
+                s => {
+                    return {
+                        time: s.time,
+                        positive: 0,
+                        negative: 0,
+                        neutral: 0
+                    };
+                },
+                (prev, current) => {
+                    return {
+                        time: prev.time,
+                        positive: prev.positive + (current.sentiment > 0.66 ? 1 : 0),
+                        negative: prev.negative + (current.sentiment < 0.33 ? 1 : 0),
+                        neutral: prev.neutral + (current.sentiment >= 0.33 && current.sentiment <= 0.66 ? 1 : 0),
+                    };
+                });
+            return agg.values();
         }
     },
 
@@ -59,29 +85,24 @@ const resolvers = {
     // Query: special type
     Query: {
         subreddit: (parent: {}, args: { nameOrUrl: string }, context: Context, info: Info) => {
-            return dummyData.subreddits.find(s => s.name == args.nameOrUrl);
+            const sr = context.db.getSubreddits().find(s => s == args.nameOrUrl);
+            if (typeof (sr) !== 'undefined') {
+                return { name: sr };
+            }
+            return null;
         },
-        subreddits: () => dummyData.subreddits.map(s => s.name),
+        subreddits: (parent: {}, args: {}, context: Context, info: Info) => {
+            return context.db.getSubreddits();
+        }
     },
-};
 
-const dummyData = {
-    subreddits: [
-        {
-            name: "r/wallstreetbets",
+    // Mutation: special type
+    Mutation: {
+        addComment: (parent: {}, args: { comment: Comment }, context: Context, info: Info) => {
+            context.db.addComment(args.comment.subredditName, args.comment.text, args.comment.timestamp, Math.random());
+            return true;
         },
-        {
-            name: "r/place",
-        },
-    ]
+    }
 };
-
-const dummySentimentData: Array<SentimentRaw> = [
-    { time: date("2022-05-27Z"), positive: 123, negative: 87, neutral: 512 },
-    { time: date("2022-05-28Z"), positive: 67, negative: 186, neutral: 342 },
-    { time: date("2022-05-29Z"), positive: 234, negative: 34, neutral: 128 },
-    { time: date("2022-05-30Z"), positive: 179, negative: 77, neutral: 946 },
-    { time: date("2022-05-31Z"), positive: 134, negative: 180, neutral: 264 },
-];
 
 export default resolvers;
