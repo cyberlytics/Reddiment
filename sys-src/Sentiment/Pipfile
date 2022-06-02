@@ -7,6 +7,8 @@ name = "pypi"
 flask = "*"
 nltk = "*"
 textblob = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [dev-packages]
 

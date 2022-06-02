@@ -1,5 +1,5 @@
 import nltk
-nltk.download('vader_lexicon')
+#nltk.download('vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from textblob import TextBlob
 from typing import Optional
@@ -21,6 +21,8 @@ class Sentiment:
         :param text: text to be analysed
         :return: returns a list of the sentiment of the text
         """
+        if not isinstance(text,str) or text == "":
+            raise ValueError("text must be a valid string")
         
         self.text = text
         sentiment = -2.0
@@ -40,23 +42,27 @@ class Sentiment:
         valid = self.validate_sentiments()
         if valid:
             return self.current_sentiments[1]
-        else: 0.0
+        else: return 0.0
         
     def text_blob_sentiment_score(self)->float:
         """analyses self.text for sentiment with text blob"""
         analysis = TextBlob(self.text).sentiment.polarity
         return analysis
 
-    def translate_sentiment(self,analysis:float)->str:
+    def translate_sentiment_to_text(self,analysis:float)->str:
         """return string representation of sentiment from text blob"""
         if not isinstance(analysis,float):
             raise ValueError("analysis must be a float")
+
+        if analysis == '':
+            raise ValueError("analysis must not be empty")
+        
         if analysis >= 0.001:
-            if analysis > 0:
-                return 'Positive'
+            #if analysis > 0:
+            return 'Positive'
         elif analysis <= -0.001:
-            if analysis <= 0:
-                return 'Negative'
+            #if analysis <= 0:
+            return 'Negative'
         return 'Neutral'
      
     def nltk_sentiment_score(self)->Optional[float]:
@@ -69,15 +75,20 @@ class Sentiment:
         """checks if both methods agree"""
         self.log_results()
         
+        if not self.mode == 'all':
+            raise ValueError("mode must be 'all'")
+        
         if only_log:
             return True
         
         # no sentiment given or only one answer given
         if not(any(self.current_sentiments)) or len(self.current_sentiments) != 2:
-            return False
+            raise ValueError("current_sentiments must be a list of length 2 and must not be empty")
         
-        nltk_sentiment = self.translate_sentiment(self.current_sentiments[0])
-        text_blob_sentiment = self.translate_sentiment(self.current_sentiments[1])
+        self.check_bounds()
+        
+        nltk_sentiment = self.translate_sentiment_to_text(self.current_sentiments[0])
+        text_blob_sentiment = self.translate_sentiment_to_text(self.current_sentiments[1])
         
         if nltk_sentiment == text_blob_sentiment:
             return True # both methods agree
@@ -85,11 +96,19 @@ class Sentiment:
             return True # if one method predicts 'text is neutral', then it is valid
         else:
             return False # methods disagree
-        
+    
+    def check_bounds(self):
+        """checks if the sentiment is within the bounds of -1.0 and 1.0"""
+        if self.current_sentiments[0] < -1.0 or self.current_sentiments[0] > 1.0:
+            raise ValueError("nltk sentiment score is out of bounds")
+        if self.current_sentiments[1] < -1.0 or self.current_sentiments[1] > 1.0:
+            raise ValueError("text blob sentiment score is out of bounds")
+
+            
     def log_results(self):
         """logs the resulting sentiment scores (float) of the analysis"""
         with open("sentiment.log","a") as f:
-            f.write(str(self.current_sentiments))
+            f.write("\n NEXT RUN" + str(self.current_sentiments))
             f.write(self.text)
             f.write("\n\n")
             
@@ -97,4 +116,6 @@ class Sentiment:
 if __name__ == "__main__":
     Sent = Sentiment(mode="all")
     print(Sent.analyse("I am very happy"))
+    Sent.current_sentiments = ['','']
+    print(Sent.validate_sentiments())
          
