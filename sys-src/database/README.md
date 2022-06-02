@@ -6,7 +6,7 @@ Elasticsearch ist eine Open-Source-Suchmaschine auf Basis von Apache Lucene. Sie
 ### 1. Installation Docker Desktop Engine
 Installationsanleitung: [https://docs.docker.com/get-docker/](https://docs.docker.com/get-docker/)
 ### 2. Umgebungsvariablen anlegen
-In den Umgebungsvariablen werden die Secrets für den Zugang zu Elastic gespeichert. Die `.env.example` zeigt die notwendigen KEY=VALUE Paare. Die nachfolgenden Variablen müssen in `.env` gesetzt werden:
+In den Umgebungsvariablen werden die Secrets für den Zugang zu Elastic gespeichert. Die `.env.exsample` zeigt die notwendigen KEY=VALUE Paare. Die nachfolgenden Variablen müssen in `.env` gesetzt werden:
 ```
 ELASTIC_VERSION = 8.2.0
 ELASTIC_SECURITY = true
