@@ -13,7 +13,7 @@ const dateScalar = new GraphQLScalarType({
         if (ast.kind === Kind.STRING) {
             return new Date(ast.value);
         }
-        return null;
+        throw `Invalid date format`;
     },
 });
 

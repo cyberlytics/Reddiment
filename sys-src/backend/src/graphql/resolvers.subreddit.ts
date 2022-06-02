@@ -20,10 +20,10 @@ const SubredditResolver = {
     },
 
     sentiment: (parent: { name: string }, args: { keywords: Array<string>, from?: Date, to?: Date }, context: Context, info: Info) => {
-        const sentiments = context.db.getSentiments(parent.name);
         const to = args.to ?? date("9999-12-31Z");
         const from = args.from ?? date("0000-01-01Z");
-        const grouped = groupby(sentiments.filter(d => d.time >= from && d.time <= to), s => s.time.valueOf());
+        const sentiments = context.db.getSentiments(parent.name, from, to, args.keywords);
+        const grouped = groupby(sentiments, s => s.time.valueOf());
         const agg = aggregate(grouped,
             s => {
                 return {

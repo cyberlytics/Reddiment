@@ -6,8 +6,8 @@ import http from 'http';
 import Context from "./graphql/context";
 import resolvers from "./graphql/resolvers";
 import typeDefs from "./graphql/typedefs";
+import DbMock from "./services/database.mock";
 import { getSentimentMock } from "./services/sentiment.mock";
-import DbMock from "./util/dbmock";
 
 
 let dbMock: DbMock | undefined = undefined;
