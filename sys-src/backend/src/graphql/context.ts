@@ -1,5 +1,5 @@
+import DbMock from "../services/database.mock";
 import { getSentimentFunction } from "../services/sentiment";
-import DbMock from "../util/dbmock";
 
 type Context = {
     db: DbMock,

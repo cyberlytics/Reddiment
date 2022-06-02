@@ -1,6 +1,6 @@
-import { SimpleCache } from "./cache";
-import { distinct } from "./list";
-import date from "./time";
+import { SimpleCache } from "../util/cache";
+import { distinct } from "../util/list";
+import date from "../util/time";
 
 
 type DbComment = {
@@ -31,9 +31,12 @@ class DbMock {
         this.comments().push({ subreddit, text, timestamp, sentiment });
     }
 
-    public getSentiments(subreddit: string): Array<{ time: Date, sentiment: number }> {
+    public getSentiments(subreddit: string, from: Date, to: Date, keywords: Array<string>): Array<{ time: Date, sentiment: number }> {
         const commentsOfSubreddit = this.comments().filter(c => c.subreddit == subreddit);
-        return commentsOfSubreddit.map(c => { return { time: c.timestamp, sentiment: c.sentiment }; });
+        const filtered = commentsOfSubreddit.filter(c => c.timestamp >= from &&
+                                                         c.timestamp <= to &&
+                                                         (keywords.length == 0 || keywords.some(kw => c.text.includes(kw))));
+        return filtered.map(c => { return { time: c.timestamp, sentiment: c.sentiment }; });
     }
 
     public getSubreddits(): Array<string> {
@@ -58,7 +61,6 @@ class DbMock {
         this.addComment("r/place", "the green fox jumps over the big dog", date("2022-05-28Z"), 0.87);
         this.addComment("r/place", "the blue fox jumps over the scared dog", date("2022-05-28Z"), 0.38);
         this.addComment("r/place", "the black fox jumps over the small dog", date("2022-05-28Z"), 0.04);
-
     }
 }
 
