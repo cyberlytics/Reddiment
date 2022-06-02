@@ -50,6 +50,8 @@ RUN npm install --omit=dev
 COPY --from=builder /home/node/app/build ./build
 
 ENV PORT=${port}
+ENV SENTIMENT_HOST=sentiment
+ENV SENTIMENT_PORT=80
 EXPOSE $port
 
 CMD [ "node", "build/server.js" ]
