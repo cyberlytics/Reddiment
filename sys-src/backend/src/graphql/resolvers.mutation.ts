@@ -1,4 +1,3 @@
-import { getSentiment } from "../services/sentiment";
 import Context from "./context";
 import Info from "./info";
 
@@ -17,7 +16,7 @@ type Comment = {
  */
 const MutationResolver = {
     addComment: async (parent: {}, args: { comment: Comment }, context: Context, info: Info): Promise<boolean> => {
-        const sentiment = await getSentiment(args.comment.text);
+        const sentiment = await context.sentiment(args.comment.text);
         if (typeof sentiment !== 'undefined') {
             context.db.addComment(args.comment.subredditName, args.comment.text, args.comment.timestamp, sentiment);
             return true;

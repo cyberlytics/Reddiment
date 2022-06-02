@@ -1,5 +1,7 @@
 const SentimentUrl = `http://${process.env.SENTIMENT_HOST}:${process.env.SENTIMENT_PORT}/sentiment`;
 
+type getSentimentFunction = (text: string) => Promise<Sentiment | undefined>;
+
 type Sentiment = number;
 
 /**
@@ -32,4 +34,4 @@ async function getSentiment(text: string): Promise<Sentiment | undefined> {
 }
 
 
-export { Sentiment, getSentiment };
+export { Sentiment, getSentiment, getSentimentFunction };
