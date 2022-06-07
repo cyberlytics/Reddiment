@@ -1,50 +1,74 @@
 <script lang="ts">
     import { browser } from '$app/env'
     import { KQL_Subreddit } from '$lib/graphql/_kitql/graphqlStores'
+    import Tags from 'svelte-tags-input'
 
     let subreddit: string
-    let tags: string
-    let time_period: string
-
-    const time_options = [
-        { value: "0", text: "gesamt"},
-        { value: "1", text: "letzte 7 Tage"},
-        { value: "2", text: "letzten 14 Tage"},
-        { value: "3", text: "letzter Monat"},
-        { value: "4", text: "letztes Jahr"},
-    ]
+    let keywords: string[]
+    let date_from: string
+    let date_to: string
 
     const handleSearch = event => {
+        console.log(`${subreddit} ${date_from} ${date_to}`)
         browser && KQL_Subreddit.query({
             variables: {
                 nameOrUrl: `r/${subreddit}`,
-                tags: `r/${tags}`,
-                time_period: `/r${time_period}`,
+                keywords: keywords,
+                from: date_from,
+                to: date_to,
             }
         })
     }
 </script>
 
-<div class="flex w-1/3">
+<div class="flex w-1/3 flex-row flex-wrap">
 
-    <div class="flex flex-col w-3/4">
-        <input type="text" class="mb-2 border-2 focus:border-orange-300 focus:outline-none px-1 border-r-0 h-9" bind:value={subreddit} placeholder="Subreddit">
-        <input type="text" class="border-2 focus:border-orange-300 focus:outline-none px-1 h-9" bind:value={tags} placeholder="Tags">
+    <input type="text" class="w-3/4 mb-2 border-2 focus:border-orange-300 focus:outline-none px-1 border-r-0 h-9" bind:value={subreddit} placeholder="Subreddit">
+
+    <button on:click={handleSearch} class="w-1/4 bg-orange-600 hover:bg-orange-400 rounded-r-lg border-red-700 hover:border-red-500 border-2 text-white uppercase h-9 mb-2">
+        Suche
+    </button>
+
+
+  
+    <!--<input type="text" class="w-1/2 border-2 focus:border-orange-300 focus:outline-none px-1 h-9" bind:value={keywords} placeholder="Tags">-->
+    <div class="custom w-1/2">
+        <Tags class="" on:tags={keywords} placeholder="Tags"/>
 
     </div>
-    <div class="flex flex-col w-1/4">
 
-        <button on:click={handleSearch} class="bg-orange-600 hover:bg-orange-400 rounded-r-lg border-red-700 hover:border-red-500 border-2 text-white uppercase h-9 mb-2">
-            Suche
-        </button>
-        <select bind:value={time_period} class="bg-white ml-2 border-b-2 focus:border-orange-400 h-9 text-gray-600 text-center">
-            {#each time_options as option, index  }
-                <option value={option.value}>{option.text}</option>
-            {/each}
-        
-        </select>
+    <div class="w-1/2 pl-2 justify-start">
+        <div date-rangepicker class="flex items-center">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                </div>
+                <input bind:value={date_from} type="text" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Start-Datum">
+            </div>
+            <span class="mx-2 text-gray-500">bis</span>
+            <div class="relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+            </div>
+            <input bind:value={date_to} type="text" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="End-Datum">
+        </div>
+        </div>
     </div>
-
 
 </div>
+{date_from}
+{date_to}
 
+<style>
+    .custom :global(.svelte-tags-input-tag) {
+        background: orange;
+    }
+
+    .custom :global(.svelte-tags-input-layout) {
+        border-width: 0;
+    }
+
+    .custom :global(.svelte-tags-input-layout:hover) {
+        border-width: 0;
+    }
+</style>

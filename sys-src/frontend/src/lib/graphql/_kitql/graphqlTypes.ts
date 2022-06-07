@@ -47,8 +47,9 @@ export type SubredditHypeArgs = {
 
 export type SubredditQueryVariables = Exact<{
   nameOrUrl: Scalars['String'];
-  tags: Scalars['String'];
-  time_period: Scalars['String'];
+  keywords: Array<Scalars['String']>;
+  from: Scalars['String'];
+  to: Scalars['String'];
 }>;
 
 
