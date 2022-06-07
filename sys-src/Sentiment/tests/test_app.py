@@ -13,26 +13,22 @@ def client():
     app.testing = True
     return app.test_client()
 
-def test_post_normal(client):
-    response = client.post("/sentiment",json={'text':'I love this movie'})
-    assert response.status_code == 200
+@pytest.mark.parametrize("text,code",[({'text':'I love this movie'},200),
+                                      ({'text':''},200),
+                                      ({'t':"I love this movie"},500)])
+def test_post_normal(client,text,code):
+    response = client.post("/sentiment",json=text)
+    assert response.status_code == code
     
     
-def test_post_fail(client):
+@pytest.mark.parametrize("fail_text,fail_code",[({'text':None},500),
+                                                ({'text':2},500)])    
+def test_post_fail(client,fail_text,fail_code):
     with pytest.raises(ValueError):
-        response = client.post("/sentiment",json={'text':2})
-        assert response.status_code == 500
+        response = client.post("/sentiment",json=fail_text)
+        assert response.status_code == fail_code
         
 
-def test_post_wrong_key(client):
-    
-    response = client.post("/sentiment",json={'t':'I love this movie'})
-    assert response.status_code == 500
-        
-def test_post_text(client):
-    with pytest.raises(ValueError):
-        response = client.post("/sentiment",'I love this movie')
-        assert response.status_code == 500
 
 
     
