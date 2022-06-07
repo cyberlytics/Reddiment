@@ -1,5 +1,7 @@
 import elasticsearch from '@elastic/elasticsearch';
+import esb from 'elastic-builder'
 import date from "../util/time";
+import { estypes } from '@elastic/elasticsearch'
 
 interface IDatabase {
     addComment: (comment: DbComment) => Promise<boolean>,
@@ -20,6 +22,20 @@ type TimeSentiment = {
     sentiment: number,
 };
 
+type Document = {
+    _index: string,
+    _id: string,
+    _version: boolean,
+    _seq_no: number,
+    _primary_term: number,
+    found: boolean,
+    _source: {
+        text: string,
+        timestamp: Date,
+        sentiment: number
+    }
+};
+
 
 class ElasticDb implements IDatabase {
     client: elasticsearch.Client;
@@ -35,11 +51,13 @@ class ElasticDb implements IDatabase {
         })
     }
 
-    //Function ingests a comment in elastic db
     public async addComment(comment: DbComment): Promise<boolean> {
-        //Similar documents are stored with the same index in elastic
-        //index == name of subreddit without "r/"
-        //The id of an document is a unique identifier
+        /**
+         * Similar documents are stored with the same index in elastic
+         * index == name of subreddit without "r/"
+         *   The id of an document is a unique identifier
+         */
+
         try {
             //delete "/r" from the index
             const idx_splitted = comment.subreddit.split("/", 2)
@@ -70,8 +88,55 @@ class ElasticDb implements IDatabase {
     }
 
     //function get Sentiments from elastic Database
+    //Funktion noch nicht fertig!!!!
     public async getSentiments(subreddit: string, from: Date, to: Date, keywords: string[]): Promise<Array<TimeSentiment>> {
+
         try {
+            //Create Query
+            //Index
+            const idx_splitted = subreddit.split("/", 2)
+            const idx: string = idx_splitted[1]
+            //Keywords
+            let keywordstring: string = keywords[0]
+            for (let i = 1; i < (keywords.length); i++) {
+                keywordstring += " " + keywords[i];
+            }
+            //console.log(keywordstring)
+
+            //Hier fehlt der Zeitraum
+
+            //Create Request Body
+            const requestBody = new esb.RequestBodySearch().query(
+                new esb.MatchQuery('text', keywordstring)
+            );
+            //log request body
+            //console.log(requestBody.toJSON())
+
+            //Get Data from elastic
+            const response: estypes.SearchResponse = await this.client.search({
+                index: idx,
+                size: 10000,
+                body: requestBody.toJSON(),
+            });
+            //get number of documents
+            const num_documents = response.hits.hits.length;
+            //get id's of documents whitch match the query
+            let ids: Array<string> = []
+            for (let i = 0; i < num_documents; i++) {
+                ids[i] = response.hits.hits[i]._id
+            }
+
+
+            for (let i = 0; i < num_documents; i++) {
+                let doc: estypes.GetResponse<Document> = await this.client.get({
+                    index: idx,
+                    id: ids[0],
+                });
+                //Funktion noch nicht fertig!!!!
+                console.log(doc)
+            }
+
+            //-------------------------
             const a: Array<TimeSentiment> = [{
                 time: date("2020, 6, 7"),
                 sentiment: 1,
@@ -113,9 +178,11 @@ const testcomment: DbComment = {
     timestamp: date("2020, 6, 7"),
     sentiment: 1,
 };
-cl.addComment(testcomment)
-    .then((result) => { console.log(result) })
-    .catch((err) => { console.log(err) });
+cl.getSentiments('r/test', new Date, new Date, ['fox', 'dog'])
+
+//cl.addComment(testcomment)
+//    .then((result) => { console.log(result) })
+//    .catch((err) => { console.log(err) });
 
 
 
