@@ -1,5 +1,5 @@
 import nltk
-#nltk.download('vader_lexicon')
+nltk.download('vader_lexicon')
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from textblob import TextBlob
 from typing import Optional
