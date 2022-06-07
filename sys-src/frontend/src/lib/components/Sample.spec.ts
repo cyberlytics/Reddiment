@@ -6,6 +6,6 @@ describe("Sample Test", () => {
 
     it('should not throw an error', () => {
         const { getByText } = render(Sample);
-        expect(() => getByText(/Sample/i)).not.toThrow();
+        expect(() => getByText(/null/i)).not.toThrow();
     })
 })
