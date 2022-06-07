@@ -50,6 +50,10 @@ class DbMock implements IDatabase {
         return new Promise((r) => r(distinct(this.comments().map(c => c.subreddit))));
     }
 
+    public pingElastic(): Promise<boolean> {
+        return new Promise((r) => r(true));
+    }
+
     public initDummy(): void {
         this.addCommentRaw("r/wallstreetbets", "the brown fox jumps over the lazy dog", date("2022-05-27Z"), 0.76);
         this.addCommentRaw("r/wallstreetbets", "the red fox jumps over the lazy dog", date("2022-05-27Z"), 0.34);
