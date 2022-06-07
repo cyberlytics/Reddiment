@@ -166,5 +166,16 @@ describe("Apollo Server GraphQL API", () => {
 
         assert.strictEqual(resultInvalid.errors?.length, 1);
     });
+
+    it("should return the service status", async () => {
+        const result = await apolloServer.executeOperation({
+            query: 'query GetServiceHealth { health { name, status, lastConnect } }'
+        });
+        assert.strictEqual(result.errors, undefined);
+        assert.deepStrictEqual(result.data?.health?.length, 1);
+
+        const db = result.data.health.find((h: any) => h.name == 'database');
+        assert.deepStrictEqual(db.status, "UP");
+    });
 });
 
