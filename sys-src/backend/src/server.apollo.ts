@@ -3,17 +3,20 @@ import { ApolloServer, ExpressContext } from "apollo-server-express";
 import express from 'express';
 import { DocumentNode } from "graphql";
 import http from 'http';
-import Context from "./graphql/context";
+import Context, { ServiceHealthInformation } from "./graphql/context";
 import resolvers from "./graphql/resolvers";
 import typeDefs from "./graphql/typedefs";
 import DbMock from "./services/database.mock";
 import { getSentimentMock } from "./services/sentiment.mock";
+import { HealthCallback } from "./services/serviceinterface";
 
+
+const healthInfo = new Map<string, ServiceHealthInformation>();
 
 let dbMock: DbMock | undefined = undefined;
-function getDbMock() {
+function getDbMock(hc: HealthCallback) {
     if (typeof dbMock === 'undefined') {
-        dbMock = new DbMock();
+        dbMock = new DbMock(hc);
         dbMock.initDummy();
     }
     return dbMock;
@@ -22,8 +25,9 @@ function getDbMock() {
 
 function contextFunctionForMock({ req }: ExpressContext): Context {
     return {
-        db: getDbMock(),
+        db: getDbMock(s => healthInfo.set('database', { status: s, lastConnect: s == 'UP' ? new Date() : undefined })),
         sentiment: getSentimentMock,
+        health: healthInfo,
     };
 };
 
@@ -31,7 +35,7 @@ function contextFunctionForProduction({ req }: ExpressContext): Context {
     throw 'Not implemented (yet)!';
 
     // return {
-        // sentiment: getSentiment
+    // sentiment: getSentiment
     // }
 }
 
@@ -70,3 +74,4 @@ async function createAndStartApolloServer(httpServer: http.Server, app: express.
 
 
 export { createApolloServer, createAndStartApolloServer, contextFunctionForMock };
+

@@ -1,6 +1,7 @@
 import { SimpleCache } from "../util/cache";
 import { distinct } from "../util/list";
 import date from "../util/time";
+import { HealthCallback } from "./serviceinterface";
 
 
 type DbComment = {
@@ -17,13 +18,17 @@ type DbComments = Array<DbComment>;
  */
 class DbMock {
     private readonly cache: SimpleCache;
+    private readonly healthCallback: HealthCallback;
 
-    constructor() {
+    constructor(healthCallback: HealthCallback) {
         this.cache = new SimpleCache();
         this.cache.set("comments", new Array<DbComment>());
+        this.healthCallback = healthCallback;
+        this.healthCallback("DOWN");
     }
 
     private comments(): DbComments {
+        this.healthCallback("UP");
         return this.cache.get<DbComments>("comments")!;
     }
 
@@ -34,8 +39,8 @@ class DbMock {
     public getSentiments(subreddit: string, from: Date, to: Date, keywords: Array<string>): Array<{ time: Date, sentiment: number }> {
         const commentsOfSubreddit = this.comments().filter(c => c.subreddit == subreddit);
         const filtered = commentsOfSubreddit.filter(c => c.timestamp >= from &&
-                                                         c.timestamp <= to &&
-                                                         (keywords.length == 0 || keywords.some(kw => c.text.includes(kw))));
+            c.timestamp <= to &&
+            (keywords.length == 0 || keywords.some(kw => c.text.includes(kw))));
         return filtered.map(c => { return { time: c.timestamp, sentiment: c.sentiment }; });
     }
 

@@ -16,6 +16,18 @@ const typeDefs = gql`
         sum: Int!
     }
 
+    type ServiceHealth {
+        name: String!
+        lastConnect: Date
+        status: ServiceStatus!
+    }
+
+    enum ServiceStatus {
+        UP
+        DOWN
+    }
+
+
     input Comment {
         subredditName: String!
         text: String!
@@ -28,6 +40,7 @@ const typeDefs = gql`
     type Query {
         subreddit(nameOrUrl: String!): Subreddit
         subreddits: [String!]!
+        health: [ServiceHealth!]!
     }
 
     type Mutation {
