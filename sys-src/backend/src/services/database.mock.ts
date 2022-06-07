@@ -22,9 +22,9 @@ class DbMock implements IDatabase {
         return this.cache.get<Comments>("comments")!;
     }
 
-    public addComment(comment: DbComment): boolean {
+    public addComment(comment: DbComment): Promise<boolean> {
         this.comments().push(comment);
-        return true;
+        return new Promise((r) => r(true));
     }
 
     private addCommentRaw(subreddit: string, text: string, timestamp: Date, sentiment: number): void {
@@ -36,16 +36,18 @@ class DbMock implements IDatabase {
         });
     }
 
-    public getSentiments(subreddit: string, from: Date, to: Date, keywords: Array<string>): Array<{ time: Date, sentiment: number }> {
-        const commentsOfSubreddit = this.comments().filter(c => c.subreddit == subreddit);
-        const filtered = commentsOfSubreddit.filter(c => c.timestamp >= from &&
-            c.timestamp <= to &&
-            (keywords.length == 0 || keywords.some(kw => c.text.includes(kw))));
-        return filtered.map(c => { return { time: c.timestamp, sentiment: c.sentiment }; });
+    public getSentiments(subreddit: string, from: Date, to: Date, keywords: Array<string>): Promise<Array<{ time: Date, sentiment: number }>> {
+        return new Promise((r) => {
+            const commentsOfSubreddit = this.comments().filter(c => c.subreddit == subreddit);
+            const filtered = commentsOfSubreddit.filter(c => c.timestamp >= from &&
+                c.timestamp <= to &&
+                (keywords.length == 0 || keywords.some(kw => c.text.includes(kw))));
+            r(filtered.map(c => { return { time: c.timestamp, sentiment: c.sentiment }; }));
+        });
     }
 
-    public getSubreddits(): Array<string> {
-        return distinct(this.comments().map(c => c.subreddit));
+    public getSubreddits(): Promise<Array<string>> {
+        return new Promise((r) => r(distinct(this.comments().map(c => c.subreddit))));
     }
 
     public initDummy(): void {
