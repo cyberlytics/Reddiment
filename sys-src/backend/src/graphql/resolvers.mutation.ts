@@ -18,7 +18,12 @@ const MutationResolver = {
     addComment: async (parent: {}, args: { comment: Comment }, context: Context, info: Info): Promise<boolean> => {
         const sentiment = await context.sentiment(args.comment.text);
         if (typeof sentiment !== 'undefined') {
-            context.db.addComment(args.comment.subredditName, args.comment.text, args.comment.timestamp, sentiment);
+            context.db.addComment({
+                sentiment: sentiment,
+                subreddit: args.comment.subredditName,
+                text: args.comment.text,
+                timestamp: args.comment.timestamp,
+            });
             return true;
         }
         return false;
