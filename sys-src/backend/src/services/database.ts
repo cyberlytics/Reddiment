@@ -1,4 +1,5 @@
 import elasticsearch from '@elastic/elasticsearch';
+import { ElementFlags } from 'typescript';
 import esb from 'elastic-builder'
 import date from "../util/time";
 import { estypes } from '@elastic/elasticsearch'
@@ -7,6 +8,7 @@ interface IDatabase {
     addComment: (comment: DbComment) => Promise<boolean>,
     getSentiments: (subreddit: string, from: Date, to: Date, keywords: Array<string>) => Promise<Array<TimeSentiment>>,
     getSubreddits: () => Promise<Array<string>>,
+    pingElastic: () => Promise<boolean>,
 
 }
 
@@ -167,6 +169,21 @@ class ElasticDb implements IDatabase {
         return a
     }
 
+    // Ping Elastic
+    public async pingElastic(): Promise<boolean> {
+        try {
+            const response = await this.client.ping({}, {
+                requestTimeout: 3000,
+            })
+            console.log(response);
+
+            return true;
+
+        } catch (ex: any) {
+            console.log(ex);
+            return false;
+        }
+    }
 }
 
 
@@ -183,7 +200,6 @@ cl.getSentiments('r/test', new Date, new Date, ['fox', 'dog'])
 //cl.addComment(testcomment)
 //    .then((result) => { console.log(result) })
 //    .catch((err) => { console.log(err) });
-
 
 
 //function ping() {
