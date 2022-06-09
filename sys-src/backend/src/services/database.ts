@@ -1,8 +1,7 @@
 import elasticsearch from '@elastic/elasticsearch';
-import { ElementFlags } from 'typescript';
 import esb from 'elastic-builder'
 import date from "../util/time";
-import { estypes } from '@elastic/elasticsearch'
+
 
 interface IDatabase {
     addComment: (comment: DbComment) => Promise<boolean>,
@@ -22,20 +21,6 @@ type DbComment = {
 type TimeSentiment = {
     time: Date,
     sentiment: number,
-};
-
-type Document = {
-    _index: string,
-    _id: string,
-    _version: boolean,
-    _seq_no: number,
-    _primary_term: number,
-    found: boolean,
-    _source: {
-        text: string,
-        timestamp: Date,
-        sentiment: number
-    }
 };
 
 
@@ -89,64 +74,64 @@ class ElasticDb implements IDatabase {
 
     }
 
-    //function get Sentiments from elastic Database
-    //Funktion noch nicht fertig!!!!
     public async getSentiments(subreddit: string, from: Date, to: Date, keywords: string[]): Promise<Array<TimeSentiment>> {
-
+        /**
+         * Funktionsbeschreibung
+         * function get Sentiments from elastic Database
+         */
         try {
             //Create Query
             //Index
-            const idx_splitted = subreddit.split("/", 2)
-            const idx: string = idx_splitted[1]
+            const idx_splitted = subreddit.split("/", 2);
+            const idx: string = idx_splitted[1];
             //Keywords
-            let keywordstring: string = keywords[0]
+            let keywordstring: string = keywords[0];
             for (let i = 1; i < (keywords.length); i++) {
                 keywordstring += " " + keywords[i];
-            }
-            //console.log(keywordstring)
-
+            };
             //Hier fehlt der Zeitraum
 
             //Create Request Body
-            const requestBody = new esb.RequestBodySearch().query(
-                new esb.MatchQuery('text', keywordstring)
-            );
-            //log request body
-            //console.log(requestBody.toJSON())
+            const requestBody = new esb.RequestBodySearch()
+                .query(esb.boolQuery()
+                    .must(new esb.MatchQuery('text', keywordstring))
+                    .must(new esb.RangeQuery('timestamp')
+                        .gte('2022-06-09T12:00:00.000')
+                        .lte('2022-06-09T13:00:00.000'))
+                        //gte = Greater-than or equal to
+                        //lte = Less-than or equal to
+                )
 
-            //Get Data from elastic
-            const response: estypes.SearchResponse = await this.client.search({
+            //log request body 
+            //const util = require('util')
+            //console.log(util.inspect(requestBody.toJSON(), {showHidden: false, depth: null, colors: true}))
+
+            //Get Data from elastic and save response to respArray
+            let respArray: any = [];
+            await this.client.search({
                 index: idx,
                 size: 10000,
                 body: requestBody.toJSON(),
+                fields: ['text', 'timestamp', 'sentiment'],
+            }).then(function (resp) {
+                for (let i = 0; i < resp.hits.hits.length; i++) {
+                    respArray.push(resp.hits.hits[i]);
+                }
+                return respArray;
+            }, function (err) {
+                console.trace(err.message);
             });
-            //get number of documents
-            const num_documents = response.hits.hits.length;
-            //get id's of documents whitch match the query
-            let ids: Array<string> = []
-            for (let i = 0; i < num_documents; i++) {
-                ids[i] = response.hits.hits[i]._id
-            }
 
+            // Create Array from type TimeSentiment
+            let timeSentiment: Array<TimeSentiment> = []
+            for (let i = 0; i < respArray.length; i++) {
+                timeSentiment[i] = {
+                    time: respArray[i].fields.timestamp[0],
+                    sentiment: respArray[i].fields.sentiment[0],
+                };
+            };
 
-            for (let i = 0; i < num_documents; i++) {
-                let doc: estypes.GetResponse<Document> = await this.client.get({
-                    index: idx,
-                    id: ids[0],
-                });
-                //Funktion noch nicht fertig!!!!
-                console.log(doc)
-            }
-
-            //-------------------------
-            const a: Array<TimeSentiment> = [{
-                time: date("2020, 6, 7"),
-                sentiment: 1,
-            }, {
-                time: date("2020, 6, 7"),
-                sentiment: 1,
-            }]
-            return a
+            return timeSentiment
 
         } catch (ex: any) {
             console.log(ex);
@@ -190,28 +175,21 @@ class ElasticDb implements IDatabase {
 
 const cl = new ElasticDb();
 const testcomment: DbComment = {
-    subreddit: 'r/test',
+    subreddit: 'r/testtimestamp',
     text: 'the brown fox jumps over the lazy dog',
-    timestamp: date("2020, 6, 7"),
+    timestamp: date("2022-06-10T13:00:00.000Z"),
     sentiment: 1,
 };
-cl.getSentiments('r/test', new Date, new Date, ['fox', 'dog'])
+
+
+cl.getSentiments('r/testtimestamp', date('2022-06-09T13:00:00.000') , new Date, ['fox', 'dog']).then((result) => { console.log(result) })
+
+
 
 //cl.addComment(testcomment)
 //    .then((result) => { console.log(result) })
 //    .catch((err) => { console.log(err) });
 
-
-//function ping() {
-//    console.log("ELASTICSEARCH: Trying to ping es");
-//    client.ping({}, { requestTimeout: 3000 }).then((response: any, error: any) => {
-//        if (response == true) {
-//            console.log('ELASTICSEARCH: elasticsearch is up!')
-//        } else {
-//            console.log('ELASTICSEARCH: elasticsearch is down!')
-//        }
-//    })
-//}
 
 
 
