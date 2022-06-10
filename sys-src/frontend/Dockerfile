@@ -5,6 +5,10 @@ WORKDIR /app
 # copy dependencies
 COPY package.json package-lock.json ./
 
+# copy graphql assets for codegen
+COPY .graphqlrc.yaml ./
+COPY ./src/lib/graphql ./src/lib/graphql
+
 # install Node dependencies
 RUN npm install
 
