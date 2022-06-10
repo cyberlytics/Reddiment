@@ -1,6 +1,8 @@
 import { ASTNode, GraphQLScalarType, Kind } from "graphql";
+import { ServiceStatusEnum } from "../services/serviceinterface";
 import { MutationResolver } from "./resolvers.mutation";
 import { SentimentResolver } from "./resolvers.sentiment";
+import { ServiceHealthQueryResolver } from "./resolvers.servicehealth";
 import { SubredditQueryResolver, SubredditResolver } from "./resolvers.subreddit";
 
 // GraphQL does not know about any "Date" type so we create one
@@ -29,6 +31,7 @@ const resolvers = {
     // Query: special type
     Query: {
         ...SubredditQueryResolver,
+        ...ServiceHealthQueryResolver,
     },
 
     // Mutation: special type
