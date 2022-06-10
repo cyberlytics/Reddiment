@@ -1,5 +1,6 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
+import { HealthCallback } from './serviceinterface';
 
 
 interface IDatabase {
@@ -7,7 +8,6 @@ interface IDatabase {
     getSentiments: (subreddit: string, from: Date, to: Date, keywords: Array<string>) => Promise<Array<TimeSentiment>>,
     getSubreddits: () => Promise<Array<string>>,
     pingElastic: () => Promise<boolean>,
-
 }
 
 type DbComment = {
@@ -24,9 +24,11 @@ type TimeSentiment = {
 
 
 class ElasticDb implements IDatabase {
-    client: elasticsearch.Client;
+    private readonly client: elasticsearch.Client;
+    private readonly healthCallback: HealthCallback;
 
-    constructor() {
+    constructor(healthCallback: HealthCallback) {
+        this.healthCallback = healthCallback;
         //create elastic client
         this.client = new elasticsearch.Client({
             node: 'http://localhost:9200',
@@ -42,7 +44,7 @@ class ElasticDb implements IDatabase {
      * Similar documents are stored with the same index in elastic
      * index == name of subreddit without "r/"
      * The id of an document is a unique identifier
-     * 
+     *
      * @param   {DbComment}  comment    the comment to add to the database
      * @returns {Promise<boolean>}      retuns true if the comment was successfully added to the database
      */
@@ -65,6 +67,8 @@ class ElasticDb implements IDatabase {
             //Refresh index
             await this.client.indices.refresh({ index: idx });
 
+            this.healthCallback('UP');
+
             if (result.result == 'created') {
                 return true;
             } else {
@@ -72,6 +76,7 @@ class ElasticDb implements IDatabase {
             }
         } catch (ex: any) {
             console.log(ex);
+            this.healthCallback('DOWN');
             return false;
         }
 
@@ -79,7 +84,7 @@ class ElasticDb implements IDatabase {
 
     /**
     * Function getSentiments() extract Sentiments from elastic Database
-    * 
+    *
     * @param   {string}      subreddit   Subreddit name
     * @param   {Date}        from        Start Timestamp for search
     * @param   {Date}        to          Stop Timestamp for search
@@ -111,7 +116,7 @@ class ElasticDb implements IDatabase {
                     //lte = Less-than or equal to
                 )
 
-            //log request body 
+            //log request body
             //const util = require('util')
             //console.log(util.inspect(requestBody.toJSON(), {showHidden: false, depth: null, colors: true}))
 
@@ -140,60 +145,61 @@ class ElasticDb implements IDatabase {
                 };
             };
 
-            return timeSentiment
+            this.healthCallback('UP');
+            return timeSentiment;
 
         } catch (ex: any) {
             console.log(ex);
-            const a: Array<TimeSentiment> = [{
-                time: new Date(Date.UTC(1900, 0, 1, 0, 0, 0, 0)),
-                sentiment: NaN
-            }]
-            return a
+            this.healthCallback('DOWN');
+            return [];
         }
     }
 
     /**
      * Function get Subreddits retuns an Array with contains all Subreddit names in Elastic Database.
-     * 
+     *
      * @returns {Promise<Array<string>>} Array with the Subreddit names
      */
     public async getSubreddits(): Promise<Array<string>> {
         try {
             //get indices from Database
-            const response = await this.client.cat.indices({format: 'json'})
+            const response = await this.client.cat.indices({ format: 'json' })
             //Extract indices to Array
             let subreddits: Array<string> = []
-            for (let i =0; i < response.length; i++){
+            for (let i = 0; i < response.length; i++) {
                 const s: any = response[i].index
                 //add "r/" to subreddit Name
                 const sr: string = "r/" + s.toString()
                 //add Subreddit Name to Array
                 subreddits.push(sr)
             }
-            return subreddits
+            this.healthCallback('UP');
+            return subreddits;
 
         } catch (ex: any) {
-            console.log(ex)
-            const a: Array<string> = ['error']
-            return a
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return [];
         }
     }
 
 
     /**
      * Fuction pingElastic() checks the connection to Elastic Database
-     * 
-     * @returns {boolean}   retuns true if the Elastic Database is reachable 
+     *
+     * @returns {boolean}   retuns true if the Elastic Database is reachable
      */
     public async pingElastic(): Promise<boolean> {
         try {
             const response = await this.client.ping({}, {
                 requestTimeout: 3000,
-            })
+            });
+            this.healthCallback('UP');
             return true;
 
         } catch (ex: any) {
             console.log(ex);
+            this.healthCallback('DOWN');
             return false;
         }
     }
@@ -224,4 +230,4 @@ class ElasticDb implements IDatabase {
 //cl.pingElastic().then((result) => { console.log(result) })
 
 
-export { IDatabase, DbComment, TimeSentiment, ElasticDb }
+export { IDatabase, DbComment, TimeSentiment, ElasticDb };

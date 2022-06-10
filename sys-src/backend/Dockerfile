@@ -52,6 +52,7 @@ COPY --from=builder /home/node/app/build ./build
 ENV PORT=${port}
 ENV SENTIMENT_HOST=sentiment
 ENV SENTIMENT_PORT=80
+ENV PRODUCTION=true
 EXPOSE $port
 
 CMD [ "node", "build/server.js" ]

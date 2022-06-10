@@ -6,7 +6,9 @@ import http from 'http';
 import Context, { ServiceHealthInformation } from "./graphql/context";
 import resolvers from "./graphql/resolvers";
 import typeDefs from "./graphql/typedefs";
+import { ElasticDb } from "./services/database";
 import DbMock from "./services/database.mock";
+import { getSentiment } from "./services/sentiment";
 import { getSentimentMock } from "./services/sentiment.mock";
 import { HealthCallback } from "./services/serviceinterface";
 
@@ -32,11 +34,11 @@ function contextFunctionForMock({ req }: ExpressContext): Context {
 };
 
 function contextFunctionForProduction({ req }: ExpressContext): Context {
-    throw 'Not implemented (yet)!';
-
-    // return {
-    // sentiment: getSentiment
-    // }
+    return {
+        sentiment: getSentiment,
+        db: new ElasticDb(s => healthInfo.set('database', { status: s, lastConnect: s == 'UP' ? new Date() : undefined })),
+        health: healthInfo,
+    };
 }
 
 
@@ -57,7 +59,7 @@ function createApolloServer(plugins: PluginDefinition[], contextFunc: ContextFun
 async function createAndStartApolloServer(httpServer: http.Server, app: express.Express, typeDefs: DocumentNode, resolvers: any): Promise<ApolloServer> {
     // Create Drain plugin outside Apollo Server creation
     const plugins = [ApolloServerPluginDrainHttpServer({ httpServer })];
-    const server = createApolloServer(plugins, contextFunctionForMock);
+    const server = createApolloServer(plugins, process.env.PRODUCTION == "true" ? contextFunctionForProduction : contextFunctionForMock);
 
     // More required logic for integrating with Express
     await server.start();
