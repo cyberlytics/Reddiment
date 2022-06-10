@@ -19,10 +19,10 @@ const SubredditResolver = {
         return parent.name;
     },
 
-    sentiment: (parent: { name: string }, args: { keywords: Array<string>, from?: Date, to?: Date }, context: Context, info: Info) => {
+    sentiment: async (parent: { name: string }, args: { keywords: Array<string>, from?: Date, to?: Date }, context: Context, info: Info) => {
         const to = args.to ?? date("9999-12-31Z");
         const from = args.from ?? date("0000-01-01Z");
-        const sentiments = context.db.getSentiments(parent.name, from, to, args.keywords);
+        const sentiments = await context.db.getSentiments(parent.name, from, to, args.keywords);
         const grouped = groupby(sentiments, s => s.time.valueOf());
         const agg = aggregate(grouped,
             s => {
@@ -49,8 +49,9 @@ const SubredditResolver = {
  * Resolves top-level queries that belong to the Subreddit topic.
  */
 const SubredditQueryResolver = {
-    subreddit: (parent: {}, args: { nameOrUrl: string }, context: Context, info: Info) => {
-        const sr = context.db.getSubreddits().find(s => s == args.nameOrUrl);
+    subreddit: async (parent: {}, args: { nameOrUrl: string }, context: Context, info: Info) => {
+        const srs = await context.db.getSubreddits()
+        const sr = srs.find(s => s == args.nameOrUrl);
         if (typeof (sr) !== 'undefined') {
             return { name: sr };
         }
