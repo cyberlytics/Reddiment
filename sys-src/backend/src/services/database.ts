@@ -1,6 +1,5 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
-import date from "../util/time";
 
 
 interface IDatabase {
@@ -191,7 +190,6 @@ class ElasticDb implements IDatabase {
             const response = await this.client.ping({}, {
                 requestTimeout: 3000,
             })
-            console.log(response);
             return true;
 
         } catch (ex: any) {
