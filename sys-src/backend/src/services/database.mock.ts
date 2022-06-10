@@ -24,7 +24,7 @@ class DbMock implements IDatabase {
 
     private comments(): Comments {
         this.healthCallback("UP");
-        return this.cache.get<DbComments>("comments")!;
+        return this.cache.get<Comments>("comments")!;
     }
 
     public addComment(comment: DbComment): Promise<boolean> {
@@ -32,13 +32,7 @@ class DbMock implements IDatabase {
         return new Promise((r) => r(true));
     }
 
-    public getSentiments(subreddit: string, from: Date, to: Date, keywords: Array<string>): Array<{ time: Date, sentiment: number }> {
-        const commentsOfSubreddit = this.comments().filter(c => c.subreddit == subreddit);
-        const filtered = commentsOfSubreddit.filter(c => c.timestamp >= from &&
-            c.timestamp <= to &&
-            (keywords.length == 0 || keywords.some(kw => c.text.includes(kw))));
-        return filtered.map(c => { return { time: c.timestamp, sentiment: c.sentiment }; });
-}   }    private addCommentRaw(subreddit: string, text: string, timestamp: Date, sentiment: number): void {
+    private addCommentRaw(subreddit: string, text: string, timestamp: Date, sentiment: number): void {
         this.addComment({
             sentiment: sentiment,
             subreddit: subreddit,
