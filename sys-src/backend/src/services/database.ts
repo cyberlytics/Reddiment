@@ -38,12 +38,16 @@ class ElasticDb implements IDatabase {
         })
     }
 
+    /**
+     * Function addComment() adds a new Comment to Elastic Database
+     * Similar documents are stored with the same index in elastic
+     * index == name of subreddit without "r/"
+     * The id of an document is a unique identifier
+     * 
+     * @param   {DbComment}  comment    the comment to add to the database
+     * @returns {Promise<boolean>}      retuns true if the comment was successfully added to the database
+     */
     public async addComment(comment: DbComment): Promise<boolean> {
-        /**
-         * Similar documents are stored with the same index in elastic
-         * index == name of subreddit without "r/"
-         *   The id of an document is a unique identifier
-         */
 
         try {
             //delete "/r" from the index
@@ -74,11 +78,16 @@ class ElasticDb implements IDatabase {
 
     }
 
+    /**
+    * Function getSentiments() extract Sentiments from elastic Database
+    * 
+    * @param   {string}      subreddit   Subreddit name
+    * @param   {Date}        from        Start Timestamp for search
+    * @param   {Date}        to          Stop Timestamp for search
+    * @param   {string[]}    keywords    Array with the keywords for the search
+    * @returns  {Array<TimeSentiment>}    Array with search results
+    */
     public async getSentiments(subreddit: string, from: Date, to: Date, keywords: string[]): Promise<Array<TimeSentiment>> {
-        /**
-         * Funktionsbeschreibung
-         * function get Sentiments from elastic Database
-         */
         try {
             //Create Query
             //Index
@@ -96,10 +105,11 @@ class ElasticDb implements IDatabase {
                 .query(esb.boolQuery()
                     .must(new esb.MatchQuery('text', keywordstring))
                     .must(new esb.RangeQuery('timestamp')
-                        .gte('2022-06-09T12:00:00.000')
-                        .lte('2022-06-09T13:00:00.000'))
-                        //gte = Greater-than or equal to
-                        //lte = Less-than or equal to
+                        .gte(from.toISOString().slice(0, -1))
+                        //.gte('2022-06-09T12:00:00.000')
+                        .lte(to.toISOString().slice(0, -1)))
+                    //gte = Greater-than or equal to
+                    //lte = Less-than or equal to
                 )
 
             //log request body 
@@ -135,33 +145,53 @@ class ElasticDb implements IDatabase {
 
         } catch (ex: any) {
             console.log(ex);
-
             const a: Array<TimeSentiment> = [{
-                time: date("2020, 6, 7"),
-                sentiment: 1,
-            }, {
-                time: date("2020, 6, 7"),
-                sentiment: 1,
+                time: new Date(Date.UTC(1900, 0, 1, 0, 0, 0, 0)),
+                sentiment: NaN
             }]
             return a
         }
     }
 
-
+    /**
+     * Function get Subreddits retuns an Array with contains all Subreddit names in Elastic Database.
+     * 
+     * @returns {Promise<Array<string>>} Array with the Subreddit names
+     */
     public async getSubreddits(): Promise<Array<string>> {
+        try {
+            //get indices from Database
+            const response = await this.client.cat.indices({format: 'json'})
+            //Extract indices to Array
+            let subreddits: Array<string> = []
+            for (let i =0; i < response.length; i++){
+                const s: any = response[i].index
+                //add "r/" to subreddit Name
+                const sr: string = "r/" + s.toString()
+                //add Subreddit Name to Array
+                subreddits.push(sr)
+            }
+            return subreddits
 
-        const a: Array<string> = ['test1', 'test2']
-        return a
+        } catch (ex: any) {
+            console.log(ex)
+            const a: Array<string> = ['error']
+            return a
+        }
     }
 
-    // Ping Elastic
+
+    /**
+     * Fuction pingElastic() checks the connection to Elastic Database
+     * 
+     * @returns {boolean}   retuns true if the Elastic Database is reachable 
+     */
     public async pingElastic(): Promise<boolean> {
         try {
             const response = await this.client.ping({}, {
                 requestTimeout: 3000,
             })
             console.log(response);
-
             return true;
 
         } catch (ex: any) {
@@ -172,25 +202,28 @@ class ElasticDb implements IDatabase {
 }
 
 
+//Testcomment
+//const testcomment: DbComment = {
+//    subreddit: 'r/hallo',
+//    text: 'the brown fox jumps over the lazy dog',
+//    timestamp: date("2022-06-10T07:55:23.097Z"),
+//    sentiment: 1,
+//};
 
-const cl = new ElasticDb();
-const testcomment: DbComment = {
-    subreddit: 'r/testtimestamp',
-    text: 'the brown fox jumps over the lazy dog',
-    timestamp: date("2022-06-10T13:00:00.000Z"),
-    sentiment: 1,
-};
+//Function call for manual test
+//const cl = new ElasticDb();
 
+//AddComment:
+//cl.addComment(testcomment).then((result) => { console.log(result) })
 
-cl.getSentiments('r/testtimestamp', date('2022-06-09T13:00:00.000') , new Date, ['fox', 'dog']).then((result) => { console.log(result) })
+//GetSentiment
+//cl.getSentiments('r/testtimestamp', new Date(Date.UTC(2022, 5, 10, 7, 30, 0, 0)) , new Date(Date.UTC(2022, 5, 10, 8, 0, 0, 0)), ['fox', 'dog']).then((result) => { console.log(result) })
 
+//getSubreddits()
+//cl.getSubreddits().then((result) => { console.log(result) })
 
-
-//cl.addComment(testcomment)
-//    .then((result) => { console.log(result) })
-//    .catch((err) => { console.log(err) });
-
-
+//Ping Database
+//cl.pingElastic().then((result) => { console.log(result) })
 
 
 export { IDatabase, DbComment, TimeSentiment, ElasticDb }
