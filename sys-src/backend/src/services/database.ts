@@ -1,14 +1,15 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
 import { HealthCallback } from './serviceinterface';
-
+import dotenv from "dotenv";
+import path from "path";
 
 interface IDatabase {
     addComment: (comment: DbComment) => Promise<boolean>,
     getSentiments: (subreddit: string, from: Date, to: Date, keywords: Array<string>) => Promise<Array<TimeSentiment>>,
     getSubreddits: () => Promise<Array<string>>,
     pingElastic: () => Promise<boolean>,
-}
+};
 
 type DbComment = {
     subreddit: string,
@@ -26,15 +27,23 @@ type TimeSentiment = {
 class ElasticDb implements IDatabase {
     private readonly client: elasticsearch.Client;
     private readonly healthCallback: HealthCallback;
+    private readonly host: string;
+    private readonly user: string;
+    private readonly password: string;
 
     constructor(healthCallback: HealthCallback) {
         this.healthCallback = healthCallback;
-        //create elastic client
+        //Get Secrets form  sys-src\docker\.env
+        dotenv.config({path: path.resolve(__dirname.slice(0, -20)+"/docker/.env")});
+        this.host = String(process.env.ELASTIC_HOST)
+        this.user = String(process.env.ELASTIC_USER)
+        this.password = String(process.env.ELASTIC_PASSWORD)
+        //create Elastic Client
         this.client = new elasticsearch.Client({
-            node: 'http://localhost:9200',
+            node: this.host,
             auth: {
-                username: 'elastic',
-                password: 'test'
+                username: this.user,
+                password: this.password,
             }
         })
     }
@@ -52,8 +61,8 @@ class ElasticDb implements IDatabase {
 
         try {
             //delete "/r" from the index
-            const idx_splitted = comment.subreddit.split("/", 2)
-            const idx: string = idx_splitted[1]
+            const idx_splitted = comment.subreddit.split("/", 2);
+            const idx: string = idx_splitted[1];
 
             // add Comment to elastic database
             const result = await this.client.index({
@@ -110,10 +119,9 @@ class ElasticDb implements IDatabase {
                     .must(new esb.MatchQuery('text', keywordstring))
                     .must(new esb.RangeQuery('timestamp')
                         .gte(from.toISOString().slice(0, -1))
-                        //.gte('2022-06-09T12:00:00.000')
                         .lte(to.toISOString().slice(0, -1)))
-                    //gte = Greater-than or equal to
-                    //lte = Less-than or equal to
+                        //gte = Greater-than or equal to
+                        //lte = Less-than or equal to
                 )
 
             //log request body
@@ -137,7 +145,7 @@ class ElasticDb implements IDatabase {
             });
 
             // Create Array from type TimeSentiment
-            let timeSentiment: Array<TimeSentiment> = []
+            let timeSentiment: Array<TimeSentiment> = [];
             for (let i = 0; i < respArray.length; i++) {
                 timeSentiment[i] = {
                     time: respArray[i].fields.timestamp[0],
@@ -163,15 +171,15 @@ class ElasticDb implements IDatabase {
     public async getSubreddits(): Promise<Array<string>> {
         try {
             //get indices from Database
-            const response = await this.client.cat.indices({ format: 'json' })
+            const response = await this.client.cat.indices({ format: 'json' });
             //Extract indices to Array
-            let subreddits: Array<string> = []
+            let subreddits: Array<string> = [];
             for (let i = 0; i < response.length; i++) {
-                const s: any = response[i].index
+                const s: any = response[i].index;
                 //add "r/" to subreddit Name
-                const sr: string = "r/" + s.toString()
+                const sr: string = "r/" + s.toString();
                 //add Subreddit Name to Array
-                subreddits.push(sr)
+                subreddits.push(sr);
             }
             this.healthCallback('UP');
             return subreddits;
@@ -204,30 +212,6 @@ class ElasticDb implements IDatabase {
         }
     }
 }
-
-
-//Testcomment
-//const testcomment: DbComment = {
-//    subreddit: 'r/hallo',
-//    text: 'the brown fox jumps over the lazy dog',
-//    timestamp: date("2022-06-10T07:55:23.097Z"),
-//    sentiment: 1,
-//};
-
-//Function call for manual test
-//const cl = new ElasticDb();
-
-//AddComment:
-//cl.addComment(testcomment).then((result) => { console.log(result) })
-
-//GetSentiment
-//cl.getSentiments('r/testtimestamp', new Date(Date.UTC(2022, 5, 10, 7, 30, 0, 0)) , new Date(Date.UTC(2022, 5, 10, 8, 0, 0, 0)), ['fox', 'dog']).then((result) => { console.log(result) })
-
-//getSubreddits()
-//cl.getSubreddits().then((result) => { console.log(result) })
-
-//Ping Database
-//cl.pingElastic().then((result) => { console.log(result) })
 
 
 export { IDatabase, DbComment, TimeSentiment, ElasticDb };
