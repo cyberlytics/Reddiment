@@ -9,6 +9,8 @@ type Comment = {
     commentId: string,
     userId?: string,
     articleId?: string,
+    upvotes?: number,
+    downvotes?: number,
 };
 
 /**

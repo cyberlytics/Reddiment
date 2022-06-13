@@ -1,5 +1,6 @@
 import { ASTNode, GraphQLScalarType, Kind } from "graphql";
 import { ServiceStatusEnum } from "../services/serviceinterface";
+import { JobQueryResolver } from "./resolvers.job";
 import { MutationResolver } from "./resolvers.mutation";
 import { SentimentResolver } from "./resolvers.sentiment";
 import { ServiceHealthQueryResolver } from "./resolvers.servicehealth";
@@ -32,6 +33,7 @@ const resolvers = {
     Query: {
         ...SubredditQueryResolver,
         ...ServiceHealthQueryResolver,
+        ...JobQueryResolver,
     },
 
     // Mutation: special type
