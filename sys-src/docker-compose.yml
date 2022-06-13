@@ -1,5 +1,5 @@
 version: "3.7"
-services: 
+services:
   backend:
     build: ./backend
     restart: always
@@ -51,8 +51,8 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     ulimits:
       memlock:
-      soft: -1
-      hard: -1
+        soft: -1
+        hard: -1
     volumes:
       - elastic-data:/usr/share/elasticsearch/data
     restart: unless-stopped
