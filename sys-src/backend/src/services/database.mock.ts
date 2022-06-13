@@ -38,6 +38,11 @@ class DbMock implements IDatabase {
             subreddit: subreddit,
             text: text,
             timestamp: timestamp,
+            articleId: '',
+            commentId: '',
+            downvotes: 0,
+            upvotes: 0,
+            userId: '',
         });
     }
 

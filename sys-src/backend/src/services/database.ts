@@ -15,6 +15,11 @@ type DbComment = {
     subreddit: string,
     text: string,
     timestamp: Date,
+    commentId: string,
+    userId: string,
+    articleId: string,
+    upvotes: number,
+    downvotes: number,
     sentiment: number,
 };
 
