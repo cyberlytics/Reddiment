@@ -14,16 +14,27 @@ t5_ : Subreddit
 t6_ : Award
 ```
 
-#### Listing
-https://not-an-aardvark.github.io/snoowrap/Listing.html
+#### Listing (https://not-an-aardvark.github.io/snoowrap/Listing.html)
 
-A class representing a list of content. This is a subclass of the native Array object, so it has all the properties of an Array (length, forEach, etc.) in addition to some added methods. The Listing can be extended by using the `#fetchMore()` and `#fetchAll()` functions. Note that these methods return new Listings, rather than mutating the original Listing.
+Properties: `limit?`, `after?`, `before?`, `show?`, and `count?`
+Members:
+- `isFinished`: Boolean
+    > A getter that indicates whether this Listing has any more items to fetch.
 
-Most methods that return Listings will also accept `limit`, `after`, `before`, `show`, and `count` properties.
+Methods: 
+- `fetchMore(options)`
+    > Fetches some more items
+- `fetchAll([options])`
+    > Fetches all of the items in this Listing, only stopping when there are none left.
 
-If you've used the reddit API before (or used other API wrappers like PRAW), you might know that reddit uses a `MoreComments` object in its raw JSON responses, representing comments that have been stubbed out of Listings. In snoowrap, there are no exposed `MoreComments` objects; the objects returned by the reddit API are stripped from Listings and are used internally as sources for the `fetchMore` functions. This means that in snoowrap, Listings that contain Comments can be used/expanded in the same manner as Listings that don't contain Comments, and for the most part you don't have to worry about the distinction.
-
-(Incidentally, if you encounter a Listing that does contain a `MoreComments` object then it's a bug, so please report it.)
+Options:
+- `amount`: Number
+    > The number of items to fetch.
+- `skipReplies`: Boolean, default: **false**
+    > For a Listing that contains comment objects on a Submission, this option can be used to save a few API calls, provided that only top-level comments are being examined. If this is set to true, snoowrap is able to fetch 100 Comments per API call rather than 20, but all returned Comments will have no fetched replies by default.
+    Internal details: When skipReplies is set to true, snoowrap uses reddit's api/info endpoint to fetch Comments. When skipReplies is set to false, snoowrap uses reddit's api/morechildren endpoint. It's worth noting that reddit does not allow concurrent requests to the api/morechildren endpoint by the same account.
+- `append`: Boolean, default: **true**
+    > If true, the resulting Listing will contain the existing elements in addition to the newly-fetched elements. If false, the resulting Listing will only contain the newly-fetched elements.
 
 #### snoowrap
 https://not-an-aardvark.github.io/snoowrap/snoowrap.html
