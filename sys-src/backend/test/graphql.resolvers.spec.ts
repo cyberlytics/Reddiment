@@ -177,5 +177,15 @@ describe("Apollo Server GraphQL API", () => {
         const db = result.data.health.find((h: any) => h.name == 'database');
         assert.deepStrictEqual(db.status, "UP");
     });
+
+    it("should return some jobs", async () => {
+        const result = await apolloServer.executeOperation({
+            query: 'query GetJobs { jobs }'
+        });
+        assert.strictEqual(result.errors, undefined);
+        assert.deepStrictEqual(result.data?.jobs?.length, 1);
+
+        assert.deepStrictEqual(result.data.jobs[0], "r/wallstreetbets");
+    });
 });
 
