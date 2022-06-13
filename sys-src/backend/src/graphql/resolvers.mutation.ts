@@ -25,6 +25,11 @@ const MutationResolver = {
                 subreddit: args.comment.subredditName,
                 text: args.comment.text,
                 timestamp: args.comment.timestamp,
+                upvotes: args.comment.upvotes ?? 0,
+                downvotes: args.comment.downvotes ?? 0,
+                articleId: args.comment.articleId ?? '',
+                userId: args.comment.userId ?? '',
+                commentId: args.comment.commentId,
             });
             return true;
         }
