@@ -2,11 +2,13 @@
     import { browser } from '$app/env'
     import { KQL_Subreddit } from '$lib/graphql/_kitql/graphqlStores'
     import Tags from 'svelte-tags-input'
+    import {DateInput} from 'date-picker-svelte'
+
 
     let subreddit: string
     let keywords: string[]
-    let date_from: string
-    let date_to: string
+    let date_from: Date
+    let date_to: Date
 
     const handleSearch = event => {
         console.log(`${subreddit} ${date_from} ${date_to}`)
@@ -14,8 +16,8 @@
             variables: {
                 nameOrUrl: `r/${subreddit}`,
                 keywords: keywords,
-                from: date_from,
-                to: date_to,
+                from: date_from.toISOString(),
+                to: date_to.toISOString(),
             }
         })
     }
@@ -38,26 +40,16 @@
     </div>
 
     <div class="w-1/2 pl-2 justify-start">
-        <div date-rangepicker class="flex items-center">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                </div>
-                <input bind:value={date_from} type="text" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Start-Datum">
-            </div>
+        <div class="flex items-center">
+            <DateInput bind:value={date_from}/>
             <span class="mx-2 text-gray-500">bis</span>
-            <div class="relative">
-            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-            </div>
-            <input bind:value={date_to} type="text" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="End-Datum">
-        </div>
+            <DateInput bind:value={date_to}/>
         </div>
     </div>
 
 </div>
-{date_from}
-{date_to}
+{date_from?.toISOString()}
+{date_to?.toISOString()}
 
 <style>
     .custom :global(.svelte-tags-input-tag) {
