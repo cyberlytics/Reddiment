@@ -34,13 +34,16 @@ const typeDefs = gql`
         timestamp: Date!
         commentId: String!
         userId: String
-        articleId: String,
+        articleId: String
+        upvotes: Int
+        downvotes: Int
     }
 
     type Query {
         subreddit(nameOrUrl: String!): Subreddit
         subreddits: [String!]!
         health: [ServiceHealth!]!
+        jobs: [String!]!
     }
 
     type Mutation {
