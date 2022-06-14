@@ -1,80 +1,86 @@
-import { requester as crawler } from './snoowrap/snoowrap'
-import express from 'express'
-import { setTimeout } from 'timers';
+import { requester as crawler } from './snoowrap/snoowrap';
 import Snoowrap from 'snoowrap';
 
-// Backend-Anbindung 
-const app = express();
-const port = 4000;
-const route = '/';
+const BackendURL = `http://${process.env.BACKEND_HOST}:${process.env.BACKEND_PORT}/graphql`;
 
-// app.listen(port, () => {
-//     crawler.search({ query: "r/wallstreetbets" }).then((data: { toJSON: () => any; }) => {
-//         var dataJSON = data.toJSON();
-//         console.log(dataJSON);
-//         app.post(route, (req, res) => {
-//             res.send(dataJSON)
-//         })
-//     })
-// })
- 
+let subredditsToSearch = new Array<string>();
+
+async function transmitComment(comment: Snoowrap.Comment) {
+    const result = await fetch(BackendURL, {
+        method: 'post',
+        body: JSON.stringify({
+            query: "mutation AddComment($comment: Comment!) {\n  addComment(comment: $comment)\n}",
+            variables: {
+                comment: {
+                    articleId: comment.parent_id.substring(3),
+                    commentId: comment.id,
+                    subredditName: comment.subreddit_name_prefixed,
+                    text: comment.body,
+                    timestamp: new Date(comment.created_utc * 1000).toISOString(),
+                    userId: comment.author.id,
+                    upvotes: comment.ups,
+                    downvotes: comment.downs,
+                }
+            },
+            operationName: "AddComment"
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+}
+
+// setInterval(async () => {
+//     try {
+//         const result = await fetch(BackendURL, {
+//             method: 'post',
+//             body: JSON.stringify({
+//                 query: "query GetJobs { jobs }",
+//                 operationName: "GetJobs"
+//             }),
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//         });
+
+//         const obj = await result.json();
+//         subredditsToSearch = (obj?.data?.jobs ?? []);
+//     }
+//     catch (ex: any) {
+//         console.log('error', ex);
+//     }
+// }, 60 * 1000);
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// /**
-//  * Gets a Listing of hot posts on this subreddit.
-//  * getHot.Options = {after?,before?,count?,limit?,show?}
-//  */
-// crawler.getSubreddit('r/wallstreetbets').getHot({}).then(data => {
-//     let fetchedData = data.fetchAll().toJSON();
-//     // TODO: send to backend
-// })
 
 // /**
 //  * Gets a Listing of new posts on this subreddit.
 //  * getNew.Options = {after?,before?,count?,limit?,show?}
 //  */
-// crawler.getSubreddit('r/wallstreetbets').getNew({}).then(data => {
-//     let fetchedData = data.fetchAll().toJSON();
-//     // TODO: send to backend
-// })
+crawler.getSubreddit('r/wallstreetbets').getNew({}).then(async (data) => {
+    let fetchedData = await data.fetchAll();
+    console.log(data.length);
+    console.log(fetchedData.length)
+    fetchedData.forEach(c => console.log(c.comments.toJSON()))
 
-// /**
-//  * Gets a Listing of new comments on this subreddit.
-//  */
-//  crawler.getSubreddit('r/wallstreetbets').getNewComments({}).then(data => {
-//     let fetchedData = data.fetchAll().toJSON();
-//     // TODO: send to backend
-// })
+    // TODO: send to backend
+})
 
-// /**
-//  * Gets a Listing of top posts on this subreddit.
-//  * getTop.Options = {after?,before?,count?,limit?,show?,time?}
-//  */
-//  crawler.getSubreddit('r/wallstreetbets').getTop({}).then(data => {
-//     let fetchedData = data.fetchAll().toJSON();
-//     // TODO: send to backend
-// })
+/**
+ * Gets a Listing of new comments on this subreddit.
+ */
+crawler.getSubreddit('r/wallstreetbets').getNewComments({}).then(async (data) => {
 
-// /**
-//  * Gets a Listing of controversial posts on this subreddit.
-//  * getControversial.Options = {after?,before?,count?,limit?,show?,time?}
-//  */
-//  crawler.getSubreddit('r/wallstreetbets').getControversial({}).then(data => {
-//     let fetchedData = data.fetchAll().toJSON();
-//     // TODO: send to backend
-// })
+    // console.log(data.length);
+    // const fetchedData = await data.fetchAll();
+    // console.log(fetchedData.length);
+
+    // fetchedData.forEach(c => transmitComment(c));
+})
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function searchSubreddit(
-    query: string,
-    time?: "all" | "hour" | "day" | "week" | "month" | "year" | undefined,
-    subreddit?: string | undefined,
-    sort?: "relevance" | "hot" | "top" | "new" | "comments" | undefined) {
-    crawler.search({ query: query, time: time, subreddit: subreddit, sort: sort }).then(data => {
-        return data.toJSON()
-    })
-}
 
 // var wallstreetbets : Snoowrap.Subreddit
 // setTimeout(() => {
@@ -87,7 +93,11 @@ function searchSubreddit(
 //             }
 //             else {
 //                 console.log("SUBREDDIT NICHT REFRESHED");
-//             }              
+//             }
 //         })
 //     })
 // }, 0); // täglich = 86400000ms
+
+
+
+
