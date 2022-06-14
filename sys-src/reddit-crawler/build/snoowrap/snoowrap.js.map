@@ -1,1 +1,0 @@
-{"version":3,"file":"snoowrap.js","sourceRoot":"","sources":["../../src/snoowrap/snoowrap.ts"],"names":[],"mappings":";;;;;;AAAA,wDAA+B;AAElB,QAAA,SAAS,GAAG,IAAI,kBAAQ,CAAC;IAClC,QAAQ,EAAE,eAAe;IACzB,QAAQ,EAAE,iBAAiB;IAC3B,SAAS,EAAE,kBAAkB;IAC7B,QAAQ,EAAE,wBAAwB;IAClC,YAAY,EAAE,gCAAgC;CACjD,CAAC,CAAA"}
