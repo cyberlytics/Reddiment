@@ -1,4 +1,4 @@
-import DbMock from "../services/database.mock";
+import { IDatabase } from "../services/database";
 import { getSentimentFunction } from "../services/sentiment";
 import { ServiceStatusEnum } from "../services/serviceinterface";
 
@@ -8,7 +8,7 @@ type ServiceHealthInformation = {
 };
 
 type Context = {
-    db: DbMock,
+    db: IDatabase,
     sentiment: getSentimentFunction,
     health: Map<string, ServiceHealthInformation>,
 };
