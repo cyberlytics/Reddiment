@@ -1,7 +1,6 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
 import { HealthCallback } from './serviceinterface';
-import dotenv from "dotenv";
 import path from "path";
 
 interface IDatabase {
@@ -32,25 +31,20 @@ type TimeSentiment = {
 class ElasticDb implements IDatabase {
     private readonly client: elasticsearch.Client;
     private readonly healthCallback: HealthCallback;
-    private readonly host: string;
-    private readonly user: string;
-    private readonly password: string;
 
     constructor(healthCallback: HealthCallback) {
         this.healthCallback = healthCallback;
-        //Get Secrets form  sys-src\docker\.env
-        dotenv.config({path: path.resolve(__dirname.slice(0, -20)+"/docker/.env")});
-        this.host = String(process.env.ELASTIC_HOST)
-        this.user = String(process.env.ELASTIC_USER)
-        this.password = String(process.env.ELASTIC_PASSWORD)
+        const host = process.env.ELASTIC_HOST || 'http://localhost:9200';
+        const user = process.env.ELASTIC_USER || 'elastic';
+        const password = process.env.ELASTIC_PASSWORD || 'test';
         //create Elastic Client
         this.client = new elasticsearch.Client({
-            node: this.host,
+            node: host,
             auth: {
-                username: this.user,
-                password: this.password,
+                username: user,
+                password: password,
             }
-        })
+        });
     }
 
     /**
@@ -112,21 +106,18 @@ class ElasticDb implements IDatabase {
             const idx_splitted = subreddit.split("/", 2);
             const idx: string = idx_splitted[1];
             //Keywords
-            let keywordstring: string = keywords[0];
-            for (let i = 1; i < (keywords.length); i++) {
-                keywordstring += " " + keywords[i];
+            let boolQuery = esb.boolQuery();
+            if (keywords.length > 0) {
+                boolQuery = boolQuery.must(new esb.MatchQuery('text', keywords.join(" ")));
             };
-            //Hier fehlt der Zeitraum
-
             //Create Request Body
             const requestBody = new esb.RequestBodySearch()
-                .query(esb.boolQuery()
-                    .must(new esb.MatchQuery('text', keywordstring))
+                .query(boolQuery
                     .must(new esb.RangeQuery('timestamp')
                         .gte(from.toISOString().slice(0, -1))
                         .lte(to.toISOString().slice(0, -1)))
-                        //gte = Greater-than or equal to
-                        //lte = Less-than or equal to
+                    //gte = Greater-than or equal to
+                    //lte = Less-than or equal to
                 )
 
             //log request body
@@ -134,29 +125,27 @@ class ElasticDb implements IDatabase {
             //console.log(util.inspect(requestBody.toJSON(), {showHidden: false, depth: null, colors: true}))
 
             //Get Data from elastic and save response to respArray
-            let respArray: any = [];
-            await this.client.search({
+            const respArray = new Array<elasticsearch.estypes.SearchHit<unknown>>();
+            const resp = await this.client.search({
                 index: idx,
                 size: 10000,
                 body: requestBody.toJSON(),
-                fields: ['text', 'timestamp', 'sentiment'],
-            }).then(function (resp) {
-                for (let i = 0; i < resp.hits.hits.length; i++) {
-                    respArray.push(resp.hits.hits[i]);
-                }
-                return respArray;
-            }, function (err) {
-                console.trace(err.message);
+                fields: ['timestamp', 'sentiment'],
+                _source: false,
             });
 
+            for (let i = 0; i < resp.hits.hits.length; i++) {
+                respArray.push(resp.hits.hits[i]);
+            }
+
             // Create Array from type TimeSentiment
-            let timeSentiment: Array<TimeSentiment> = [];
-            for (let i = 0; i < respArray.length; i++) {
-                timeSentiment[i] = {
-                    time: respArray[i].fields.timestamp[0],
-                    sentiment: respArray[i].fields.sentiment[0],
-                };
-            };
+            const timeSentiment: Array<TimeSentiment> = [];
+            respArray.forEach(r => {
+                timeSentiment.push({
+                    time: r.fields?.timestamp[0],
+                    sentiment: r.fields?.sentiment[0],
+                });
+            })
 
             this.healthCallback('UP');
             return timeSentiment;
