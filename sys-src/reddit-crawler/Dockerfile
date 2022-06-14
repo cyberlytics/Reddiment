@@ -1,25 +1,33 @@
-# development step
+# build step
 
-FROM node:18-alpine as base
+FROM node:18-alpine as builder
 
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
 WORKDIR /home/node/app
 
-COPY package*.json ./
+COPY --chown=node:node package*.json .
+RUN npm config set unsafe-perm true
+
+RUN npm i -g typescript
 
 USER node
-
 RUN npm i
 
-RUN npm run dev
+COPY --chown=node:node tsconfig.json .
+COPY --chown=node:node src/ .
 
-COPY . .
+RUN npm run build
 
 # production step
 
-FROM base as production
+FROM node:18-alpine as production
 
-ENV NODE_PATH = ./build
+RUN mkdir -p /app/node_modules && chown -R node:node /app
+WORKDIR /app
+COPY --chown=node:node package*.json .
 
-ENV PORT = 4000
+USER node
+RUN npm i --omit=dev
+COPY --from=builder /home/node/app/build ./build
 
-RUN npm run build
+CMD ["node", "build/crawler.js" ]
