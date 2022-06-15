@@ -10,9 +10,8 @@ services:
     ports:
       - "4000:4000"
     secrets:
-      - backend_graphql_access_key
+      - backend_access_key
       - sentiment_access_key
-      - elastic_password
 
   frontend:
     build: ./frontend
@@ -25,6 +24,8 @@ services:
       - BACKEND_ADDR=${BACKEND_ADDR}
     ports:
       - "80:80"
+    secrets:
+      - backend_access_key
 
 
   sentiment:
@@ -37,7 +38,7 @@ services:
     ports:
       - "80:4001"
     secrets:
-      - backend_access_key
+      - sentiment_access_key
 
   elasticsearch:
     container_name: elasticsearch
@@ -48,8 +49,6 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=${ELASTIC_SECURITY}
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-    secrets:
-      - elastic_password
     ulimits:
       memlock:
         soft: -1
