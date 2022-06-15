@@ -47,14 +47,6 @@ services:
     secrets:
       - backend_access_key
 
-#  shares_crawler:
-#    build: ./shares_crawler
-#    restart: always
-#    container_name: shares_crawler
-#    hostname: shares_crawler
-#    secrets:
-#      - backend_access_key
-
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
