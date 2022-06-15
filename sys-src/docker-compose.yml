@@ -65,6 +65,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=${ELASTIC_SECURITY}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     secrets:
       - elastic_password
     ulimits:
