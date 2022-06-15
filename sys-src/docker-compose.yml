@@ -39,6 +39,22 @@ services:
     secrets:
       - backend_access_key
 
+#  reddit_crawler:
+#    build: ./reddit-crawler
+#    restart: always
+#    container_name: reddit_crawler
+#    hostname: reddit_crawler
+#    secrets:
+#      - backend_access_key
+
+#  shares_crawler:
+#    build: ./shares_crawler
+#    restart: always
+#    container_name: shares_crawler
+#    hostname: shares_crawler
+#    secrets:
+#      - backend_access_key
+
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
@@ -47,7 +63,6 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=${ELASTIC_SECURITY}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     secrets:
       - elastic_password
     ulimits:
@@ -58,13 +73,13 @@ services:
       - elastic-data:/usr/share/elasticsearch/data
     restart: unless-stopped
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "${ELASTIC_PORT1}:$ELASTIC_PORT1}"
+      - "${ELASTIC_PORT2}:$ELASTIC_PORT2}"
     healthcheck:
       test:
         [
         "CMD-SHELL",
-        "curl --fail http://localhost:9200 || exit 1",
+        "curl --fail http://localhost:${ELASTIC_PORT1} || exit 1",
         ]
       interval: 10s
       timeout: 10s
