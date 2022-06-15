@@ -1,5 +1,5 @@
 import { requester as crawler } from './auth';
-import Snoowrap from 'snoowrap';
+import Snoowrap, { Comment, Listing, Submission, Subreddit } from 'snoowrap';
 
 // Backend connection
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8,31 +8,42 @@ const BackendURL = `http://${process.env.BACKEND_HOST}:${process.env.BACKEND_POR
 
 let subredditsToSearch = new Array<string>();
 
+/**
+ * Send relevant comment data to backend
+ * @param comment a Snoowrap.Comment object, containing all comment data
+ */
 async function transmitComment(comment: Snoowrap.Comment) {
-    const result = await fetch(BackendURL, {
-        method: 'post',
-        body: JSON.stringify({
-            query: "mutation AddComment($comment: Comment!) {\n  addComment(comment: $comment)\n}",
-            variables: {
-                comment: {
-                    articleId: comment.parent_id.substring(3),
-                    commentId: comment.id,
-                    subredditName: comment.subreddit_name_prefixed,
-                    text: comment.body,
-                    timestamp: new Date(comment.created_utc * 1000).toISOString(),
-                    userId: comment.author.id,
-                    upvotes: comment.ups,
-                    downvotes: comment.downs,
-                }
+    try {
+        const result = await fetch(BackendURL, {
+            method: 'post',
+            body: JSON.stringify({
+                query: "mutation AddComment($comment: Comment!) {\n  addComment(comment: $comment)\n}",
+                variables: {
+                    comment: {
+                        articleId: comment.parent_id.substring(3),
+                        commentId: comment.id,
+                        subredditName: comment.subreddit_name_prefixed,
+                        text: comment.body,
+                        timestamp: new Date(comment.created_utc * 1000).toISOString(),
+                        userId: comment.author.id,
+                        upvotes: comment.ups,
+                        downvotes: comment.downs,
+                    }
+                },
+                operationName: "AddComment"
+            }),
+            headers: {
+                'Content-Type': 'application/json',
             },
-            operationName: "AddComment"
-        }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+        });
+    } catch (error) {
+        console.log('error', error);
+    }
 }
 
+/**
+ * Receive a task list to work through in 
+ */
 setInterval(async () => {
     try {
         const result = await fetch(BackendURL, {
@@ -49,54 +60,77 @@ setInterval(async () => {
         const obj = await result.json();
         subredditsToSearch = (obj?.data?.jobs ?? []);
     }
-    catch (ex: any) {
-        console.log('error', ex);
+    catch (error: any) {
+        console.log('error', error);
     }
 }, 60 * 1000);
 
 
-// Reddit Crawler
+/** 
+ * Reddit Crawler
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// /**
-//  * Gets a Listing of new posts on this subreddit.
-//  */
-crawler.getSubreddit('r/wallstreetbets').getNew({}).then(async (data) => {
-    
-    let fetchedData = await data.fetchAll({
-        amount: 10,
-    });
+const cs_limit = 100; 
+const sms_limit = 25;
 
-    // console.log(data.length);
-    // console.log(data.toJSON());
-    // console.log(fetchedData.length)
+let sr_queue = new Array<Snoowrap.Subreddit>();
 
-    fetchedData.forEach(sraw => {
-        sraw.fetch().then(s => {
-            //console.log(s.comments.length); // ständig leer, weiß nicht warum
-            s.comments.forEach(c => {
-                // console.log(c.body);
-                transmitComment(c)
-            });
-        });
-    })
-})
+subredditsToSearch.push('r/wallstreetbets')
+subredditsToSearch.push('r/wallstreetbets')
 
 /**
- * Gets a Listing of new comments on this subreddit.
+ * Fill Subreddit Queue
  */
-crawler.getSubreddit('r/wallstreetbets').getNewComments({}).then(async (data) => {
+setInterval(async () => {
+        try {
+            while(subredditsToSearch.length > 0){
+                let sr_name = subredditsToSearch.pop();
+                if(sr_name){
+                    let sr = crawler.getSubreddit(sr_name);
+                    sr_queue.push(sr);
+                    console.log("SUBREDDIT PUSHED");
+                    
+                }
+            }
+        } catch (error) {
+            console.log('error', error);
+        }
+}, 10 * 1000); // every 10 seconds
 
-    const fetchedData = await data.fetchAll();
 
-    // console.log(data.length);
-    // console.log(fetchedData.length);
-
-    fetchedData.forEach(c => transmitComment(c));
-})
-
-
-setInterval(() => {
-    
-}, 60 * 1000);
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Get all Comments of Subreddit and their Submissions
+ */
+setInterval(async () => {
+    try {
+        while (sr_queue.length > 0) {
+            let sr = sr_queue.pop();
+            if(sr){
+                await sr.refresh().then(rf_sr => {
+                    console.log("SUBREDDIT REFRESHED");
+                    
+                    rf_sr.getNewComments().then(async raw_cs => {
+                        let ft_cs = await raw_cs.fetchAll({amount: cs_limit});
+                        console.log("FETCHED COMMENTS: " + ft_cs.length);
+        
+                        ft_cs.forEach(c => transmitComment(c));
+                    })
+                    rf_sr.getNew().then(async raw_sms=> {
+                        const ft_sms = await raw_sms.fetchAll({amount: sms_limit});
+                        ft_sms.forEach(async raw_sm =>{
+                            await raw_sm.fetch().then(async ft_sm => {
+                                const ft_cs = await ft_sm.comments.fetchAll({amount: cs_limit});
+                                console.log("FETCHED COMMENTS IN SUBMISSION: " + ft_cs.length);
+                                
+                                ft_cs.forEach(c => transmitComment(c));
+                            })
+                        })
+                    })
+                })
+            }
+        }
+    } catch (error) {
+        console.log('error', error);        
+    }
+}, 60 * 1000); // every 60 seconds
