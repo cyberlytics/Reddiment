@@ -39,6 +39,7 @@ services:
     secrets:
       - backend_access_key
 
+<<<<<<< HEAD
   reddit_crawler:
     build: ./reddit-crawler
     restart: always
@@ -48,6 +49,15 @@ services:
       - backend_access_key
       - reddit_login_password
       - reddit_client_secret
+=======
+#  reddit_crawler:
+#    build: ./reddit-crawler
+#    restart: always
+#    container_name: reddit_crawler
+#    hostname: reddit_crawler
+#    secrets:
+#      - backend_access_key
+>>>>>>> 5e23193 (docker-compose update configuration environments)
 
 #  shares_crawler:
 #    build: ./shares_crawler
@@ -65,7 +75,6 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=${ELASTIC_SECURITY}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     secrets:
       - elastic_password
     ulimits:
