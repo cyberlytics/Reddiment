@@ -3,6 +3,7 @@
     import { KQL_Subreddit } from '$lib/graphql/_kitql/graphqlStores'
     import Tags from 'svelte-tags-input'
 
+    
     let subreddit: string
     let keywords: string[]
     let date_from: Date;
@@ -36,7 +37,7 @@
 
     <!--<input type="text" class="w-1/2 border-2 focus:border-orange-300 focus:outline-none px-1 h-9" bind:value={keywords} placeholder="Tags">-->
     <div class="custom">
-        <Tags class="" on:tags={keywords} placeholder="Tags"/>
+        <Tags on:tags={keywords} placeholder="Tags" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
     </div>
 
     <div date-rangepicker class="flex items-center">
@@ -74,22 +75,42 @@
 </div>
 
 <style>
+    
     .custom :global(.svelte-tags-input-tag) {
-        background: rgb(0, 0, 0);
+        background-color: rgb(255 138 76);
+        border-radius: 0.2rem;
+    }
+
+    .custom :global(.svelte-tags-input-tag:hover) {
+        background-color: rgba(255, 138, 76, 0.78);
+    }
+
+    .custom :global(.svelte-tags-input-layout) {
+        padding: 0;
+        border-width: 0;
     }
 
     .custom :global(.svelte-tags-input-layout:hover) {
-        border-width: 1px;
-        border-color: inherit;
+        border-width: 0;
     }
-    .custom :global(.svelte-tags-input-layout.focus), .custom :global(.svelte-tags-input-layout:focus) {
-        border-width: 1px;
+    
+    .custom :global(.svelte-tags-input-tag.focus), .custom :global(.svelte-tags-input:focus) {
         border-radius: 0.5rem;
+        border-width: 1px;
+        border-color: rgb(63 131 248);
+        box-shadow: 5 0 0 0 calc(1px + 3px) rgb(63 131 248);
+        margin: 0;
     }
-    :root{
-        --date-picker-selected-color: white;
-        --date-picker-selected-background:  rgb(253,186,116);
-        --date-picker-highlight-border:  rgb(253,186,116);
-        --date-picker-highlight-shadow:  transparent;
+
+    .custom :global(.svelte-tags-input) {
+        margin-top: 0;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgb(203 209 219)
     }
+
+
+
+
+
 </style>
