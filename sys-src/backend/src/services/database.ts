@@ -1,7 +1,6 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
 import { HealthCallback } from './serviceinterface';
-import path from "path";
 
 interface IDatabase {
     addComment: (comment: DbComment) => Promise<boolean>,
@@ -27,7 +26,17 @@ type TimeSentiment = {
     sentiment: number,
 };
 
-
+/**
+ * Class: ElasticDb
+ * 
+ * Each document is stored under a unique ID.
+ * Reddit Comment --> ID == commentId
+ * Financial Data --> ID == ?
+ * 
+ * Similar documents are stored with the same index in elastic.
+ * Reddit Comment from subreddit "r/wallstreetbets" --> Index: r_wallstreetbest (Prefix "r_" indecates Comment of Subreddit)
+ * Financial Data --> Index: f_xyz (Prefix "f_" indecates financial Data)
+ */
 class ElasticDb implements IDatabase {
     private readonly client: elasticsearch.Client;
     private readonly healthCallback: HealthCallback;
@@ -50,8 +59,8 @@ class ElasticDb implements IDatabase {
     /**
      * Function addComment() adds a new Comment to Elastic Database
      * Similar documents are stored with the same index in elastic
-     * index == name of subreddit without "r/"
-     * The id of an document is a unique identifier
+     * index == name of subreddit, substitute "/" with "_" --> "r_wallstreetbets"
+     * The id of an document is a unique identifier --> commentId
      *
      * @param   {DbComment}  comment    the comment to add to the database
      * @returns {Promise<boolean>}      retuns true if the comment was successfully added to the database
@@ -59,35 +68,77 @@ class ElasticDb implements IDatabase {
     public async addComment(comment: DbComment): Promise<boolean> {
 
         try {
-            //delete "/r" from the index
-            const idx_splitted = comment.subreddit.split("/", 2);
-            const idx: string = idx_splitted[1];
-
-            // add Comment to elastic database
-            const result = await this.client.index({
+            //substitite "/" with "_" for subreddit index
+            const idx = comment.subreddit.replace("/", "_");
+            //Check if the Comment already exists
+            const commendExist = await this.client.exists({
                 index: idx,
-                document: {
-                    text: comment.text,
-                    timestamp: comment.timestamp,
-                    sentiment: comment.sentiment,
-                }
+                id: comment.commentId
             });
-            //Refresh index
-            await this.client.indices.refresh({ index: idx });
 
-            this.healthCallback('UP');
+            if (commendExist == true) {
+                //Comment exists --> Update Document
+                //Update Comment
+                const result = await this.client.update({
+                    index: idx,
+                    id: comment.commentId,
+                    body: {
+                        doc: {
+                            subreddit: comment.subreddit,
+                            text: comment.text,
+                            timestamp: comment.timestamp,
+                            commentId: comment.commentId,
+                            userId: comment.userId,
+                            articleId: comment.articleId,
+                            upvotes: comment.upvotes,
+                            downvotes: comment.downvotes,
+                            sentiment: comment.sentiment,
+                        },
+                        doc_as_upsert: true
+                    }
+                });
+                //Refresh index
+                await this.client.indices.refresh({ index: idx });
+                this.healthCallback('UP');
+                if (result.result == 'updated') {
+                    return true;
+                } else {
+                    return false;
+                }
 
-            if (result.result == 'created') {
-                return true;
             } else {
-                return false;
+                //Comment does not exist --> add new Comment
+                // add Comment to elastic database
+                const result = await this.client.index({
+                    index: idx,
+                    id: comment.commentId,
+                    document: {
+                        subreddit: comment.subreddit,
+                        text: comment.text,
+                        timestamp: comment.timestamp,
+                        commentId: comment.commentId,
+                        userId: comment.userId,
+                        articleId: comment.articleId,
+                        upvotes: comment.upvotes,
+                        downvotes: comment.downvotes,
+                        sentiment: comment.sentiment,
+                    }
+                });
+                //Refresh index
+                await this.client.indices.refresh({ index: idx });
+                this.healthCallback('UP');
+                if (result.result == 'created') {
+                    return true;
+                } else {
+                    return false;
+                }
             }
+
         } catch (ex: any) {
             console.log(ex);
             this.healthCallback('DOWN');
             return false;
         }
-
     }
 
     /**
@@ -103,8 +154,7 @@ class ElasticDb implements IDatabase {
         try {
             //Create Query
             //Index
-            const idx_splitted = subreddit.split("/", 2);
-            const idx: string = idx_splitted[1];
+            const idx = subreddit.replace("/", "_");
             //Keywords
             let boolQuery = esb.boolQuery();
             if (keywords.length > 0) {
@@ -171,9 +221,12 @@ class ElasticDb implements IDatabase {
             for (let i = 0; i < response.length; i++) {
                 const s: any = response[i].index;
                 //add "r/" to subreddit Name
-                const sr: string = "r/" + s.toString();
-                //add Subreddit Name to Array
-                subreddits.push(sr);
+                const sr: string = s.toString();
+                //Check if the index prefix is "r_"
+                if (sr.startsWith("r_") == true) {
+                    //add Subreddit Name to Array
+                    subreddits.push(sr.replace("_", "/"));
+                }
             }
             this.healthCallback('UP');
             return subreddits;
