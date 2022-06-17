@@ -9,6 +9,7 @@ interface IDatabase {
     pingElastic: () => Promise<boolean>,
 };
 
+//Types Comment
 type DbComment = {
     subreddit: string,
     text: string,
@@ -24,6 +25,18 @@ type DbComment = {
 type TimeSentiment = {
     time: Date,
     sentiment: number,
+};
+
+//Types Finance
+type DbFinance = {
+    aktie: string,
+    timestamp: Date,
+    value: number,
+};
+
+type TimeFinance = {
+    time: Date,
+    value: number,
 };
 
 /**
@@ -258,6 +271,92 @@ class ElasticDb implements IDatabase {
             return false;
         }
     }
+
+    /**
+    * Function addFinance() adds new financial data to Elastic Database
+    * Similar documents are stored with the same index in elastic
+    * index == name of stock,  with prefix "f_" --> "f_XYZ"
+    * The id of an document is a unique identifier --> stockname_tiemstamp
+    *
+    * @param   {DbFinance}  finance    the financial data to add to the database
+    * @returns {Promise<boolean>}      retuns true if the financial data was successfully added to the database
+     * 
+     */
+    public async addFinance(finance: DbFinance): Promise<boolean> {
+        try {
+            //Check if the stock already exists --> id
+
+            //Stock exists --> Update Document
+
+            //Stock does not exist --> Add new Document
+
+            this.healthCallback('UP');
+            //Dummy
+            return true;
+
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return false;
+        }
+    }
+
+    /**
+    * Function getFinance() extract financial data from elastic Database
+    *
+    * @param   {string}      stock          Stock name
+    * @param   {Date}        from           Start Timestamp for search
+    * @param   {Date}        to             Stop Timestamp for search
+    * @returns {Array<TimeFinance>}         Array with search results
+    */
+    public async getFinance(stock: string, from: Date, to: Date,): Promise<Array<TimeFinance>> {
+        try {
+            //create request Body
+
+            //Get Data from elastic and save response
+
+            // Create Array from type TimeFinance            
+
+            this.healthCallback('UP');
+            //Dummy
+            return []
+
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return [];
+        }
+    }
+
+
+    /**
+    * Function getStocks retuns an Array with contains all Stock names in Elastic Database.
+    *
+    * @returns {Promise<Array<string>>} Array with the Subreddit names
+    */
+    public async getStocks(): Promise<Array<string>> {
+        try {
+            //get all indices from Database
+
+            //Sort prefix --> "f_"       
+
+            //Delete prefix "f_"
+
+            //add Stock Name to Array
+
+            this.healthCallback('UP');
+            //Dummy
+            return []
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return [];
+        }
+    }
+
+
+
+
 }
 
 
