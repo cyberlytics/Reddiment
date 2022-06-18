@@ -2,11 +2,12 @@ import { SimpleCache } from "../util/cache";
 import { distinct } from "../util/list";
 import date from "../util/time";
 import { HealthCallback } from "./serviceinterface";
-import { DbComment, IDatabase } from "./database";
+import { DbComment, IDatabase, DbFinance } from "./database";
 
 
 
 type Comments = Array<DbComment>;
+type Finances = Array<DbFinance>;
 
 /**
  * A simple and very basic mock for Elasticsearch database
@@ -18,6 +19,7 @@ class DbMock implements IDatabase {
     constructor(healthCallback: HealthCallback) {
         this.cache = new SimpleCache();
         this.cache.set("comments", new Array<DbComment>());
+        this.cache.set('finances', new Array<DbFinance>());
         this.healthCallback = healthCallback;
         this.healthCallback("DOWN");
     }
@@ -64,6 +66,37 @@ class DbMock implements IDatabase {
         return new Promise((r) => r(true));
     }
 
+    private finances():Finances{
+        this.healthCallback('UP');
+        return this.cache.get<Finances>('finances')!;
+    }
+
+    public addFinance(finance: DbFinance) : Promise<boolean>{
+        this.finances().push(finance);
+        return new Promise((s)=> s(true));
+    }
+
+    private addFinanceRaW(aktie:string,timestamp:Date ,value:number):void {
+        this.addFinance({
+            aktie: aktie,
+            timestamp: timestamp,
+            value: value,
+        });
+    }
+
+    public getFinance(stock: string, from: Date, to: Date):  Promise<Array<{ time: Date; value: number; }>>{
+        return new Promise((s)=>{
+            const nameofStock = this.finances().filter(c => c.aktie == stock); 
+            const filteredF = nameofStock.filter(c => c.timestamp >= from &&
+                c.timestamp<= to);
+                s(filteredF.map(c=>{return{time: c.timestamp, value:c.value};}))
+        })
+    }
+
+    public getStocks(): Promise<Array<string>>{
+        return new Promise((a)=> a(distinct(this.finances().map(c => c.aktie))));
+    }
+
     public initDummy(): void {
         this.addCommentRaw("r/wallstreetbets", "the brown fox jumps over the lazy dog", date("2022-05-27Z"), 0.76);
         this.addCommentRaw("r/wallstreetbets", "the red fox jumps over the lazy dog", date("2022-05-27Z"), 0.34);
@@ -82,6 +115,14 @@ class DbMock implements IDatabase {
         this.addCommentRaw("r/place", "the green fox jumps over the big dog", date("2022-05-28Z"), 0.87);
         this.addCommentRaw("r/place", "the blue fox jumps over the scared dog", date("2022-05-28Z"), 0.38);
         this.addCommentRaw("r/place", "the black fox jumps over the small dog", date("2022-05-28Z"), 0.04);
+        
+
+        this.addFinanceRaW('VW',date("2022-05-28Z"),100)
+        this.addFinanceRaW('VW',date("2022-06-28Z"),120)
+        this.addFinanceRaW('VW',date("2022-07-28Z"),10)
+        this.addFinanceRaW('VW',date("2022-08-28Z"),140)
+        this.addFinanceRaW('VW',date("2022-09-28Z"),170)
+        this.addFinanceRaW('VW',date("2022-10-28Z"),30)
     }
 }
 
