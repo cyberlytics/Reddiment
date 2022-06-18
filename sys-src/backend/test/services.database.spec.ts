@@ -5,7 +5,7 @@ describe("Elastic Database", () => {
     // Tests Reddit Comments
     it("should return true on inserting or updating a comment", async () => {
         const db = new ElasticDb(s => null);
-        const result = await db.addComment({ subreddit: 'r/wallstreetbets', sentiment: 1, text: 'the brown fox jumps over the lazy dog', timestamp: new Date(Date.UTC(2022, 5, 13, 10, 30, 0, 0)), articleId: '', commentId: '', downvotes: 0, upvotes: 0, userId: '' });
+        const result = await db.addComment({ subreddit: 'r/wallstreetbets', sentiment: 1, text: 'the brown fox jumps over the lazy dog', timestamp: new Date(Date.UTC(2022, 5, 13, 10, 30, 0, 0)), articleId: '123articleId', commentId: '123commentID', downvotes: 10, upvotes: 10, userId: '123userId' });
         assert.deepStrictEqual(result, true);
     });
 
