@@ -66,17 +66,17 @@ class DbMock implements IDatabase {
         return new Promise((r) => r(true));
     }
 
-    private finances():Finances{
+    private finances(): Finances {
         this.healthCallback('UP');
         return this.cache.get<Finances>('finances')!;
     }
 
-    public addFinance(finance: DbFinance) : Promise<boolean>{
+    public addFinance(finance: DbFinance): Promise<boolean> {
         this.finances().push(finance);
-        return new Promise((s)=> s(true));
+        return new Promise((s) => s(true));
     }
 
-    private addFinanceRaW(aktie:string,timestamp:Date ,value:number):void {
+    private addFinanceRaW(aktie: string, timestamp: Date, value: number): void {
         this.addFinance({
             aktie: aktie,
             timestamp: timestamp,
@@ -84,17 +84,17 @@ class DbMock implements IDatabase {
         });
     }
 
-    public getFinance(stock: string, from: Date, to: Date):  Promise<Array<{ time: Date; value: number; }>>{
-        return new Promise((s)=>{
-            const nameofStock = this.finances().filter(c => c.aktie == stock); 
+    public getFinance(stock: string, from: Date, to: Date): Promise<Array<{ time: Date; value: number; }>> {
+        return new Promise((s) => {
+            const nameofStock = this.finances().filter(c => c.aktie == stock);
             const filteredF = nameofStock.filter(c => c.timestamp >= from &&
-                c.timestamp<= to);
-                s(filteredF.map(c=>{return{time: c.timestamp, value:c.value};}))
+                c.timestamp <= to);
+            s(filteredF.map(c => { return { time: c.timestamp, value: c.value }; }))
         })
     }
 
-    public getStocks(): Promise<Array<string>>{
-        return new Promise((a)=> a(distinct(this.finances().map(c => c.aktie))));
+    public getStocks(): Promise<Array<string>> {
+        return new Promise((a) => a(distinct(this.finances().map(c => c.aktie))));
     }
 
     public initDummy(): void {
@@ -115,14 +115,14 @@ class DbMock implements IDatabase {
         this.addCommentRaw("r/place", "the green fox jumps over the big dog", date("2022-05-28Z"), 0.87);
         this.addCommentRaw("r/place", "the blue fox jumps over the scared dog", date("2022-05-28Z"), 0.38);
         this.addCommentRaw("r/place", "the black fox jumps over the small dog", date("2022-05-28Z"), 0.04);
-        
 
-        this.addFinanceRaW('VW',date("2022-05-28Z"),100)
-        this.addFinanceRaW('VW',date("2022-06-28Z"),120)
-        this.addFinanceRaW('VW',date("2022-07-28Z"),10)
-        this.addFinanceRaW('VW',date("2022-08-28Z"),140)
-        this.addFinanceRaW('VW',date("2022-09-28Z"),170)
-        this.addFinanceRaW('VW',date("2022-10-28Z"),30)
+
+        this.addFinanceRaW('VW', date("2022-05-28Z"), 100)
+        this.addFinanceRaW('VW', date("2022-06-28Z"), 120)
+        this.addFinanceRaW('VW', date("2022-07-28Z"), 10)
+        this.addFinanceRaW('VW', date("2022-08-28Z"), 140)
+        this.addFinanceRaW('VW', date("2022-09-28Z"), 170)
+        this.addFinanceRaW('VW', date("2022-10-28Z"), 30)
     }
 }
 

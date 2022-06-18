@@ -88,12 +88,12 @@ class ElasticDb implements IDatabase {
             //substitite "/" with "_" for subreddit index
             const idx = comment.subreddit.replace("/", "_");
             //Check if the Comment already exists
-            const commendExist = await this.client.exists({
+            const commentExists = await this.client.exists({
                 index: idx,
                 id: comment.commentId
             });
 
-            if (commendExist == true) {
+            if (commentExists) {
                 //Comment exists --> Update Document
                 //Update Comment
                 const result = await this.client.update({
@@ -117,7 +117,7 @@ class ElasticDb implements IDatabase {
                 //Refresh index
                 await this.client.indices.refresh({ index: idx });
                 this.healthCallback('UP');
-                if (result.result == 'updated') {
+                if (result.result === 'updated') {
                     return true;
                 } else {
                     return false;
@@ -144,7 +144,7 @@ class ElasticDb implements IDatabase {
                 //Refresh index
                 await this.client.indices.refresh({ index: idx });
                 this.healthCallback('UP');
-                if (result.result == 'created') {
+                if (result.result === 'created') {
                     return true;
                 } else {
                     return false;
@@ -240,7 +240,7 @@ class ElasticDb implements IDatabase {
                 //add "r/" to subreddit Name
                 const sr: string = s.toString();
                 //Check if the index prefix is "r_"
-                if (sr.startsWith("r_") == true) {
+                if (sr.startsWith("r_")) {
                     //add Subreddit Name to Array
                     subreddits.push(sr.replace("_", "/"));
                 }
@@ -289,21 +289,21 @@ class ElasticDb implements IDatabase {
     public async addFinance(finance: DbFinance): Promise<boolean> {
         try {
             // Noch nicht fertig -> genaue Daten fehlen
-            const prefix: string = "f_"
-            const teilen: string = "_"
-            const fidx = prefix.concat(finance.aktie)
+            const prefix: string = "f_";
+            const teilen: string = "_";
+            const fidx = prefix.concat(finance.aktie);
             //console.log(finance.aktie.concat(teilen, finance.timestamp.toDateString()))
             //Check if the stock already exists --> id
             const stockExist = await this.client.exists({
                 index: fidx,
-                id: finance.aktie.concat(teilen, finance.timestamp.toDateString()),
+                id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
             });
 
-            if (stockExist == true) {
+            if (stockExist) {
                 //Stock Exist --> Update Document
                 const stockRes = await this.client.update({
                     index: fidx,
-                    id: finance.aktie.concat(teilen, finance.timestamp.toDateString()),
+                    id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
                     body: {
                         doc: {
                             aktie: finance.aktie,
@@ -317,7 +317,7 @@ class ElasticDb implements IDatabase {
                 //refresh Index
                 await this.client.indices.refresh({ index: fidx });
                 this.healthCallback('UP');
-                if (stockRes.result == 'updated') {
+                if (stockRes.result === 'updated') {
                     return true;
                 } else {
                     return false;
@@ -327,7 +327,7 @@ class ElasticDb implements IDatabase {
                 // add Stock to elastic database 
                 const stockRes = await this.client.index({
                     index: fidx,
-                    id: finance.aktie.concat(teilen, finance.timestamp.toDateString()),
+                    id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
                     document: {
                         aktie: finance.aktie,
                         timestamp: finance.timestamp,
@@ -337,7 +337,7 @@ class ElasticDb implements IDatabase {
                 //refresh Index
                 await this.client.indices.refresh({ index: fidx });
                 this.healthCallback('UP');
-                if (stockRes.result == 'created') {
+                if (stockRes.result === 'created') {
                     return true;
                 } else {
                     return false;
@@ -360,30 +360,27 @@ class ElasticDb implements IDatabase {
     */
     public async getFinance(stock: string, from: Date, to: Date,): Promise<Array<TimeFinance>> {
         try {
-            //const prefix: string = "f_"
-            //create request Body
-            //const fidx = prefix.concat(stock);
-            const fidx = stock
-            let FboolQuery = esb.boolQuery();
-            FboolQuery = FboolQuery.must(new esb.MatchQuery('aktie'));
-            const requestFBody = new esb.RequestBodySearch()
-                .query(FboolQuery
+            //create Index with prefix
+            const fidx = "f_" + stock;
+            //create query
+            const queryFBody = new esb.RequestBodySearch()
+                .query(esb.boolQuery()
                     .must(new esb.RangeQuery('timestamp')
                         .gte(from.toISOString().slice(0, -1))
                         .lte(to.toISOString().slice(0, -1)))
-                )
+                );
 
             //Get Data from elastic and save response
             const respFArray = new Array<elasticsearch.estypes.SearchHit<unknown>>();
-            const Fresp = await this.client.search({
+            const fresp = await this.client.search({
                 index: fidx,
                 size: 10000,
-                body: requestFBody.toJSON(),
+                body: queryFBody.toJSON(),
                 fields: ['timestamp', 'value'],
                 _source: false,
             });
-            for (let n = 0; n < Fresp.hits.hits.length; n++) {
-                respFArray.push(Fresp.hits.hits[n]);
+            for (let n = 0; n < fresp.hits.hits.length; n++) {
+                respFArray.push(fresp.hits.hits[n]);
             }
 
             // Create Array from type TimeFinance            
@@ -418,16 +415,12 @@ class ElasticDb implements IDatabase {
             for (let n = 0; n < responseF.length; n++) {
                 const a: any = responseF[n].index;
                 const ar: string = a.toString();
-                if (ar.startsWith('f_') == true) {
-                    stocks.push(ar.replace('f_',''));
+                //add Stock Name to Array
+                if (ar.startsWith('f_')) {
+                    //Delete prefix "f_"
+                    stocks.push(ar.replace('f_', ''));
                 }
             }
-            //Sort prefix --> "f_"       
-
-            //Delete prefix "f_"
-
-            //add Stock Name to Array
-
             this.healthCallback('UP');
             return stocks;
 
