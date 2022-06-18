@@ -7,6 +7,10 @@ interface IDatabase {
     getSentiments: (subreddit: string, from: Date, to: Date, keywords: Array<string>) => Promise<Array<TimeSentiment>>,
     getSubreddits: () => Promise<Array<string>>,
     pingElastic: () => Promise<boolean>,
+    addFinance: (finance: DbFinance) => Promise<boolean>,
+    getFinance: (stock: string, from: Date, to: Date) => Promise<Array<TimeFinance>>,
+    getStocks: () => Promise<Array<string>>,
+
 };
 
 //Types Comment
@@ -276,7 +280,7 @@ class ElasticDb implements IDatabase {
     * Function addFinance() adds new financial data to Elastic Database
     * Similar documents are stored with the same index in elastic
     * index == name of stock,  with prefix "f_" --> "f_XYZ"
-    * The id of an document is a unique identifier --> stockname_tiemstamp
+    * The id of an document is a unique identifier --> stockname_timestamp
     *
     * @param   {DbFinance}  finance    the financial data to add to the database
     * @returns {Promise<boolean>}      retuns true if the financial data was successfully added to the database
@@ -284,16 +288,61 @@ class ElasticDb implements IDatabase {
      */
     public async addFinance(finance: DbFinance): Promise<boolean> {
         try {
+            // Noch nicht fertig -> genaue Daten fehlen
+            const prefix: string = "f_"
+            const teilen: string = "_"
+            const fidx = prefix.concat(finance.aktie)
+            //console.log(finance.aktie.concat(teilen, finance.timestamp.toDateString()))
             //Check if the stock already exists --> id
+            const stockExist = await this.client.exists({
+                index: fidx,
+                id: finance.aktie.concat(teilen, finance.timestamp.toDateString()),
+            });
 
-            //Stock exists --> Update Document
+            if (stockExist == true) {
+                //Stock Exist --> Update Document
+                const stockRes = await this.client.update({
+                    index: fidx,
+                    id: finance.aktie.concat(teilen, finance.timestamp.toDateString()),
+                    body: {
+                        doc: {
+                            aktie: finance.aktie,
+                            timestamp: finance.timestamp,
+                            value: finance.value,
+                        },
+                        doc_as_upsert: true
+                    }
+                });
 
-            //Stock does not exist --> Add new Document
-
-            this.healthCallback('UP');
-            //Dummy
-            return true;
-
+                //refresh Index
+                await this.client.indices.refresh({ index: fidx });
+                this.healthCallback('UP');
+                if (stockRes.result == 'updated') {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                // If Stock dosent exist --> add new Stock
+                // add Stock to elastic database 
+                const stockRes = await this.client.index({
+                    index: fidx,
+                    id: finance.aktie.concat(teilen, finance.timestamp.toDateString()),
+                    document: {
+                        aktie: finance.aktie,
+                        timestamp: finance.timestamp,
+                        value: finance.value,
+                    }
+                });
+                //refresh Index
+                await this.client.indices.refresh({ index: fidx });
+                this.healthCallback('UP');
+                if (stockRes.result == 'created') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         } catch (ex: any) {
             console.log(ex);
             this.healthCallback('DOWN');
@@ -311,15 +360,42 @@ class ElasticDb implements IDatabase {
     */
     public async getFinance(stock: string, from: Date, to: Date,): Promise<Array<TimeFinance>> {
         try {
+            //const prefix: string = "f_"
             //create request Body
+            //const fidx = prefix.concat(stock);
+            const fidx = stock
+            let FboolQuery = esb.boolQuery();
+            FboolQuery = FboolQuery.must(new esb.MatchQuery('aktie'));
+            const requestFBody = new esb.RequestBodySearch()
+                .query(FboolQuery
+                    .must(new esb.RangeQuery('timestamp')
+                        .gte(from.toISOString().slice(0, -1))
+                        .lte(to.toISOString().slice(0, -1)))
+                )
 
             //Get Data from elastic and save response
+            const respFArray = new Array<elasticsearch.estypes.SearchHit<unknown>>();
+            const Fresp = await this.client.search({
+                index: fidx,
+                size: 10000,
+                body: requestFBody.toJSON(),
+                fields: ['timestamp', 'value'],
+                _source: false,
+            });
+            for (let n = 0; n < Fresp.hits.hits.length; n++) {
+                respFArray.push(Fresp.hits.hits[n]);
+            }
 
             // Create Array from type TimeFinance            
-
+            const timeFinance: Array<TimeFinance> = [];
+            respFArray.forEach(s => {
+                timeFinance.push({
+                    time: s.fields?.timestamp[0],
+                    value: s.fields?.value[0],
+                });
+            })
             this.healthCallback('UP');
-            //Dummy
-            return []
+            return timeFinance;
 
         } catch (ex: any) {
             console.log(ex);
@@ -332,12 +408,20 @@ class ElasticDb implements IDatabase {
     /**
     * Function getStocks retuns an Array with contains all Stock names in Elastic Database.
     *
-    * @returns {Promise<Array<string>>} Array with the Subreddit names
+    * @returns {Promise<Array<string>>} Array with the Stock names
     */
     public async getStocks(): Promise<Array<string>> {
         try {
             //get all indices from Database
-
+            const responseF = await this.client.cat.indices({ format: 'json' });
+            let stocks: Array<string> = [];
+            for (let n = 0; n < responseF.length; n++) {
+                const a: any = responseF[n].index;
+                const ar: string = a.toString();
+                if (ar.startsWith('f_') == true) {
+                    stocks.push(ar.replace('f_',''));
+                }
+            }
             //Sort prefix --> "f_"       
 
             //Delete prefix "f_"
@@ -345,19 +429,15 @@ class ElasticDb implements IDatabase {
             //add Stock Name to Array
 
             this.healthCallback('UP');
-            //Dummy
-            return []
+            return stocks;
+
         } catch (ex: any) {
             console.log(ex);
             this.healthCallback('DOWN');
             return [];
         }
     }
-
-
-
-
 }
 
 
-export { IDatabase, DbComment, TimeSentiment, ElasticDb };
+export { IDatabase, DbComment, TimeSentiment, ElasticDb, DbFinance };
