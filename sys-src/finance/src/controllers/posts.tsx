@@ -1,40 +1,37 @@
-import { Request, Response, NextFunction } from 'express';
-
-const DAILY_ADJUSTED = 'TIME_SERIES_DAILY_ADJUSTED';
-const MONTHLY_ADJUSTED = 'TIME_SERIES_MONTHLY_ADJUSTED';
-const YEARLY_ADJUSTED = 'TIME_SERIES_YEARLY_ADJUSTED';
+import express from 'express';
+import yahooFinance from 'yahoo-finance2';
+import { HistoricalOptions } from 'yahoo-finance2/dist/esm/src/modules/historical';
+import { formatDate } from '../utils';
+import { verifyTicker } from '../utils';
 
 
 // adding a post
-const addPost = async (req: Request, res: Response, next: NextFunction) => {
+const addPost = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     // get the data from req.body
     // let title: string = req.body.title;
-    const body: string = req.body.body;
+
     // add the post
-    const config = JSON.parse(JSON.stringify(body));
-    const { ticker, times } = config;
-    const request = await fetch(
-        `https://www.alphavantage.co/query?function=${timePeriod(
-            times
-        )}&symbol=${ticker}&apikey=${process.env.ALPHA_VANTAGE_API_KEY}`
-    );
+    console.log("parsing..")
 
-    // return response
-    return res.status(200).json({
-        message: res.json()
-    });
-};
+    const ticker: string = req.body.ticker;
+    console.log("ticker is %d", ticker)
 
-
-const timePeriod = (type: string): string => {
-    switch (type) {
-        case 'daily':
-            return DAILY_ADJUSTED;
-        case 'monthly':
-            return MONTHLY_ADJUSTED
-        default:
-            return YEARLY_ADJUSTED;
+    if (verifyTicker(ticker)) {
+        const currentDate = new Date();
+        console.log("currentDate is %d", currentDate);
+        const options: HistoricalOptions = { period1: '2010-01-01', period2: formatDate(currentDate), interval: '1d' };
+        const results = await yahooFinance.historical(ticker, options);
+        console.log("results is %d", results);
+        // return response
+        return res.status(200).json({
+            message: results
+        });
     }
-}
+    else {
+        return res.status(400).json({
+            message: 'Invalid ticker'
+        });
+    }
+};
 
 export default { addPost };
