@@ -24,6 +24,14 @@ function getDbMock(hc: HealthCallback) {
     return dbMock;
 }
 
+let dbProd: ElasticDb | undefined = undefined;
+function getDbProd(hc: HealthCallback) {
+    if (typeof dbProd === 'undefined') {
+        dbProd = new ElasticDb(hc);
+    }
+    return dbProd;
+}
+
 
 function contextFunctionForMock({ req }: ExpressContext): Context {
     return {
@@ -36,7 +44,7 @@ function contextFunctionForMock({ req }: ExpressContext): Context {
 function contextFunctionForProduction({ req }: ExpressContext): Context {
     return {
         sentiment: getSentiment,
-        db: new ElasticDb(s => healthInfo.set('database', { status: s, lastConnect: s == 'UP' ? new Date() : undefined })),
+        db: getDbProd(s => healthInfo.set('database', { status: s, lastConnect: s == 'UP' ? new Date() : undefined })),
         health: healthInfo,
     };
 }
