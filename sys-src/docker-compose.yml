@@ -39,13 +39,13 @@ services:
     secrets:
       - backend_access_key
 
-#  reddit_crawler:
-#    build: ./reddit-crawler
-#    restart: always
-#    container_name: reddit_crawler
-#    hostname: reddit_crawler
-#    secrets:
-#      - backend_access_key
+  reddit_crawler:
+    build: ./reddit-crawler
+    restart: always
+    container_name: reddit_crawler
+    hostname: reddit_crawler
+    secrets:
+      - backend_access_key
 
 #  shares_crawler:
 #    build: ./shares_crawler
