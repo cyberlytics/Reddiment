@@ -53,7 +53,7 @@ describe("List.aggregate", () => {
         const data = new Map<number, number[]>();
         data.set(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-        assert.deepStrictEqual(aggregate(data, n => 0, (p, c) => p + c).get(0), 55);
+        assert.deepStrictEqual(aggregate(data, _ => 0, (p, c) => p + c).get(0), 55);
     });
 
     it("should aggregate multiple groups", () => {
