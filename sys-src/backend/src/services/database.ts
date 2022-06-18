@@ -1,15 +1,19 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
 import { HealthCallback } from './serviceinterface';
-import path from "path";
 
 interface IDatabase {
     addComment: (comment: DbComment) => Promise<boolean>,
     getSentiments: (subreddit: string, from: Date, to: Date, keywords: Array<string>) => Promise<Array<TimeSentiment>>,
     getSubreddits: () => Promise<Array<string>>,
     pingElastic: () => Promise<boolean>,
+    addFinance: (finance: DbFinance) => Promise<boolean>,
+    getFinance: (stock: string, from: Date, to: Date) => Promise<Array<TimeFinance>>,
+    getStocks: () => Promise<Array<string>>,
+
 };
 
+//Types Comment
 type DbComment = {
     subreddit: string,
     text: string,
@@ -27,7 +31,29 @@ type TimeSentiment = {
     sentiment: number,
 };
 
+//Types Finance
+type DbFinance = {
+    aktie: string,
+    timestamp: Date,
+    value: number,
+};
 
+type TimeFinance = {
+    time: Date,
+    value: number,
+};
+
+/**
+ * Class: ElasticDb
+ * 
+ * Each document is stored under a unique ID.
+ * Reddit Comment --> ID == commentId
+ * Financial Data --> ID == ?
+ * 
+ * Similar documents are stored with the same index in elastic.
+ * Reddit Comment from subreddit "r/wallstreetbets" --> Index: r_wallstreetbest (Prefix "r_" indecates Comment of Subreddit)
+ * Financial Data --> Index: f_xyz (Prefix "f_" indecates financial Data)
+ */
 class ElasticDb implements IDatabase {
     private readonly client: elasticsearch.Client;
     private readonly healthCallback: HealthCallback;
@@ -50,8 +76,8 @@ class ElasticDb implements IDatabase {
     /**
      * Function addComment() adds a new Comment to Elastic Database
      * Similar documents are stored with the same index in elastic
-     * index == name of subreddit without "r/"
-     * The id of an document is a unique identifier
+     * index == name of subreddit, substitute "/" with "_" --> "r_wallstreetbets"
+     * The id of an document is a unique identifier --> commentId
      *
      * @param   {DbComment}  comment    the comment to add to the database
      * @returns {Promise<boolean>}      retuns true if the comment was successfully added to the database
@@ -59,35 +85,77 @@ class ElasticDb implements IDatabase {
     public async addComment(comment: DbComment): Promise<boolean> {
 
         try {
-            //delete "/r" from the index
-            const idx_splitted = comment.subreddit.split("/", 2);
-            const idx: string = idx_splitted[1];
-
-            // add Comment to elastic database
-            const result = await this.client.index({
+            //substitite "/" with "_" for subreddit index
+            const idx = comment.subreddit.replace("/", "_");
+            //Check if the Comment already exists
+            const commentExists = await this.client.exists({
                 index: idx,
-                document: {
-                    text: comment.text,
-                    timestamp: comment.timestamp,
-                    sentiment: comment.sentiment,
-                }
+                id: comment.commentId
             });
-            //Refresh index
-            await this.client.indices.refresh({ index: idx });
 
-            this.healthCallback('UP');
+            if (commentExists) {
+                //Comment exists --> Update Document
+                //Update Comment
+                const result = await this.client.update({
+                    index: idx,
+                    id: comment.commentId,
+                    body: {
+                        doc: {
+                            subreddit: comment.subreddit,
+                            text: comment.text,
+                            timestamp: comment.timestamp,
+                            commentId: comment.commentId,
+                            userId: comment.userId,
+                            articleId: comment.articleId,
+                            upvotes: comment.upvotes,
+                            downvotes: comment.downvotes,
+                            sentiment: comment.sentiment,
+                        },
+                        doc_as_upsert: true
+                    }
+                });
+                //Refresh index
+                await this.client.indices.refresh({ index: idx });
+                this.healthCallback('UP');
+                if (result.result === 'updated') {
+                    return true;
+                } else {
+                    return false;
+                }
 
-            if (result.result == 'created') {
-                return true;
             } else {
-                return false;
+                //Comment does not exist --> add new Comment
+                // add Comment to elastic database
+                const result = await this.client.index({
+                    index: idx,
+                    id: comment.commentId,
+                    document: {
+                        subreddit: comment.subreddit,
+                        text: comment.text,
+                        timestamp: comment.timestamp,
+                        commentId: comment.commentId,
+                        userId: comment.userId,
+                        articleId: comment.articleId,
+                        upvotes: comment.upvotes,
+                        downvotes: comment.downvotes,
+                        sentiment: comment.sentiment,
+                    }
+                });
+                //Refresh index
+                await this.client.indices.refresh({ index: idx });
+                this.healthCallback('UP');
+                if (result.result === 'created') {
+                    return true;
+                } else {
+                    return false;
+                }
             }
+
         } catch (ex: any) {
             console.log(ex);
             this.healthCallback('DOWN');
             return false;
         }
-
     }
 
     /**
@@ -103,8 +171,7 @@ class ElasticDb implements IDatabase {
         try {
             //Create Query
             //Index
-            const idx_splitted = subreddit.split("/", 2);
-            const idx: string = idx_splitted[1];
+            const idx = subreddit.replace("/", "_");
             //Keywords
             let boolQuery = esb.boolQuery();
             if (keywords.length > 0) {
@@ -171,9 +238,12 @@ class ElasticDb implements IDatabase {
             for (let i = 0; i < response.length; i++) {
                 const s: any = response[i].index;
                 //add "r/" to subreddit Name
-                const sr: string = "r/" + s.toString();
-                //add Subreddit Name to Array
-                subreddits.push(sr);
+                const sr: string = s.toString();
+                //Check if the index prefix is "r_"
+                if (sr.startsWith("r_")) {
+                    //add Subreddit Name to Array
+                    subreddits.push(sr.replace("_", "/"));
+                }
             }
             this.healthCallback('UP');
             return subreddits;
@@ -205,7 +275,162 @@ class ElasticDb implements IDatabase {
             return false;
         }
     }
+
+    /**
+    * Function addFinance() adds new financial data to Elastic Database
+    * Similar documents are stored with the same index in elastic
+    * index == name of stock,  with prefix "f_" --> "f_XYZ"
+    * The id of an document is a unique identifier --> stockname_timestamp
+    *
+    * @param   {DbFinance}  finance    the financial data to add to the database
+    * @returns {Promise<boolean>}      retuns true if the financial data was successfully added to the database
+     * 
+     */
+    public async addFinance(finance: DbFinance): Promise<boolean> {
+        try {
+            // Noch nicht fertig -> genaue Daten fehlen
+            const prefix: string = "f_";
+            const teilen: string = "_";
+            const fidx = prefix.concat(finance.aktie);
+            //console.log(finance.aktie.concat(teilen, finance.timestamp.toDateString()))
+            //Check if the stock already exists --> id
+            const stockExist = await this.client.exists({
+                index: fidx,
+                id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
+            });
+
+            if (stockExist) {
+                //Stock Exist --> Update Document
+                const stockRes = await this.client.update({
+                    index: fidx,
+                    id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
+                    body: {
+                        doc: {
+                            aktie: finance.aktie,
+                            timestamp: finance.timestamp,
+                            value: finance.value,
+                        },
+                        doc_as_upsert: true
+                    }
+                });
+
+                //refresh Index
+                await this.client.indices.refresh({ index: fidx });
+                this.healthCallback('UP');
+                if (stockRes.result === 'updated') {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                // If Stock dosent exist --> add new Stock
+                // add Stock to elastic database 
+                const stockRes = await this.client.index({
+                    index: fidx,
+                    id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
+                    document: {
+                        aktie: finance.aktie,
+                        timestamp: finance.timestamp,
+                        value: finance.value,
+                    }
+                });
+                //refresh Index
+                await this.client.indices.refresh({ index: fidx });
+                this.healthCallback('UP');
+                if (stockRes.result === 'created') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return false;
+        }
+    }
+
+    /**
+    * Function getFinance() extract financial data from elastic Database
+    *
+    * @param   {string}      stock          Stock name
+    * @param   {Date}        from           Start Timestamp for search
+    * @param   {Date}        to             Stop Timestamp for search
+    * @returns {Array<TimeFinance>}         Array with search results
+    */
+    public async getFinance(stock: string, from: Date, to: Date,): Promise<Array<TimeFinance>> {
+        try {
+            //create Index with prefix
+            const fidx = "f_" + stock;
+            //create query
+            const queryFBody = new esb.RequestBodySearch()
+                .query(esb.boolQuery()
+                    .must(new esb.RangeQuery('timestamp')
+                        .gte(from.toISOString().slice(0, -1))
+                        .lte(to.toISOString().slice(0, -1)))
+                );
+
+            //Get Data from elastic and save response
+            const respFArray = new Array<elasticsearch.estypes.SearchHit<unknown>>();
+            const fresp = await this.client.search({
+                index: fidx,
+                size: 10000,
+                body: queryFBody.toJSON(),
+                fields: ['timestamp', 'value'],
+                _source: false,
+            });
+            for (let n = 0; n < fresp.hits.hits.length; n++) {
+                respFArray.push(fresp.hits.hits[n]);
+            }
+
+            // Create Array from type TimeFinance            
+            const timeFinance: Array<TimeFinance> = [];
+            respFArray.forEach(s => {
+                timeFinance.push({
+                    time: s.fields?.timestamp[0],
+                    value: s.fields?.value[0],
+                });
+            })
+            this.healthCallback('UP');
+            return timeFinance;
+
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return [];
+        }
+    }
+
+
+    /**
+    * Function getStocks retuns an Array with contains all Stock names in Elastic Database.
+    *
+    * @returns {Promise<Array<string>>} Array with the Stock names
+    */
+    public async getStocks(): Promise<Array<string>> {
+        try {
+            //get all indices from Database
+            const responseF = await this.client.cat.indices({ format: 'json' });
+            let stocks: Array<string> = [];
+            for (let n = 0; n < responseF.length; n++) {
+                const a: any = responseF[n].index;
+                const ar: string = a.toString();
+                //add Stock Name to Array
+                if (ar.startsWith('f_')) {
+                    //Delete prefix "f_"
+                    stocks.push(ar.replace('f_', ''));
+                }
+            }
+            this.healthCallback('UP');
+            return stocks;
+
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return [];
+        }
+    }
 }
 
 
-export { IDatabase, DbComment, TimeSentiment, ElasticDb };
+export { IDatabase, DbComment, TimeSentiment, ElasticDb, DbFinance };
