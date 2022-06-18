@@ -1,6 +1,7 @@
 import { ApolloServer } from "apollo-server-express";
 import assert from "assert";
 import { contextFunctionForMock, createApolloServer } from "../src/server.apollo";
+import { date, daynumber, MillisecondsPerDay } from "../src/util/time";
 
 describe("Apollo Server GraphQL API", () => {
     let apolloServer: ApolloServer;
@@ -51,7 +52,7 @@ describe("Apollo Server GraphQL API", () => {
         assert.deepStrictEqual(result2.data?.subreddit?.name, demoSubreddit);
         assert.deepStrictEqual(result2.data?.subreddit?.sentiment?.length, 1);
         const s = result2.data.subreddit.sentiment[0]!;
-        assert.deepStrictEqual(s.time, timestamp);
+        assert.deepStrictEqual(s.time, new Date(daynumber(date(timestamp)) * MillisecondsPerDay).toISOString());
         assert.deepStrictEqual(s.positive + s.negative + s.neutral, 1);
         assert.deepStrictEqual(s.sum, 1);
         assert.deepStrictEqual(s.positive === 0 || s.positive === 1, true);
@@ -186,6 +187,85 @@ describe("Apollo Server GraphQL API", () => {
         assert.deepStrictEqual(result.data?.jobs?.length, 1);
 
         assert.deepStrictEqual(result.data.jobs[0], "r/wallstreetbets");
+    });
+
+
+    it("should group the queried sentiments by date", async () => {
+        const demoSubreddit = "r/test" + new Date().valueOf();
+
+        const addComment = async (text: string, timestamp: Date) => {
+            const result = await apolloServer.executeOperation({
+                query: 'mutation add($comment: Comment!) { addComment(comment: $comment) }',
+                variables: {
+                    comment: {
+                        subredditName: demoSubreddit,
+                        text: text,
+                        timestamp: timestamp.toISOString(),
+                        commentId: "0123456789",
+                        userId: "abcdef",
+                        articleId: "ZYXWVU",
+                    }
+                }
+            });
+
+            assert.strictEqual(result.errors, undefined);
+            assert.deepStrictEqual(result.data?.addComment, true);
+        };
+
+        const retrieveSentiments = async (expected: Array<{ date: Date, sum: number }>) => {
+            const result = await apolloServer.executeOperation({
+                query: 'query get($name: String!, $keywords: [String!]!) { subreddit(nameOrUrl: $name) { name, sentiment(keywords: $keywords) { time, positive, negative, neutral, sum } } }',
+                variables: {
+                    name: demoSubreddit,
+                    keywords: new Array<string>(),
+                }
+            });
+
+            assert.strictEqual(result.errors, undefined);
+            if (expected.length > 0) {
+                assert.deepStrictEqual(result.data?.subreddit?.name, demoSubreddit);
+                assert.deepStrictEqual(result.data?.subreddit?.sentiment?.length, expected.filter(e => e.sum > 0).length);
+
+                expected.forEach((e) => {
+                    const filtered = result!.data!.subreddit.sentiment.filter((s: any) => s.time === e.date.toISOString());
+                    if (e.sum > 0) {
+                        assert.deepStrictEqual(filtered.length, 1);
+                        assert.deepStrictEqual(filtered[0].sum, e.sum);
+                    }
+                    else {
+                        assert.deepStrictEqual(filtered.length, 0);
+                    }
+                });
+            }
+            else {
+                assert.deepStrictEqual(result.data?.subreddit?.name, demoSubreddit);
+                assert.deepStrictEqual(result.data?.subreddit?.sentiment?.length, 0);
+            }
+        };
+
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < (1 + 5 * i) % 7; j++) {
+                const randomHour = Math.floor(Math.random() * 24).toLocaleString('en-US', { minimumIntegerDigits: 2 });
+                const randomMinute = Math.floor(Math.random() * 60).toLocaleString('en-US', { minimumIntegerDigits: 2 });
+                const randomSecond = Math.floor(Math.random() * 60).toLocaleString('en-US', { minimumIntegerDigits: 2 });
+                const d = date(`2022-06-${10 + i}T${randomHour}:${randomMinute}:${randomSecond}Z`);
+                addComment(`Some blue flowers yield a lot of wine ${j}`, d);
+            }
+        }
+
+
+        retrieveSentiments([
+            { date: date("2022-06-10T00:00:00Z"), sum: 1 },
+            { date: date("2022-06-11T00:00:00Z"), sum: 6 },
+            { date: date("2022-06-12T00:00:00Z"), sum: 4 },
+            { date: date("2022-06-13T00:00:00Z"), sum: 2 },
+            { date: date("2022-06-14T00:00:00Z"), sum: 0 },
+            { date: date("2022-06-15T00:00:00Z"), sum: 5 },
+            { date: date("2022-06-16T00:00:00Z"), sum: 3 },
+            { date: date("2022-06-17T00:00:00Z"), sum: 1 },
+            { date: date("2022-06-18T00:00:00Z"), sum: 6 },
+            { date: date("2022-06-19T00:00:00Z"), sum: 4 },
+        ]);
     });
 });
 
