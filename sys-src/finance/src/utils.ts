@@ -1,4 +1,3 @@
-import { stringify } from "querystring";
 
 function padTo2Digits(num: number): string {
     return num.toString().padStart(2, '0');
@@ -8,7 +7,7 @@ function formatDate(date: Date): string {
     return (
         [
             date.getFullYear(),
-            padTo2Digits(date.getMonth() + 1),
+            padTo2Digits(date.getMonth()),
             padTo2Digits(date.getDate()),
         ]
 
@@ -21,10 +20,10 @@ function verifyTicker(ticker: string): boolean {
         return false
     }
     if (ticker.length < 3) {
-        return true
+        return false
     }
 
     return true
 }
 
-export { formatDate, verifyTicker };
+export { formatDate, verifyTicker, padTo2Digits };
