@@ -1,27 +1,37 @@
 import express from 'express';
 import yahooFinance from 'yahoo-finance2';
-import { HistoricalOptions } from 'yahoo-finance2/dist/esm/src/modules/historical';
 import { formatDate } from '../utils';
 import { verifyTicker } from '../utils';
 
 
 // adding a post
-const addPost = async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    // get the data from req.body
-    // let title: string = req.body.title;
-
-    // add the post
-    console.log("parsing..")
+const addPost = async (req: express.Request, res: express.Response) => {
+    // get daily values between startDate and endDate of given ticker
 
     const ticker: string = req.body.ticker;
-    console.log("ticker is %d", ticker)
+
+    // if req has field startDate or endDate set those values to the startDate and endDate variables
+    let startDate: string = req.body.startDate;
+    const endDate: string = formatDate(new Date());
+
+    if (!ticker) {
+        // return error if ticker is not set
+        res.status(400).json({
+            message: "ticker is required"
+        });
+    }
+
+    // check if req has startDate and endDate
+    if (!startDate) {
+        // set startDate to the current date minus one year
+        startDate = formatDate(new Date(new Date().setFullYear(new Date().getFullYear() - 1)));
+    };
 
     if (verifyTicker(ticker)) {
         const currentDate = new Date();
-        console.log("currentDate is %d", currentDate);
-        const options: HistoricalOptions = { period1: '2010-01-01', period2: formatDate(currentDate), interval: '1d' };
+        // options for api call
+        const options: any = { period1: startDate, period2: endDate, interval: '1d' };
         const results = await yahooFinance.historical(ticker, options);
-        console.log("results is %d", results);
         // return response
         return res.status(200).json({
             message: results
