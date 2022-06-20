@@ -76,9 +76,9 @@ class DbMock implements IDatabase {
         return new Promise((s) => s(true));
     }
 
-    private addFinanceRaW(aktie: string, timestamp: Date, open: number, high: number, low: number, close: number, adjClose: number, volume: number): void {
+    private addFinanceRaW(stock: string, timestamp: Date, open: number, high: number, low: number, close: number, adjClose: number, volume: number): void {
         this.addFinance({
-            aktie: aktie,
+            stock: stock,
             timestamp: timestamp,
             open: open,
             high: high,
@@ -91,7 +91,7 @@ class DbMock implements IDatabase {
 
     public getFinance(stock: string, from: Date, to: Date): Promise<Array<{ time: Date; close: number; }>> {
         return new Promise((s) => {
-            const nameofStock = this.finances().filter(c => c.aktie == stock);
+            const nameofStock = this.finances().filter(c => c.stock == stock);
             const filteredF = nameofStock.filter(c => c.timestamp >= from &&
                 c.timestamp <= to);
             s(filteredF.map(c => { return { time: c.timestamp, close: c.close }; }))
@@ -99,7 +99,7 @@ class DbMock implements IDatabase {
     }
 
     public getStocks(): Promise<Array<string>> {
-        return new Promise((a) => a(distinct(this.finances().map(c => c.aktie))));
+        return new Promise((a) => a(distinct(this.finances().map(c => c.stock))));
     }
 
     public initDummy(): void {

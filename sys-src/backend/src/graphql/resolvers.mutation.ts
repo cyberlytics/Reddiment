@@ -51,7 +51,7 @@ const MutationResolver = {
         return await context.db.addFinance({
             timestamp: new Date(daynumber(args.stock.date) * MillisecondsPerDay),
             adjClose: args.stock.adjClose ?? 0,
-            aktie: args.stock.stockName,
+            stock: args.stock.stockName,
             close: args.stock.close,
             high: args.stock.high ?? 0,
             low: args.stock.low ?? 0,
