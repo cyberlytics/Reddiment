@@ -249,7 +249,7 @@ describe("Apollo Server GraphQL API", () => {
                 const randomMinute = Math.floor(Math.random() * 60).toLocaleString('en-US', { minimumIntegerDigits: 2 });
                 const randomSecond = Math.floor(Math.random() * 60).toLocaleString('en-US', { minimumIntegerDigits: 2 });
                 const d = date(`2022-06-${10 + i}T${randomHour}:${randomMinute}:${randomSecond}Z`);
-                addComment(`Some blue flowers yield a lot of wine ${j}`, d);
+                await addComment(`Some blue flowers yield a lot of wine ${j}`, d);
             }
         }
 
@@ -266,6 +266,121 @@ describe("Apollo Server GraphQL API", () => {
             { date: date("2022-06-18T00:00:00Z"), sum: 6 },
             { date: date("2022-06-19T00:00:00Z"), sum: 4 },
         ]);
+    });
+
+
+
+    it("should return one stock name (default data)", async () => {
+        const result = await apolloServer.executeOperation({
+            query: 'query GetStockNames { stocks }'
+        });
+        assert.strictEqual(result.errors, undefined);
+        assert.deepStrictEqual(result.data?.stocks, ["VW"]);
+    });
+
+    it("should return a previously added stock", async () => {
+        const demoStock = "ACME" + new Date().valueOf();
+        const timestamp = new Date().toISOString();
+
+        const result1 = await apolloServer.executeOperation({
+            query: 'mutation add($stock: RawStock!) { addStock(stock: $stock) }',
+            variables: {
+                stock: {
+                    stockName: demoStock,
+                    date: timestamp,
+                    open: 123.45,
+                    close: 234.56,
+                    adjClose: 169.96,
+                    volume: 1e100,
+                    high: 456.78,
+                    low: 12.34,
+                },
+            },
+        });
+
+        assert.strictEqual(result1.errors, undefined);
+        assert.deepStrictEqual(result1.data?.addStock, true);
+
+        const result2 = await apolloServer.executeOperation({
+            query: 'query get($name: String!) { stock(name: $name) { name, values { time, close } } }',
+            variables: {
+                name: demoStock,
+            }
+        });
+
+        assert.strictEqual(result2.errors, undefined);
+        assert.deepStrictEqual(result2.data?.stock?.name, demoStock);
+        assert.deepStrictEqual(result2.data?.stock?.values?.length, 1);
+        const s = result2.data.stock.values[0]!;
+        assert.deepStrictEqual(s.time, new Date(daynumber(date(timestamp)) * MillisecondsPerDay).toISOString());
+        assert.deepStrictEqual(s.close, 234.56);
+    });
+
+    it("should return null if an invalid name is supplied", async () => {
+        const demoStock = "ACME" + new Date().valueOf();
+
+        const resultInvalid = await apolloServer.executeOperation({
+            query: 'query get($name: String!) { stock(name: $name) { name, values { time, close } } }',
+            variables: {
+                name: demoStock,
+            }
+        });
+
+        assert.strictEqual(resultInvalid.errors, undefined);
+        assert.strictEqual(resultInvalid.data?.stock, null);
+    });
+
+    it("should return a previously added stock if it is in the date interval", async () => {
+        const demoStock = "ACME" + new Date().valueOf();
+        const addStock = async (timestamp: Date, close: number) => {
+            const result = await apolloServer.executeOperation({
+                query: 'mutation add($stock: RawStock!) { addStock(stock: $stock) }',
+                variables: {
+                    stock: {
+                        stockName: demoStock,
+                        date: timestamp.toISOString(),
+                        open: 123.45,
+                        close: close,
+                        adjClose: 169.96,
+                        volume: 1e100,
+                        high: 456.78,
+                        low: 12.34,
+                    },
+                },
+            });
+            assert.strictEqual(result.errors, undefined);
+            assert.deepStrictEqual(result.data?.addStock, true);
+        };
+
+        const retrieveStock = async (from?: Date, to?: Date, closes?: Array<number>) => {
+            const result = await apolloServer.executeOperation({
+                query: 'query get($name: String!, $from: Date, $to: Date) { stock(name: $name) { name, values(from: $from, to: $to) { time, close } } }',
+                variables: {
+                    name: demoStock,
+                    from: from?.toISOString() ?? null,
+                    to: to?.toISOString() ?? null,
+                }
+            });
+            assert.strictEqual(result.errors, undefined);
+            assert.deepStrictEqual(result.data?.stock?.name, demoStock);
+            closes = closes ?? new Array<number>();
+            if (closes.length > 0) {
+                assert.deepStrictEqual(result.data?.stock?.values?.length, closes.length);
+                result.data.stock.values.forEach((v: any, i: number) => {
+                    assert.ok((date(v.time) >= (from ?? date("1900-01-01"))) && (date(v.time) <= (to ?? date("2099-12-31"))))
+                    assert.deepStrictEqual(v.close, closes![i]);
+                });
+            }
+        };
+
+        await addStock(date("2022-06-20T00:00:00Z"), 100);
+        await addStock(date("2022-06-21T00:00:00Z"), 150);
+        await addStock(date("2022-06-22T00:00:00Z"), 200);
+        await addStock(date("2022-06-23T00:00:00Z"), 250);
+
+        await retrieveStock(undefined, undefined, [100, 150, 200, 250]);
+        await retrieveStock(date("2022-06-21T00:00:00Z"), undefined, [150, 200, 250]);
+        await retrieveStock(date("2022-06-21T00:00:00Z"), date("2022-06-22T00:00:00Z"), [150, 200]);
     });
 });
 
