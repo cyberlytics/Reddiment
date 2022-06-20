@@ -35,12 +35,17 @@ type TimeSentiment = {
 type DbFinance = {
     aktie: string,
     timestamp: Date,
-    value: number,
+    open: number,
+    high: number,
+    low: number,
+    close: number,
+    adjClose: number,
+    volume: number,
 };
 
 type TimeFinance = {
     time: Date,
-    value: number,
+    close: number,
 };
 
 /**
@@ -308,7 +313,12 @@ class ElasticDb implements IDatabase {
                         doc: {
                             aktie: finance.aktie,
                             timestamp: finance.timestamp,
-                            value: finance.value,
+                            open: finance.open,
+                            high: finance.high,
+                            low: finance.low,
+                            close: finance.close,
+                            adjClose: finance.adjClose,
+                            volume: finance.volume,
                         },
                         doc_as_upsert: true
                     }
@@ -331,7 +341,12 @@ class ElasticDb implements IDatabase {
                     document: {
                         aktie: finance.aktie,
                         timestamp: finance.timestamp,
-                        value: finance.value,
+                        open: finance.open,
+                        high: finance.high,
+                        low: finance.low,
+                        close: finance.close,
+                        adjClose: finance.adjClose,
+                        volume: finance.volume,
                     }
                 });
                 //refresh Index
@@ -376,7 +391,7 @@ class ElasticDb implements IDatabase {
                 index: fidx,
                 size: 10000,
                 body: queryFBody.toJSON(),
-                fields: ['timestamp', 'value'],
+                fields: ['timestamp', 'close'],
                 _source: false,
             });
             for (let n = 0; n < fresp.hits.hits.length; n++) {
@@ -388,7 +403,7 @@ class ElasticDb implements IDatabase {
             respFArray.forEach(s => {
                 timeFinance.push({
                     time: s.fields?.timestamp[0],
-                    value: s.fields?.value[0],
+                    close: s.fields?.close[0],
                 });
             })
             this.healthCallback('UP');
@@ -400,7 +415,6 @@ class ElasticDb implements IDatabase {
             return [];
         }
     }
-
 
     /**
     * Function getStocks retuns an Array with contains all Stock names in Elastic Database.
@@ -414,6 +428,7 @@ class ElasticDb implements IDatabase {
             let stocks: Array<string> = [];
             for (let n = 0; n < responseF.length; n++) {
                 const a: any = responseF[n].index;
+                //add Stock Name to Array
                 const ar: string = a.toString();
                 //add Stock Name to Array
                 if (ar.startsWith('f_')) {
@@ -421,6 +436,7 @@ class ElasticDb implements IDatabase {
                     stocks.push(ar.replace('f_', ''));
                 }
             }
+
             this.healthCallback('UP');
             return stocks;
 
