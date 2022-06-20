@@ -50,15 +50,15 @@ const SubredditResolver = {
  */
 const SubredditQueryResolver = {
     subreddit: async (parent: {}, args: { nameOrUrl: string }, context: Context, info: Info) => {
-        const srs = await context.db.getSubreddits()
+        const srs = await context.db.getSubreddits();
         const sr = srs.find(s => s == args.nameOrUrl);
         if (typeof (sr) !== 'undefined') {
             return { name: sr };
         }
         return null;
     },
-    subreddits: (parent: {}, args: {}, context: Context, info: Info) => {
-        return context.db.getSubreddits();
+    subreddits: async (parent: {}, args: {}, context: Context, info: Info) => {
+        return await context.db.getSubreddits();
     }
 };
 

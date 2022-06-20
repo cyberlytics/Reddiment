@@ -16,6 +16,16 @@ const typeDefs = gql`
         sum: Int!
     }
 
+    type Stock {
+        name: String!
+        values(from: Date, to: Date): [StockData!]!
+    }
+
+    type StockData {
+        time: Date!
+        close: Float!
+    }
+
     type ServiceHealth {
         name: String!
         lastConnect: Date
@@ -39,15 +49,31 @@ const typeDefs = gql`
         downvotes: Int
     }
 
+    input RawStock {
+        stockName: String!
+        date: Date!
+        open: Float
+        close: Float!
+        adjClose: Float
+        volume: Float
+        high: Float
+        low: Float
+    }
+
     type Query {
         subreddit(nameOrUrl: String!): Subreddit
         subreddits: [String!]!
+
+        stock(name: String!): Stock
+        stocks: [String!]!
+
         health: [ServiceHealth!]!
         jobs: [String!]!
     }
 
     type Mutation {
         addComment(comment: Comment!): Boolean!
+        addStock(stock: RawStock!): Boolean!
     }
 `;
 

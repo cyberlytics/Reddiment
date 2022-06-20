@@ -1,3 +1,4 @@
+import { daynumber, MillisecondsPerDay } from "../util/time";
 import Context from "./context";
 import Info from "./info";
 
@@ -13,6 +14,17 @@ type Comment = {
     downvotes?: number,
 };
 
+type RawStock = {
+    stockName: string,
+    date: Date,
+    close: number,
+    open?: number,
+    adjClose?: number,
+    volume?: number,
+    high?: number,
+    low?: number,
+};
+
 /**
  * Resolves top-level mutations.
  */
@@ -20,7 +32,7 @@ const MutationResolver = {
     addComment: async (parent: {}, args: { comment: Comment }, context: Context, info: Info): Promise<boolean> => {
         const sentiment = await context.sentiment(args.comment.text);
         if (typeof sentiment !== 'undefined') {
-            context.db.addComment({
+            return await context.db.addComment({
                 sentiment: sentiment,
                 subreddit: args.comment.subredditName,
                 text: args.comment.text,
@@ -31,10 +43,22 @@ const MutationResolver = {
                 userId: args.comment.userId ?? '',
                 commentId: args.comment.commentId,
             });
-            return true;
         }
         return false;
     },
+
+    addStock: async (parent: {}, args: { stock: RawStock }, context: Context, info: Info): Promise<boolean> => {
+        return await context.db.addFinance({
+            timestamp: new Date(daynumber(args.stock.date) * MillisecondsPerDay),
+            adjClose: args.stock.adjClose ?? 0,
+            aktie: args.stock.stockName,
+            close: args.stock.close,
+            high: args.stock.high ?? 0,
+            low: args.stock.low ?? 0,
+            open: args.stock.open ?? 0,
+            volume: args.stock.volume ?? 0,
+        });
+    }
 };
 
-export { Comment, MutationResolver };
+export { Comment, RawStock, MutationResolver };
