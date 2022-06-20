@@ -46,7 +46,7 @@ describe("Elastic Database", () => {
     //Test financial data
     it("should return true on inserting or updating financial data", async () => {
         const db = new ElasticDb(s => null);
-        const result = await db.addFinance({ aktie: '123testaktie123', timestamp: new Date(Date.UTC(2022, 5, 17, 11, 30, 0, 0)), open: 100, high: 150, low: 40, close: 112, adjClose: 113, volume: 464732 });
+        const result = await db.addFinance({ stock: '123testaktie123', timestamp: new Date(Date.UTC(2022, 5, 17, 11, 30, 0, 0)), open: 100, high: 150, low: 40, close: 112, adjClose: 113, volume: 464732 });
         assert.deepStrictEqual(result, true);
     });
 

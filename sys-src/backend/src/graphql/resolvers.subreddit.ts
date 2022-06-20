@@ -1,5 +1,5 @@
 import { aggregate, groupby } from "../util/list";
-import date from "../util/time";
+import { date, daynumber, MillisecondsPerDay } from "../util/time";
 import Context from "./context";
 import Info from "./info";
 
@@ -23,11 +23,11 @@ const SubredditResolver = {
         const to = args.to ?? date("9999-12-31Z");
         const from = args.from ?? date("0000-01-01Z");
         const sentiments = await context.db.getSentiments(parent.name, from, to, args.keywords);
-        const grouped = groupby(sentiments, s => s.time.valueOf());
+        const grouped = groupby(sentiments, s => daynumber(s.time));
         const agg = aggregate(grouped,
-            s => {
+            (s, k) => {
                 return {
-                    time: s.time,
+                    time: new Date(k * MillisecondsPerDay),
                     positive: 0,
                     negative: 0,
                     neutral: 0
@@ -50,15 +50,15 @@ const SubredditResolver = {
  */
 const SubredditQueryResolver = {
     subreddit: async (parent: {}, args: { nameOrUrl: string }, context: Context, info: Info) => {
-        const srs = await context.db.getSubreddits()
+        const srs = await context.db.getSubreddits();
         const sr = srs.find(s => s == args.nameOrUrl);
         if (typeof (sr) !== 'undefined') {
             return { name: sr };
         }
         return null;
     },
-    subreddits: (parent: {}, args: {}, context: Context, info: Info) => {
-        return context.db.getSubreddits();
+    subreddits: async (parent: {}, args: {}, context: Context, info: Info) => {
+        return await context.db.getSubreddits();
     }
 };
 
