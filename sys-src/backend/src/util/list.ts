@@ -27,15 +27,15 @@ function groupby<T, P>(list: T[], selector: (obj: T) => P): Map<P, T[]> {
 /**
  * Aggregates a previously grouped list of elements.
  * @param {Map<P, T[]>} groupedList A previously grouped list of elements. See `groupby` function.
- * @param {(obj: T) => R} initFunc An aggregation initializer function.
+ * @param {(obj: T, key: P) => R} initFunc An aggregation initializer function.
  * @param {(previous: R, current: T) => R} aggregation An aggregation function.
  * @returns {Map<P, R>} A `Map<P, R>` containing all aggregated values grouped by ``P``.
  */
-function aggregate<T, P, R>(groupedList: Map<P, T[]>, initFunc: (obj: T) => R, aggregation: (previous: R, current: T) => R): Map<P, R> {
+function aggregate<T, P, R>(groupedList: Map<P, T[]>, initFunc: (obj: T, key: P) => R, aggregation: (previous: R, current: T) => R): Map<P, R> {
     const result = new Map<P, R>();
     groupedList.forEach((values, k) => {
         if (values.length > 0) {
-            result.set(k, values.reduce(aggregation, initFunc(values[0])));
+            result.set(k, values.reduce(aggregation, initFunc(values[0], k)));
         }
     });
     return result;
