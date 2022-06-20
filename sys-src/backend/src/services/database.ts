@@ -33,7 +33,7 @@ type TimeSentiment = {
 
 //Types Finance
 type DbFinance = {
-    aktie: string,
+    stock: string,
     timestamp: Date,
     open: number,
     high: number,
@@ -50,11 +50,11 @@ type TimeFinance = {
 
 /**
  * Class: ElasticDb
- * 
+ *
  * Each document is stored under a unique ID.
  * Reddit Comment --> ID == commentId
  * Financial Data --> ID == ?
- * 
+ *
  * Similar documents are stored with the same index in elastic.
  * Reddit Comment from subreddit "r/wallstreetbets" --> Index: r_wallstreetbest (Prefix "r_" indecates Comment of Subreddit)
  * Financial Data --> Index: f_xyz (Prefix "f_" indecates financial Data)
@@ -289,29 +289,29 @@ class ElasticDb implements IDatabase {
     *
     * @param   {DbFinance}  finance    the financial data to add to the database
     * @returns {Promise<boolean>}      retuns true if the financial data was successfully added to the database
-     * 
+     *
      */
     public async addFinance(finance: DbFinance): Promise<boolean> {
         try {
             // Noch nicht fertig -> genaue Daten fehlen
             const prefix: string = "f_";
             const teilen: string = "_";
-            const fidx = prefix.concat(finance.aktie);
-            //console.log(finance.aktie.concat(teilen, finance.timestamp.toDateString()))
+            const fidx = prefix.concat(finance.stock);
+            //console.log(finance.stock.concat(teilen, finance.timestamp.toDateString()))
             //Check if the stock already exists --> id
             const stockExist = await this.client.exists({
                 index: fidx,
-                id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
+                id: finance.stock.concat(teilen, finance.timestamp.toISOString()),
             });
 
             if (stockExist) {
                 //Stock Exist --> Update Document
                 const stockRes = await this.client.update({
                     index: fidx,
-                    id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
+                    id: finance.stock.concat(teilen, finance.timestamp.toISOString()),
                     body: {
                         doc: {
-                            aktie: finance.aktie,
+                            stock: finance.stock,
                             timestamp: finance.timestamp,
                             open: finance.open,
                             high: finance.high,
@@ -334,12 +334,12 @@ class ElasticDb implements IDatabase {
                 }
             } else {
                 // If Stock dosent exist --> add new Stock
-                // add Stock to elastic database 
+                // add Stock to elastic database
                 const stockRes = await this.client.index({
                     index: fidx,
-                    id: finance.aktie.concat(teilen, finance.timestamp.toISOString()),
+                    id: finance.stock.concat(teilen, finance.timestamp.toISOString()),
                     document: {
-                        aktie: finance.aktie,
+                        stock: finance.stock,
                         timestamp: finance.timestamp,
                         open: finance.open,
                         high: finance.high,
@@ -398,7 +398,7 @@ class ElasticDb implements IDatabase {
                 respFArray.push(fresp.hits.hits[n]);
             }
 
-            // Create Array from type TimeFinance            
+            // Create Array from type TimeFinance
             const timeFinance: Array<TimeFinance> = [];
             respFArray.forEach(s => {
                 timeFinance.push({
