@@ -45,8 +45,7 @@ router.use((req, res, next) => {
 
 /** Server */
 const httpServer = http.createServer(router);
-const PORT: any = process.env.PORT ?? 6060;
-// tslint:disable-next-line:no-console
-httpServer.listen(PORT, () => console.log(`The server is running on port ${PORT}`));
+const PORT: any = process.env.PORT ?? 8080;
+httpServer.listen(PORT)// , () => console.log(`The server is running on port ${PORT}`));
 
 export default router;
