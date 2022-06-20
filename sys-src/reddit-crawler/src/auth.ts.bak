@@ -1,8 +1,5 @@
 import Snoowrap from 'snoowrap'
 
-
-
-
 /*export const requester = new Snoowrap({
     username: 'reddiment-bot',
     password: 'reddiment123,.-',
