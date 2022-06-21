@@ -34,7 +34,7 @@ services:
     env_file:
       - .env
     ports:
-      - "4001:80"
+      - "80"
     secrets:
       - backend_access_key
 
