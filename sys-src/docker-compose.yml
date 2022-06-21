@@ -17,17 +17,17 @@ services:
         gid: "1000"
         mode: 0400
 
-  #frontend:
-  #  build: ./frontend
-  #  restart: always
-  #  container_name: frontend
-  #  hostname: frontend
-  #  env_file:
-  #    - .env
-  #  environment:
-  #    - BACKEND_ADDR=${BACKEND_ADDR}
-  #  ports:
-  #    - "80:80"
+  frontend:
+    build: ./frontend
+    restart: always
+    container_name: frontend
+    hostname: frontend
+    env_file:
+      - .env
+    environment:
+      - BACKEND_ADDR=${BACKEND_ADDR}
+    ports:
+      - "80:80"
 
   sentiment:
     build: ./Sentiment
