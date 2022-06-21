@@ -1,6 +1,5 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
-import { StringifyOptions } from 'querystring';
 import { HealthCallback } from './serviceinterface';
 
 interface IDatabase {

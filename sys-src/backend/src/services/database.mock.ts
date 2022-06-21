@@ -63,6 +63,7 @@ class DbMock implements IDatabase {
     }
 
     public deleteComment(index: string): Promise<boolean> {
+        this.cache.set<Comments>("comments", this.comments().filter(c => c.subreddit !== index));
         return new Promise((r) => r(true));
     }
 
@@ -107,6 +108,7 @@ class DbMock implements IDatabase {
     }
 
     public deleteFinance(stock: string): Promise<boolean> {
+        this.cache.set<Finances>('finances', this.finances().filter(f => f.stock !== stock));
         return new Promise((r) => r(true));
     }
 
