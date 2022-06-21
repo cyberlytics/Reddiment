@@ -1,4 +1,4 @@
-query {
+query Health {
     health {
         name
         lastConnect
