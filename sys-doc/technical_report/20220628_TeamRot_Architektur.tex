@@ -87,17 +87,19 @@ Dieser Abschnitt beschreibt die Persistenzschicht von Reddiment.  Die Speicherun
 
 \subsection{Dienste} \label{sub:services}
 
-Dieser Abschnitt beschreibt die Dienste (engl. Services). Reddiment hat zwei Dienste: 
+Dieser Abschnitt beschreibt die Dienste (engl. Services). Reddiment hat drei Dienste: 
 
 \subsubsection{Sentiment}
 
-In diesem Dienst wird für einen Text das Sentiment ermittelt. 
-%TODO Konrad
-
+In diesem Dienst wird für einen Text das Sentiment ermittelt. Um das Sentiment an das Backend zu übermitteln wurde eine Flask-REST-API entworfen. Diese weist einen Endpoint \texttt{\/sentiment} auf. An diesen Endpoint kann mittels eines Posts ein Text (JSON-Format) übertragen werden. Das Modul \textit{sentiment} ermittelt die Stimmungslage des Textes und gibt das Ergebnis in JSON-Format zurück. Die Ermittelung des Sentiments erfolgt zweifach, durch zwei regelbasierte Verfahren.  Das geschieht, um eine Absicherung der Richtigkeit des Wertes zu haben. Einerseits wird dafür \textit{Vader} \cite{vader}(Valence Aware Dictionary and Sentiment Reasoner) der Python-Bibliothek \textit{nltk} verwendet, zum anderen \textit{TextBlob} \cite{textblob}. 
 \subsubsection{Reddit Crawler}
 
 Der Reddit Crawler verwendet „snoowrap“ \cite{snoowrap},  das eine Schnittstelle für den Zugriff auf jeden Reddit-API-Endpunkt bereitstellt.
 %TODO Wolfgang
+
+\subsubsection{Markdaten}
+
+Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können wurde eine weitere REST-API für Marktdaten erstellt. Diese weißt den Endpoint \texttt{/post} auf und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} geladen und zurückgegeben. 
 
 \subsection{Frontend} \label{sub:frontend}
 Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur. Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks SvelteKit \cite{sveltekit} realisiert. Das Frontend besteht aus zwei Bausteinen: 1) den Routen zur Navigation, und 2) der \textit{Library} für Komponenten und weitere Module.
