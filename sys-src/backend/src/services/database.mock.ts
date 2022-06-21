@@ -62,6 +62,10 @@ class DbMock implements IDatabase {
         return new Promise((r) => r(distinct(this.comments().map(c => c.subreddit))));
     }
 
+    public deleteComment(index: string): Promise<boolean> {
+        return new Promise((r) => r(true));
+    }
+
     public pingElastic(): Promise<boolean> {
         return new Promise((r) => r(true));
     }
@@ -100,6 +104,10 @@ class DbMock implements IDatabase {
 
     public getStocks(): Promise<Array<string>> {
         return new Promise((a) => a(distinct(this.finances().map(c => c.stock))));
+    }
+
+    public deleteFinance(stock: string): Promise<boolean> {
+        return new Promise((r) => r(true));
     }
 
     public initDummy(): void {
