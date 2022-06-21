@@ -62,6 +62,11 @@ class DbMock implements IDatabase {
         return new Promise((r) => r(distinct(this.comments().map(c => c.subreddit))));
     }
 
+    public deleteComment(index: string): Promise<boolean> {
+        this.cache.set<Comments>("comments", this.comments().filter(c => c.subreddit !== index));
+        return new Promise((r) => r(true));
+    }
+
     public pingElastic(): Promise<boolean> {
         return new Promise((r) => r(true));
     }
@@ -100,6 +105,11 @@ class DbMock implements IDatabase {
 
     public getStocks(): Promise<Array<string>> {
         return new Promise((a) => a(distinct(this.finances().map(c => c.stock))));
+    }
+
+    public deleteFinance(stock: string): Promise<boolean> {
+        this.cache.set<Finances>('finances', this.finances().filter(f => f.stock !== stock));
+        return new Promise((r) => r(true));
     }
 
     public initDummy(): void {
