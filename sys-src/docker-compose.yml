@@ -12,10 +12,7 @@ services:
     secrets:
       - backend_graphql_access_key
       - sentiment_access_key
-      - source: elastic_password
-        uid: "1000"
-        gid: "1000"
-        mode: 0400
+      - elastic_password
 
   frontend:
     build: ./frontend
@@ -37,7 +34,7 @@ services:
     env_file:
       - .env
     ports:
-      - "80:4001"
+      - "4001:80"
     secrets:
       - backend_access_key
 
@@ -70,11 +67,8 @@ services:
       - xpack.security.enabled=${ELASTIC_SECURITY}
      # - ELASTIC_PASSWORD_FILE=/run/secrets/elastic_password
       - ELASTIC_PASSWORD=password
-    secrets:
-      - source: elastic_password
-        uid: "1000"
-        gid: "1000"
-        mode: 0400
+    env_file:
+      - .env
 
     ulimits:
       memlock:
