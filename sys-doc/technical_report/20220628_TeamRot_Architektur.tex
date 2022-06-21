@@ -47,8 +47,7 @@ Dieser Technical Report beschreibt die Architektur von Reddiment -- ein webbasie
 
 \section{Einführung und Ziele}
 
-\texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen.
-Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden \dots
+\texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden welches das Sentiment als auch die Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits über die Zeit und den Aktienverlauf gegenüberstellt. 
 
 In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz auf die angewandten Sicherheitskonzepte in Abschnitt~\ref{s:sicherheitskonzepte} eingegangen und ein Fazit in Abschnitt~\ref{s:fazit} gegeben, gefolgt vom Literaturverzeichnis am Ende.
 
@@ -56,45 +55,70 @@ In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht 
 Diese Sicht zeigt die statische Zerlegung des Systems in Bausteine sowie deren Beziehungen. 
 
 \subsection{Gesamtsystem}
-%Whitebox-Beschreibung des Gesamtsystems, zusammen mit Blackbox-Beschreibungen der darin enthaltenen Bausteine.
-Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung \ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer.
+Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung \ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer. Die beiden Datenquellen von Reddiment sind 
+\begin{itemize}
+  \item Reddit API für Subreddit Daten 
+  \item Yahoo Finance für Aktienmarkt Daten
+\end{itemize}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=\linewidth]{context}
-	\caption{Reddiment Gesamtsystem}
+	\caption{Kontextabgrenzung des Reddiment Gesamtsystems}
 	\label{fig:context}
 \end{figure}
 
-\subsection{Backend}
+\subsection{Backend} \label{sub:backend}
 Dieser Abschnitt beschreibt die server-seitige Backend-Architektur.
 
 \subsubsection{Laufzeitumgebung}
 
 JavaScript-basierte Plattform Node.js mit dem serverseitigen Webframework ExpressJS.
 
+\subsubsection{GraphQL}
 
-\subsection{Datenbank} \label{datenbank}
+Apollo Server wird als Erweiterung der bestehenden Node.js Middleware mit ExpressJS verwendet, um eine GraphQL API zur Verfügung zu stellen.
+%TODO Tobias
 
-Die Speicherung der Daten erfolgt mit Elasticsearch.
+\subsection{Datenbank} \label{sub:database}
 
+Dieser Abschnitt beschreibt die Persistenzschicht von Reddiment.  Die Speicherung der Daten erfolgt mit „Elasticsearch“ \cite{elasticsearch}.
+%TODO Ardian, Daniel
 
-\subsection{Dienste}
-Dieser Abschnitt beschreibt die Dienste (engl. Services).
+\subsection{Dienste} \label{sub:services}
+
+Dieser Abschnitt beschreibt die Dienste (engl. Services). Reddiment hat zwei Dienste: 
 
 \subsubsection{Sentiment}
 
-In diesem Dienst \dots
+In diesem Dienst wird für einen Text das Sentiment ermittelt. 
+%TODO Konrad
 
 \subsubsection{Reddit Crawler}
 
-Der Reddit Crawler
+Der Reddit Crawler verwendet „snoowrap“ \cite{snoowrap},  das eine Schnittstelle für den Zugriff auf jeden Reddit-API-Endpunkt bereitstellt.
+%TODO Wolfgang
+
+\subsection{Frontend} \label{sub:frontend}
+Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur. Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks SvelteKit \cite{sveltekit} realisiert. Das Frontend besteht aus zwei Bausteinen: 1) den Routen zur Navigation, und 2) der \textit{Library} für Komponenten und weitere Module.
+
+Die Routen zur Navigation sind selbst in zwei Unter-Bausteine zerlegt und befinden sich im Ordner \texttt{routes}
+
+\subsubsection{Layout}
+
+Es gibt Elemente, die auf jeder Seite sichtbar sind, z. B. die Navigationsleiste oder eine Fußzeile. Anstatt sie auf jeder Seite zu wiederholen,  wird eine Layout-Komponente namens \texttt{src/routes/\_\_layout.svelte} verwendet.
+
+\subsubsection{Route}
 
 
-\subsection{Frontend}
-Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur.
-Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks SvelteKit realisiert.
-Es ist selbst in zwei Unter-Bausteine zerlegt:
+Die \textit{Library} ist eine Sammlung von Frontend-Komponenten,  ...
+
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\linewidth]{architecture}
+	\caption{Überblick über die Architektur von Reddiment. Die Architektur besteht aus vier Teilen: Das Frontend bietet dem Nutzer ein graphisches Dashboard zur Visualisierung der Metriken (Abschnitt \ref{sub:frontend}),  das Backend stellt (Abschnitt \ref{sub:backend}) die GraphQL API bereit,  die Datenbank (Abschnitt \ref{sub:database}) speichert persistent Reddit und Aktienmarkt Daten,  und den Diensten (Abschnitt \ref{sub:services}) zur Sentiment Analyse als auch zum crawlen der Daten von APIs.}
+	\label{fig:architecture}
+\end{figure*}
 
 \subsubsection{Components}
 
@@ -102,18 +126,12 @@ In diesem Modul sind die Svelte-Komponenten gesammelt, mit denen die eigentliche
 Die Komponenten behandeln alle Eingaben und kommunizieren bei Bedarf mit dem Backend über die GraphQL API Schnittstelle.
 
 
+
 \section{Verteilungssicht} \label{s:verteilungssicht}
 Das Verteilungssicht beschreibt die Verteilung des Gesamtsystems,  wichtige Begründungen für diese Verteilungsstruktur und die Zuordnung von Softwareartefakten zu Bestandteilen der Infrastruktur.
-Zentrale Bestandteile der Verteilungsstruktur sind \dots
+Zentraler Bestandteile der Verteilungsstruktur sind „Docker“ \cite{docker} Container.
 
-\begin{figure*}[ht]
-	\centering
-	\includegraphics[width=\linewidth]{architecture}
-	\caption{Überblick über die Architektur von Reddiment. Die Architektur besteht aus vier Teilen: Das Frontend bietet dem Nutzer eine graphisches Dashboard zur Visualisierung der Metriken (Abschnitt ),  das Backend umfasst (Abschnitt ),  die Datenbank (Abschnitt ) ist ,  und den Diensten (engl. Services) zur Sentiment Analyse als auch zum crawlen der Daten von externen APIs.}
-	\label{fig:architecture}
-\end{figure*}
-
-Tailwind CSS
+%TODO Fabian
 
 \section{Entwicklungswerkzeuge} \label{s:entwicklungswerkzeuge}
 
@@ -121,13 +139,11 @@ Im folgenden Abschnitt wird auf die verwendeten Entwicklungswerkzeuge eingegange
 
 \subsection{Paketverwaltung}
 
-Die Verwaltung der Abhängigkeiten erfolgt mit „npm“.
+Die Verwaltung der Abhängigkeiten erfolgt mit „npm“ \cite{npm}.
 
 \subsection{Linting}
 
-In beiden Unterprojekten (Frontend und Backend) wird jeweils „eslint“ in Verbindung mit „prettier“ verwendet,
-um die Einhaltung der Codierrichtlinien zu gewährleisten.
-
+Im Frontend wird „eslint“ in Verbindung mit „prettier“ verwendet,um die Einhaltung der Codierrichtlinien zu gewährleisten.
 Die Konfigurationen sind jeweils in den Dateien \texttt{eslintrc.js} und \texttt{prettierrc.js} hinterlegt.
 
 \subsection{Build-Tools}
@@ -158,11 +174,11 @@ Dieser Abschnitt beschreibt die angewendeten Sicherheitskonzepte, die für eine 
 
 \subsection{Secrets Verwaltung}
 
-\dots
+%TODO Fabian
 
 \section{Fazit und Ausblick} \label{s:fazit}
 
-\dots
+%TODO Philipp
 
 \printbibliography
 
