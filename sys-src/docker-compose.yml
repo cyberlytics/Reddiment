@@ -5,8 +5,6 @@ services:
     restart: always
     container_name: backend
     hostname: backend
-    env_file:
-      - ./docker/.env
     ports:
       - "4000:4000"
     secrets:
@@ -19,8 +17,6 @@ services:
     restart: always
     container_name: frontend
     hostname: frontend
-    env_file:
-      - ./docker/.env
     environment:
       - BACKEND_ADDR=${BACKEND_ADDR}
     ports:
@@ -32,8 +28,6 @@ services:
     restart: always
     container_name: sentiment
     hostname: sentiment
-    env_file:
-      - ./docker/.env
     ports:
       - "80:4001"
     secrets:
@@ -60,11 +54,10 @@ services:
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
-    env_file:
-      - ./docker/.env
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=${ELASTIC_SECURITY}
+      - ELASTIC_PASSWORD_FILE=/run/secrets/elastic_password.txt
     secrets:
       - elastic_password
     ulimits:
