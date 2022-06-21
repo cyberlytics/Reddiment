@@ -1,6 +1,7 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
 import getSecret from '../util/secrets';
+import { date } from '../util/time';
 import { HealthCallback } from './serviceinterface';
 
 interface IDatabase {
@@ -49,9 +50,9 @@ type TimeFinance = {
     close: number,
 };
 
-let secretPassword: string = 'test';
+let secretPassword: string = 'password';
 async function initSecrets() {
-    secretPassword = (await getSecret('elastic_password')) || process.env.ELASTIC_PASSWORD || 'test';
+    secretPassword = (await getSecret('elastic_password')) || process.env.ELASTIC_PASSWORD || 'password';
 }
 
 /**
@@ -71,7 +72,7 @@ class ElasticDb implements IDatabase {
 
     constructor(healthCallback: HealthCallback) {
         this.healthCallback = healthCallback;
-        const host = `http://${process.env.ELASTIC_ADDR}` || 'http://localhost:9200';
+        const host = `http://${process.env.ELASTIC_ADDR || 'localhost:9200'}`;
         const user = process.env.ELASTIC_USERNAME || 'elastic';
         const password = secretPassword;
 
@@ -221,7 +222,7 @@ class ElasticDb implements IDatabase {
             const timeSentiment: Array<TimeSentiment> = [];
             respArray.forEach(r => {
                 timeSentiment.push({
-                    time: r.fields?.timestamp[0],
+                    time: date(r.fields?.timestamp[0]),
                     sentiment: r.fields?.sentiment[0],
                 });
             })
@@ -436,7 +437,7 @@ class ElasticDb implements IDatabase {
             const timeFinance: Array<TimeFinance> = [];
             respFArray.forEach(s => {
                 timeFinance.push({
-                    time: s.fields?.timestamp[0],
+                    time: date(s.fields?.timestamp[0]),
                     close: s.fields?.close[0],
                 });
             })
