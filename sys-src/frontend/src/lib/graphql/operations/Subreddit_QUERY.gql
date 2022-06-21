@@ -1,5 +1,12 @@
-query Subreddit($nameOrUrl: String!) {
+query Subreddit($nameOrUrl: String!, $keywords: [String!]!, $from: Date, $to: Date) {
     subreddit(nameOrUrl: $nameOrUrl) {
         name
+        sentiment(keywords: $keywords, from: $from, to: $to) {
+            time
+            positive
+            negative
+            neutral
+            sum
+        }
     }
 }
