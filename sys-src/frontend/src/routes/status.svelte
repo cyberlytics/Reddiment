@@ -1,4 +1,15 @@
-<main class="p-4 flex-grow">
+<script lang="ts">
+    import { onMount } from "svelte";
+    import { browser } from '$app/env';
+    import { KQL_Health } from '../lib/graphql/_kitql/graphqlStores.js';
+    import { services } from "../lib/mocks/healthMock";
+
+    onMount(async () => {
+        browser && await KQL_Health.query({})
+    });
+</script>
+
+<main class="p-8 flex-grow">
 
     <div class="relative overflow-x-auto sm:rounded-lg">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -16,51 +27,27 @@
             </tr>
             </thead>
             <tbody>
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                    Elastic Database
-                </th>
-                <td class="px-6 py-4">
-                    2022-06-07 09:03:07
-                </td>
-                <td class="px-6 py-4 text-green-600">
-                    Verfügbar
-                </td>
-            </tr>
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                    Sentiment
-                </th>
-                <td class="px-6 py-4">
-                    2022-06-07 09:03:07
-                </td>
-                <td class="px-6 py-4 text-green-600">
-                    Verfügbar
-                </td>
-            </tr>
-            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                    Stock Market Crawler
-                </th>
-                <td class="px-6 py-4">
-                    2022-06-07 09:03:07
-                </td>
-                <td class="px-6 py-4 text-green-600">
-                    Verfügbar
-                </td>
-            </tr>
-            <tr class="bg-white dark:bg-gray-800">
-                <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                    Reddit Crawler
-                </th>
-                <td class="px-6 py-4">
-                    2022-06-07 09:03:07
-                </td>
-                <td class="px-6 py-4 text-red-600">
-                    Nicht verfügbar
-                </td>
-            </tr>
+            {#each services as service}
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                        {service.name}
+                    </th>
+                    <td class="px-6 py-4">
+                        {service.lastConnect}
+                    </td>
+                    {#if service.status === 'UP'}
+                        <td class="px-6 py-4 text-green-600">
+                            Verfügbar
+                        </td>
+                    {:else}
+                        <td class="px-6 py-4 text-red-600">
+                            Nicht Verfügbar
+                        </td>
+                    {/if}
+                </tr>
+            {/each}
             </tbody>
         </table>
     </div>
+
 </main>
