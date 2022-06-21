@@ -5,28 +5,37 @@ services:
     restart: always
     container_name: backend
     hostname: backend
+    env_file:
+      - .env
     ports:
       - "4000:4000"
     secrets:
       - backend_graphql_access_key
       - sentiment_access_key
-      - elastic_password
+      - source: elastic_password
+        uid: "1000"
+        gid: "1000"
+        mode: 0400
 
-  frontend:
-    build: ./frontend
-    restart: always
-    container_name: frontend
-    hostname: frontend
-    environment:
-      - BACKEND_ADDR=${BACKEND_ADDR}
-    ports:
-      - "80:80"
+  #frontend:
+  #  build: ./frontend
+  #  restart: always
+  #  container_name: frontend
+  #  hostname: frontend
+  #  env_file:
+  #    - .env
+  #  environment:
+  #    - BACKEND_ADDR=${BACKEND_ADDR}
+  #  ports:
+  #    - "80:80"
 
   sentiment:
     build: ./Sentiment
     restart: always
     container_name: sentiment
     hostname: sentiment
+    env_file:
+      - .env
     ports:
       - "80:4001"
     secrets:
@@ -37,6 +46,8 @@ services:
     restart: always
     container_name: reddit_crawler
     hostname: reddit_crawler
+    env_file:
+      - .env
     secrets:
       - backend_access_key
       - reddit_login_password
@@ -53,12 +64,18 @@ services:
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
+    hostname: datenbank
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=${ELASTIC_SECURITY}
-      - ELASTIC_PASSWORD_FILE=/run/secrets/elastic_password.txt
+     # - ELASTIC_PASSWORD_FILE=/run/secrets/elastic_password
+      - ELASTIC_PASSWORD=password
     secrets:
-      - elastic_password
+      - source: elastic_password
+        uid: "1000"
+        gid: "1000"
+        mode: 0400
+
     ulimits:
       memlock:
         soft: -1
@@ -67,8 +84,8 @@ services:
       - elastic-data:/usr/share/elasticsearch/data
     restart: unless-stopped
     ports:
-      - "${ELASTIC_PORT1}:$ELASTIC_PORT1}"
-      - "${ELASTIC_PORT2}:$ELASTIC_PORT2}"
+      - "${ELASTIC_PORT1}:${ELASTIC_PORT1}"
+      - "${ELASTIC_PORT2}:${ELASTIC_PORT2}"
     healthcheck:
       test:
         [
@@ -86,5 +103,13 @@ volumes:
 secrets:
   backend_access_key:
     file: ./docker/secrets/backend_access_key.txt
+  backend_graphql_access_key:
+    file: ./docker/secrets/backend_graphql_access_key.txt
   sentiment_access_key:
     file: ./docker/secrets/sentiment_access_key.txt
+  elastic_password:
+    file: ./docker/secrets/elastic_password.txt
+  reddit_client_secret:
+    file: ./docker/secrets/reddit_client_secret.txt
+  reddit_login_password:
+    file: ./docker/secrets/reddit_login_password.txt

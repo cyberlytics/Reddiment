@@ -4,7 +4,7 @@ import Snoowrap, { Comment, Listing, Submission, Subreddit } from 'snoowrap';
 // Backend connection
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const BackendURL = `http://${process.env.BACKEND_HOST}:${process.env.BACKEND_PORT}/graphql`;
+const BackendURL = `http://${process.env.BACKEND_ADDR}/graphql`;
 
 let subredditsToSearch = new Array<string>();
 
@@ -42,7 +42,7 @@ async function transmitComment(comment: Snoowrap.Comment) {
 }
 
 /**
- * Receive a task list to work through in 
+ * Receive a task list to work through in
  */
 setInterval(async () => {
     try {
@@ -66,12 +66,12 @@ setInterval(async () => {
 }, 60 * 1000);
 
 
-/** 
+/**
  * Reddit Crawler
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const cs_limit = 100; 
+const cs_limit = 100;
 const sms_limit = 25;
 
 let sr_queue = new Array<Snoowrap.Subreddit>();
@@ -90,7 +90,7 @@ setInterval(async () => {
                     let sr = crawler.getSubreddit(sr_name);
                     sr_queue.push(sr);
                     console.log("SUBREDDIT PUSHED");
-                    
+
                 }
             }
         } catch (error) {
@@ -109,11 +109,11 @@ setInterval(async () => {
             if(sr){
                 await sr.refresh().then(rf_sr => {
                     console.log("SUBREDDIT REFRESHED");
-                    
+
                     rf_sr.getNewComments().then(async raw_cs => {
                         let ft_cs = await raw_cs.fetchAll({amount: cs_limit});
                         console.log("FETCHED COMMENTS: " + ft_cs.length);
-        
+
                         ft_cs.forEach(c => transmitComment(c));
                     })
                     rf_sr.getNew().then(async raw_sms=> {
@@ -122,7 +122,7 @@ setInterval(async () => {
                             await raw_sm.fetch().then(async ft_sm => {
                                 const ft_cs = await ft_sm.comments.fetchAll({amount: cs_limit});
                                 console.log("FETCHED COMMENTS IN SUBMISSION: " + ft_cs.length);
-                                
+
                                 ft_cs.forEach(c => transmitComment(c));
                             })
                         })
@@ -131,6 +131,6 @@ setInterval(async () => {
             }
         }
     } catch (error) {
-        console.log('error', error);        
+        console.log('error', error);
     }
 }, 60 * 1000); // every 60 seconds

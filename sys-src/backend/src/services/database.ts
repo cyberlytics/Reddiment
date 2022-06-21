@@ -1,5 +1,6 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
+import getSecret from '../util/secrets';
 import { HealthCallback } from './serviceinterface';
 
 interface IDatabase {
@@ -48,6 +49,11 @@ type TimeFinance = {
     close: number,
 };
 
+let secretPassword: string = 'test';
+async function initSecrets() {
+    secretPassword = (await getSecret('elastic_password')) || process.env.ELASTIC_PASSWORD || 'test';
+}
+
 /**
  * Class: ElasticDb
  *
@@ -65,9 +71,10 @@ class ElasticDb implements IDatabase {
 
     constructor(healthCallback: HealthCallback) {
         this.healthCallback = healthCallback;
-        const host = process.env.ELASTIC_HOST || 'http://localhost:9200';
-        const user = process.env.ELASTIC_USER || 'elastic';
-        const password = process.env.ELASTIC_PASSWORD || 'test';
+        const host = `http://${process.env.ELASTIC_ADDR}` || 'http://localhost:9200';
+        const user = process.env.ELASTIC_USERNAME || 'elastic';
+        const password = secretPassword;
+
         //create Elastic Client
         this.client = new elasticsearch.Client({
             node: host,
@@ -449,4 +456,4 @@ class ElasticDb implements IDatabase {
 }
 
 
-export { IDatabase, DbComment, TimeSentiment, ElasticDb, DbFinance };
+export { IDatabase, DbComment, TimeSentiment, ElasticDb, DbFinance, initSecrets };
