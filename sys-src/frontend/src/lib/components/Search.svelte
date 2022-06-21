@@ -3,7 +3,7 @@
     import { KQL_Subreddit } from '$lib/graphql/_kitql/graphqlStores'
     import Tags from 'svelte-tags-input'
 
-    
+
     let subreddit: string
     let keywords: string[]
     let date_from: Date;
@@ -26,16 +26,15 @@
 
 </script>
 
-<div class="flex justify-around m-4 pt-4 pb-4 bg-gray-50 rounded-lg">
+<div class="flex justify-around m-4 pt-4 pb-4 bg-white rounded-lg">
     <input
         type="text"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
+        class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
         placeholder="Subreddit"
         bind:value={subreddit}
         required
     >
 
-    <!--<input type="text" class="w-1/2 border-2 focus:border-orange-300 focus:outline-none px-1 h-9" bind:value={keywords} placeholder="Tags">-->
     <div class="custom">
         <Tags on:tags={keywords} placeholder="Tags" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
     </div>
@@ -48,7 +47,7 @@
             <input
                 name="start"
                 type="text"
-                class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 on:changeDate={changeStartDate}
                 placeholder="Startdatum wählen"
             >
@@ -61,7 +60,7 @@
             <input
                 name="end"
                 type="text"
-                class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                class="border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 on:changeDate={changeEndDate}
                 placeholder="Enddatum wählen"
             >
@@ -75,7 +74,7 @@
 </div>
 
 <style>
-    
+
     .custom :global(.svelte-tags-input-tag) {
         background-color: rgb(255 138 76);
         border-radius: 0.2rem;
@@ -93,7 +92,7 @@
     .custom :global(.svelte-tags-input-layout:hover) {
         border-width: 0;
     }
-    
+
     .custom :global(.svelte-tags-input-tag.focus), .custom :global(.svelte-tags-input:focus) {
         border-radius: 0.5rem;
         border-width: 1px;
