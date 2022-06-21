@@ -5,8 +5,8 @@ import { date, daynumber, MillisecondsPerDay } from "../src/util/time";
 
 describe("Apollo Server GraphQL API", () => {
     let apolloServer: ApolloServer;
-    before(() => {
-        apolloServer = createApolloServer([], contextFunctionForMock);
+    before(async () => {
+        apolloServer = await createApolloServer([], contextFunctionForMock);
     });
     after(async () => {
         await apolloServer?.stop();

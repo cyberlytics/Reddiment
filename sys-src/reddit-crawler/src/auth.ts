@@ -1,28 +1,14 @@
 import Snoowrap from 'snoowrap'
-
-
-
-
-/*export const requester = new Snoowrap({
-    username: 'reddiment-bot',
-    password: 'reddiment123,.-',
-    userAgent: 'reddiment-script',
-    clientId: '8OguKkRA6T2BhvMi0C-bcA',
-    clientSecret: 'pijvpzZ0rCkrGTegt4ndliPJjHkcKw'
-})*/
-
-
-
-const fs = require('fs')
+import fs from 'fs';
 
 
 
 export const requester = new Snoowrap({
     username: process.env.REDDIT_USERNAME || 'reddiment-bot',
-    password:  fs.readFile('/run/secrets/reddit_login_password.txt') || 'reddiment123,.-',
+    password:  fs.readFileSync('/run/secrets/reddit_login_password')?.toString('utf-8') || 'reddiment123,.-',
     userAgent: process.env.REDDIT_USER_AGENT || 'reddiment-script',
     clientId: process.env.REDDIT_CLIENT_ID || '8OguKkRA6T2BhvMi0C-bcA',
-    clientSecret: fs.readFile('/run/secrets/reddit_client_secret.txt') || 'pijvpzZ0rCkrGTegt4ndliPJjHkcKw'
+    clientSecret: fs.readFileSync('/run/secrets/reddit_client_secret')?.toString('utf-8') || 'pijvpzZ0rCkrGTegt4ndliPJjHkcKw'
 })
 
 

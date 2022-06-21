@@ -7,7 +7,7 @@ import { createAndStartApolloServer } from './server.apollo';
 
 async function startServer(): Promise<void> {
     // Port is defined in Dockerfile (with fallback to 4000)
-    const port = process.env.PORT || 4000;
+    const port = process.env.BACKEND_PORT || 4000;
 
     // ExpressJS middleware
     const app = express();
