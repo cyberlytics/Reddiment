@@ -1,5 +1,6 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
+import { StringifyOptions } from 'querystring';
 import { HealthCallback } from './serviceinterface';
 
 interface IDatabase {
@@ -260,6 +261,33 @@ class ElasticDb implements IDatabase {
         }
     }
 
+    /**
+    * Function delete a Comment by Index
+    * Deleting an index deletes its documents, shards, and metadata.
+    * @param    {string}    index       Index == r_subreddit
+    * @returns  {Promise<boolean>}      Returns true if the Comment was successfully deleted
+    */
+    public async deleteComment(index: string): Promise<boolean> {
+        try {
+            //substitite "/" with "_" for subreddit index
+            const idx = index.replace("/", "_");
+            //delete the Index
+            const resp = await this.client.indices.delete({
+                index: idx,
+            });
+
+            this.healthCallback('UP');
+            if (resp.acknowledged) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return false;
+        }
+    }
 
     /**
      * Fuction pingElastic() checks the connection to Elastic Database
@@ -446,7 +474,35 @@ class ElasticDb implements IDatabase {
             return [];
         }
     }
-}
 
+    /**
+    * Function delete Financial Data by Index
+    * Deleting an index deletes its documents, shards, and metadata.
+    * @param    {string}    stock       Index == f_Stockname
+    * @returns  {Promise<boolean>}      Returns true if the Financial Data was successfully deleted
+    */
+    public async deleteFinance(stock: string): Promise<boolean> {
+        try {
+            //substitite "/" with "_" for subreddit index
+            const prefix: string = "f_";
+            const idx = prefix.concat(stock);
+            //delete the document
+            const resp = await this.client.indices.delete({
+                index: idx,
+            });
+
+            this.healthCallback('UP');
+            if (resp.acknowledged) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (ex: any) {
+            console.log(ex);
+            this.healthCallback('DOWN');
+            return false;
+        }
+    }
+}
 
 export { IDatabase, DbComment, TimeSentiment, ElasticDb, DbFinance };
