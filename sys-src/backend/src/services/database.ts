@@ -122,7 +122,7 @@ class ElasticDb implements IDatabase {
                             articleId: comment.articleId,
                             upvotes: comment.upvotes,
                             downvotes: comment.downvotes,
-                            sentiment: comment.sentiment,
+                            sentiment: comment.sentiment.toFixed(2),
                         },
                         doc_as_upsert: true
                     }
@@ -130,7 +130,7 @@ class ElasticDb implements IDatabase {
                 //Refresh index
                 await this.client.indices.refresh({ index: idx });
                 this.healthCallback('UP');
-                if (result.result === 'updated') {
+                if (result.result === 'updated' || result.result === 'noop') {
                     return true;
                 } else {
                     return false;
@@ -151,7 +151,7 @@ class ElasticDb implements IDatabase {
                         articleId: comment.articleId,
                         upvotes: comment.upvotes,
                         downvotes: comment.downvotes,
-                        sentiment: comment.sentiment,
+                        sentiment: comment.sentiment.toFixed(2),
                     }
                 });
                 //Refresh index
@@ -223,7 +223,7 @@ class ElasticDb implements IDatabase {
             respArray.forEach(r => {
                 timeSentiment.push({
                     time: date(r.fields?.timestamp[0]),
-                    sentiment: r.fields?.sentiment[0],
+                    sentiment: parseFloat(r.fields?.sentiment[0]),
                 });
             })
 
