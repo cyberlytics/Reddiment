@@ -24,7 +24,15 @@
     const changeStartDate = evt => date_from = evt.detail.date;
     const changeEndDate = evt => date_to = evt.detail.date;
 
+
+    const addTagInput = (evt) => {
+        keywords = [...evt.detail.tags];
+
+    }
+
+
 </script>
+
 
 <div class="flex justify-around m-4 pt-4 pb-4 bg-white rounded-lg">
     <input
@@ -36,7 +44,7 @@
     >
 
     <div class="custom">
-        <Tags on:tags={keywords} placeholder="Tags" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
+        <Tags on:tags={addTagInput} placeholder="Tags" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
     </div>
 
     <div date-rangepicker class="flex items-center">
@@ -77,7 +85,17 @@
 
     .custom :global(.svelte-tags-input-tag) {
         background-color: rgb(255 138 76);
-        border-radius: 0.2rem;
+        border-radius: 0.35rem;
+        padding: 3px 5px 5px 5px;
+        margin: 0 4px 0 0;
+        font-weight: 550;
+        display: inline;
+    }
+
+    .custom :global(.svelte-tags-input-tag-remove) {
+        margin-left: 1px;
+        font-size: large;
+        
     }
 
     .custom :global(.svelte-tags-input-tag:hover) {
@@ -87,6 +105,8 @@
     .custom :global(.svelte-tags-input-layout) {
         padding: 0;
         border-width: 0;
+        align-items: center;
+        
     }
 
     .custom :global(.svelte-tags-input-layout:hover) {
