@@ -18,7 +18,7 @@ describe("Elastic Database", () => {
 
     it("should return true, if the comment was successfully updated", async () => {
         const db = new ElasticDb(s => null);
-        const result = await db.addComment({ subreddit: 'r/123testsubreddit123', sentiment: 0, text: 'the brown fox jumps over the lazy dog', timestamp: new Date(Date.UTC(2022, 5, 13, 10, 30, 0, 0)), articleId: '123articleId', commentId: '123commentID', downvotes: 10, upvotes: 10, userId: '123userId' });
+        const result = await db.addComment({ subreddit: 'r/123testsubreddit123', sentiment: 0.123, text: 'the brown fox jumps over the lazy dog', timestamp: new Date(Date.UTC(2022, 5, 13, 10, 30, 0, 0)), articleId: '123articleId', commentId: '123commentID', downvotes: 10, upvotes: 10, userId: '123userId' });
         assert.deepStrictEqual(result, true);
     });
 
@@ -31,7 +31,7 @@ describe("Elastic Database", () => {
     it("Should retrun Array with TimeSentiments", async () => {
         const db = new ElasticDb(s => null);
         const result = await db.getSentiments('r/123testsubreddit123', new Date(Date.UTC(2022, 5, 13, 10, 0, 0, 0)), new Date(Date.UTC(2022, 5, 13, 11, 0, 0, 0)), ['fox']);
-        assert.deepStrictEqual(result, [{ time: '2022-06-13T10:30:00.000Z', sentiment: 0 }])
+        assert.deepStrictEqual(result, [{ time: '2022-06-13T10:30:00.000Z', sentiment: 0.123 }])
     })
 
     it("should retrun true if the Comment was successfully deleted", async () => {

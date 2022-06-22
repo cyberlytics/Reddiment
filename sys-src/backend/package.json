@@ -6,7 +6,7 @@
   "scripts": {
     "test": "nyc mocha",
     "start": "ts-node src/server.ts",
-    "start-prod": "set \"PRODUCTION=true\" && ts-node src/server.ts",
+    "start-prod": "set \"PRODUCTION=true\" && set \"SENTIMENT_ADDR=localhost:4001\" && ts-node src/server.ts",
     "build": "tsc"
   },
   "author": "",
