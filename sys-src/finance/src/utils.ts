@@ -16,6 +16,10 @@ function formatDate(date: Date): string {
 
 function verifyTicker(ticker: string): boolean {
 
+    // check if ticker exists
+    if (!ticker) {
+        return false
+    }
     if (ticker.length >= 5) {
         return false
     }

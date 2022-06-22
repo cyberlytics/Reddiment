@@ -7,20 +7,22 @@ import { verifyTicker } from '../utils';
 // adding a post
 const addPost = async (req: express.Request, res: express.Response) => {
     // get daily values between startDate and endDate of given ticker
-
+    if (!req.body.ticker) {
+        return false
+    };
     const ticker: string = req.body.ticker;
 
     // if req has field startDate or endDate set those values to the startDate and endDate variables
+
     let startDate: string = req.body.startDate;
     const endDate: string = formatDate(new Date());
 
-    if (!ticker) {
+    if (!ticker || ticker == '') {
         // return error if ticker is not set
         res.status(400).json({
             message: "ticker is required"
         });
     }
-
     // check if req has startDate and endDate
     if (!startDate) {
         // set startDate to the current date minus one year
