@@ -348,12 +348,12 @@ class ElasticDb implements IDatabase {
                         doc: {
                             stock: finance.stock,
                             timestamp: finance.timestamp,
-                            open: finance.open,
-                            high: finance.high,
-                            low: finance.low,
-                            close: finance.close,
-                            adjClose: finance.adjClose,
-                            volume: finance.volume,
+                            open: finance.open.toFixed(2),
+                            high: finance.high.toFixed(2),
+                            low: finance.low.toFixed(2),
+                            close: finance.close.toFixed(2),
+                            adjClose: finance.adjClose.toFixed(2),
+                            volume: finance.volume.toFixed(2),
                         },
                         doc_as_upsert: true
                     }
@@ -376,12 +376,12 @@ class ElasticDb implements IDatabase {
                     document: {
                         stock: finance.stock,
                         timestamp: finance.timestamp,
-                        open: finance.open,
-                        high: finance.high,
-                        low: finance.low,
-                        close: finance.close,
-                        adjClose: finance.adjClose,
-                        volume: finance.volume,
+                        open: finance.open.toFixed(2),
+                        high: finance.high.toFixed(2),
+                        low: finance.low.toFixed(2),
+                        close: finance.close.toFixed(2),
+                        adjClose: finance.adjClose.toFixed(2),
+                        volume: finance.volume.toFixed(2),
                     }
                 });
                 //refresh Index
@@ -438,7 +438,7 @@ class ElasticDb implements IDatabase {
             respFArray.forEach(s => {
                 timeFinance.push({
                     time: date(s.fields?.timestamp[0]),
-                    close: s.fields?.close[0],
+                    close: parseFloat(s.fields?.close[0]),
                 });
             })
             this.healthCallback('UP');
