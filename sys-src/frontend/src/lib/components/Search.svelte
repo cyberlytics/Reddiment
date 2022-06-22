@@ -1,20 +1,29 @@
 <script lang="ts">
     import { browser } from '$app/env'
     import { KQL_Subreddit } from '$lib/graphql/_kitql/graphqlStores'
+    import { KQL_Stock} from "$lib/graphql/_kitql/graphqlStores";
     import Tags from 'svelte-tags-input'
-
 
     let subreddit: string
     let keywords: string[]
     let date_from: Date;
     let date_to: Date;
 
-    const handleSearch = event => {
-        console.log(`${subreddit} ${date_from} ${date_to}`)
+    const handleSearch = () => {
+        console.log(`${subreddit} ${keywords} ${date_from} ${date_to}`)
+        // Query subreddit data
         browser && KQL_Subreddit.query({
             variables: {
                 nameOrUrl: `r/${subreddit}`,
                 keywords: keywords,
+                from: date_from?.toISOString(),
+                to: date_to?.toISOString(),
+            }
+        })
+        // Query stock data
+        browser && KQL_Stock.query({
+            variables: {
+                name: "VW",
                 from: date_from?.toISOString(),
                 to: date_to?.toISOString(),
             }

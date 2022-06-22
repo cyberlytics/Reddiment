@@ -1,0 +1,8 @@
+query Stock($name: String!, $from: Date, $to: Date) {
+    stock(name: $name) {
+        values(from: $from, to: $to) {
+            time
+            close
+        }
+    }
+}
