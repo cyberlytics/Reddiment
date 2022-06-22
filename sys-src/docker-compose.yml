@@ -7,6 +7,8 @@ services:
     hostname: backend
     env_file:
       - .env
+    environment:
+      - BACKEND_ADDR=${BACKEND_HOSTNAME}:${BACKEND_PORT}
     ports:
       - "4000:4000"
     secrets:
