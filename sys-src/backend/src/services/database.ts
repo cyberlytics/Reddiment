@@ -1,5 +1,7 @@
 import elasticsearch from '@elastic/elasticsearch';
 import esb from 'elastic-builder'
+import getSecret from '../util/secrets';
+import { date } from '../util/time';
 import { HealthCallback } from './serviceinterface';
 
 interface IDatabase {
@@ -48,6 +50,11 @@ type TimeFinance = {
     close: number,
 };
 
+let secretPassword: string = 'password';
+async function initSecrets() {
+    secretPassword = (await getSecret('elastic_password')) || process.env.ELASTIC_PASSWORD || 'password';
+}
+
 /**
  * Class: ElasticDb
  *
@@ -65,9 +72,10 @@ class ElasticDb implements IDatabase {
 
     constructor(healthCallback: HealthCallback) {
         this.healthCallback = healthCallback;
-        const host = process.env.ELASTIC_HOST || 'http://localhost:9200';
-        const user = process.env.ELASTIC_USER || 'elastic';
-        const password = process.env.ELASTIC_PASSWORD || 'test';
+        const host = `http://${process.env.ELASTIC_ADDR || 'localhost:9200'}`;
+        const user = process.env.ELASTIC_USERNAME || 'elastic';
+        const password = secretPassword;
+
         //create Elastic Client
         this.client = new elasticsearch.Client({
             node: host,
@@ -114,7 +122,7 @@ class ElasticDb implements IDatabase {
                             articleId: comment.articleId,
                             upvotes: comment.upvotes,
                             downvotes: comment.downvotes,
-                            sentiment: comment.sentiment,
+                            sentiment: comment.sentiment.toFixed(2),
                         },
                         doc_as_upsert: true
                     }
@@ -122,7 +130,7 @@ class ElasticDb implements IDatabase {
                 //Refresh index
                 await this.client.indices.refresh({ index: idx });
                 this.healthCallback('UP');
-                if (result.result === 'updated') {
+                if (result.result === 'updated' || result.result === 'noop') {
                     return true;
                 } else {
                     return false;
@@ -143,7 +151,7 @@ class ElasticDb implements IDatabase {
                         articleId: comment.articleId,
                         upvotes: comment.upvotes,
                         downvotes: comment.downvotes,
-                        sentiment: comment.sentiment,
+                        sentiment: comment.sentiment.toFixed(2),
                     }
                 });
                 //Refresh index
@@ -214,8 +222,8 @@ class ElasticDb implements IDatabase {
             const timeSentiment: Array<TimeSentiment> = [];
             respArray.forEach(r => {
                 timeSentiment.push({
-                    time: r.fields?.timestamp[0],
-                    sentiment: r.fields?.sentiment[0],
+                    time: date(r.fields?.timestamp[0]),
+                    sentiment: parseFloat(r.fields?.sentiment[0]),
                 });
             })
 
@@ -429,7 +437,7 @@ class ElasticDb implements IDatabase {
             const timeFinance: Array<TimeFinance> = [];
             respFArray.forEach(s => {
                 timeFinance.push({
-                    time: s.fields?.timestamp[0],
+                    time: date(s.fields?.timestamp[0]),
                     close: s.fields?.close[0],
                 });
             })
@@ -504,4 +512,4 @@ class ElasticDb implements IDatabase {
     }
 }
 
-export { IDatabase, DbComment, TimeSentiment, ElasticDb, DbFinance };
+export { IDatabase, DbComment, TimeSentiment, ElasticDb, DbFinance, initSecrets };

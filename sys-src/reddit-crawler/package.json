@@ -5,8 +5,9 @@
   "main": "src/crawler.ts",
   "scripts": {
     "start": "NODE_PATH=./build node build/crawler.js",
-    "build": "tsc", 
-    "dev": "nodemon src/crawler.ts"
+    "build": "tsc",
+    "dev": "nodemon src/crawler.ts",
+    "start-node": "set \"BACKEND_ADDR=localhost:4000\" && ts-node src/crawler.ts"
   },
   "author": "",
   "license": "ISC",
