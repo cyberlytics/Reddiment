@@ -36,9 +36,9 @@ const SubredditResolver = {
             (prev, current) => {
                 return {
                     time: prev.time,
-                    positive: prev.positive + (current.sentiment > 0.66 ? 1 : 0),
-                    negative: prev.negative + (current.sentiment < 0.33 ? 1 : 0),
-                    neutral: prev.neutral + (current.sentiment >= 0.33 && current.sentiment <= 0.66 ? 1 : 0),
+                    positive: prev.positive + (current.sentiment > 0.01 ? 1 : 0),
+                    negative: prev.negative + (current.sentiment < -0.01 ? 1 : 0),
+                    neutral: prev.neutral + (current.sentiment >= -0.01 && current.sentiment <= 0.01 ? 1 : 0),
                 };
             });
         return agg.values();

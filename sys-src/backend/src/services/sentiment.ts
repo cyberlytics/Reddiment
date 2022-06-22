@@ -1,4 +1,4 @@
-const SentimentUrl = `http://${process.env.SENTIMENT_HOST}:${process.env.SENTIMENT_PORT}/sentiment`;
+const SentimentUrl = `http://${process.env.SENTIMENT_ADDR}/sentiment`;
 
 type getSentimentFunction = (text: string) => Promise<Sentiment | undefined>;
 

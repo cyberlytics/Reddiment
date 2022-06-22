@@ -6,12 +6,13 @@ services:
     container_name: backend
     hostname: backend
     env_file:
-      - ./docker/.env
+      - .env
     ports:
       - "4000:4000"
     secrets:
-      - backend_access_key
+      - backend_graphql_access_key
       - sentiment_access_key
+      - elastic_password
 
   frontend:
     build: ./frontend
@@ -19,14 +20,9 @@ services:
     container_name: frontend
     hostname: frontend
     env_file:
-      - ./docker/.env
-    environment:
-      - BACKEND_ADDR=${BACKEND_ADDR}
+      - .env
     ports:
       - "80:80"
-    secrets:
-      - backend_access_key
-
 
   sentiment:
     build: ./Sentiment
@@ -34,21 +30,44 @@ services:
     container_name: sentiment
     hostname: sentiment
     env_file:
-      - ./docker/.env
+      - .env
     ports:
-      - "80:4001"
+      - "4001:80"
     secrets:
-      - sentiment_access_key
+      - backend_access_key
+
+  reddit_crawler:
+    build: ./reddit-crawler
+    restart: always
+    container_name: reddit_crawler
+    hostname: reddit_crawler
+    env_file:
+      - .env
+    secrets:
+      - backend_access_key
+      - reddit_login_password
+      - reddit_client_secret
+
+#  shares_crawler:
+#    build: ./shares_crawler
+#    restart: always
+#    container_name: shares_crawler
+#    hostname: shares_crawler
+#    secrets:
+#      - backend_access_key
 
   elasticsearch:
     container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
-    env_file:
-      - ./docker/.env
+    hostname: datenbank
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=${ELASTIC_SECURITY}
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+     # - ELASTIC_PASSWORD_FILE=/run/secrets/elastic_password
+      - ELASTIC_PASSWORD=password
+    env_file:
+      - .env
+
     ulimits:
       memlock:
         soft: -1
@@ -57,13 +76,13 @@ services:
       - elastic-data:/usr/share/elasticsearch/data
     restart: unless-stopped
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "${ELASTIC_PORT1}:${ELASTIC_PORT1}"
+      - "${ELASTIC_PORT2}:${ELASTIC_PORT2}"
     healthcheck:
       test:
         [
         "CMD-SHELL",
-        "curl --fail http://localhost:9200 || exit 1",
+        "curl --fail http://localhost:${ELASTIC_PORT1} || exit 1",
         ]
       interval: 10s
       timeout: 10s
@@ -76,5 +95,13 @@ volumes:
 secrets:
   backend_access_key:
     file: ./docker/secrets/backend_access_key.txt
+  backend_graphql_access_key:
+    file: ./docker/secrets/backend_graphql_access_key.txt
   sentiment_access_key:
     file: ./docker/secrets/sentiment_access_key.txt
+  elastic_password:
+    file: ./docker/secrets/elastic_password.txt
+  reddit_client_secret:
+    file: ./docker/secrets/reddit_client_secret.txt
+  reddit_login_password:
+    file: ./docker/secrets/reddit_login_password.txt
