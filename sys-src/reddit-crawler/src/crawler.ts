@@ -41,4 +41,4 @@ setInterval(async () => {
     } catch (error) {
         console.log('error', error);
     }
-}, 60 * 1000 / 60); // every 60 seconds
+}, 60 * 1000); // every 60 seconds
