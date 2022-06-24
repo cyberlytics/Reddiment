@@ -24,7 +24,6 @@ export const sentimentChart = {
     },
     xaxis: {
         type: 'datetime',
-        tickAmount: 6,
         title: {
             text: "Datum"
         },

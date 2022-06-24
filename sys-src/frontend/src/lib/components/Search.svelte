@@ -9,8 +9,11 @@
     let date_from: Date;
     let date_to: Date;
 
+    const changeStartDate = evt => date_from = evt.detail.date;
+    const changeEndDate = evt => date_to = evt.detail.date;
+    const addTagInput = evt => keywords = [...evt.detail.tags];
+
     const handleSearch = () => {
-        console.log(`${subreddit} ${keywords} ${date_from} ${date_to}`)
         // Query subreddit data
         browser && KQL_Subreddit.query({
             variables: {
@@ -20,30 +23,20 @@
                 to: date_to?.toISOString(),
             }
         })
+
         // Query stock data
         browser && KQL_Stock.query({
             variables: {
-                name: "VW",
+                name: keywords[0],
                 from: date_from?.toISOString(),
                 to: date_to?.toISOString(),
             }
         })
     }
-
-    const changeStartDate = evt => date_from = evt.detail.date;
-    const changeEndDate = evt => date_to = evt.detail.date;
-
-
-    const addTagInput = (evt) => {
-        keywords = [...evt.detail.tags];
-
-    }
-
-
 </script>
 
-
 <div class="flex justify-around m-4 pt-4 pb-4 bg-white rounded-lg">
+
     <input
         type="text"
         class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
@@ -53,7 +46,7 @@
     >
 
     <div class="custom">
-        <Tags on:tags={addTagInput} placeholder="Tags" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
+        <Tags on:tags={addTagInput} placeholder="Schlüsselwörter" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
     </div>
 
     <div date-rangepicker class="flex items-center">
@@ -104,7 +97,7 @@
     .custom :global(.svelte-tags-input-tag-remove) {
         margin-left: 1px;
         font-size: large;
-        
+
     }
 
     .custom :global(.svelte-tags-input-tag:hover) {
@@ -115,7 +108,7 @@
         padding: 0;
         border-width: 0;
         align-items: center;
-        
+
     }
 
     .custom :global(.svelte-tags-input-layout:hover) {
@@ -136,9 +129,5 @@
         border-radius: 0.5rem;
         border: 1px solid rgb(203 209 219)
     }
-
-
-
-
 
 </style>
