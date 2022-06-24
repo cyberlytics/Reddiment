@@ -42,22 +42,22 @@
 \pagestyle{empty}
 
 \begin{abstract}
-Dieser Technical Report beschreibt die Architektur von Reddiment -- ein webbasiertes Dashboard zur Sentiment-Analyse von Subreddits. 
+Dieser Technical Report beschreibt die Architektur von Reddiment -- ein webbasiertes Dashboard zur Sentiment-Analyse von Subreddits.
 \end{abstract}
 
 \section{Einführung und Ziele}
 
-\texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden welches das Sentiment als auch die Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits über die Zeit und den Aktienverlauf gegenüberstellt. 
+\texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden welches das Sentiment als auch die Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits über die Zeit und den Aktienverlauf gegenüberstellt.
 
 In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz auf die angewandten Sicherheitskonzepte in Abschnitt~\ref{s:sicherheitskonzepte} eingegangen und ein Fazit in Abschnitt~\ref{s:fazit} gegeben, gefolgt vom Literaturverzeichnis am Ende.
 
 \section{Bausteinsicht} \label{s:bausteinsicht}
-Diese Sicht zeigt die statische Zerlegung des Systems in Bausteine sowie deren Beziehungen. 
+Diese Sicht zeigt die statische Zerlegung des Systems in Bausteine sowie deren Beziehungen.
 
 \subsection{Gesamtsystem}
-Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung \ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer. Die beiden Datenquellen von Reddiment sind 
+Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung \ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer. Die beiden Datenquellen von Reddiment sind
 \begin{itemize}
-  \item Reddit API für Subreddit Daten 
+  \item Reddit API für Subreddit Daten
   \item Yahoo Finance für Aktienmarkt Daten
 \end{itemize}
 
@@ -69,15 +69,8 @@ Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggre
 \end{figure}
 
 \subsection{Backend} \label{sub:backend}
-Dieser Abschnitt beschreibt die server-seitige Backend-Architektur.
+Das Backend wurde als ein unter „Node.js“~\cite{node} laufender Server realisiert. Hierfür kam das Web"=Framework „Express“~\cite{express} zum Einsatz. Darauf aufbauend wurde eine GraphQL-Schnittstelle~\cite{graphql} mithilfe des Frameworks „Apollo Server“~\cite{apolloserver} implementiert.
 
-\subsubsection{Laufzeitumgebung}
-
-JavaScript-basierte Plattform Node.js mit dem serverseitigen Webframework ExpressJS.
-
-\subsubsection{GraphQL}
-
-Apollo Server wird als Erweiterung der bestehenden Node.js Middleware mit ExpressJS verwendet, um eine GraphQL API zur Verfügung zu stellen.
 %TODO Tobias
 
 \subsection{Datenbank} \label{sub:database}
@@ -90,7 +83,7 @@ Dieser Abschnitt beschreibt die Dienste (engl. Services). Reddiment hat drei Die
 
 \subsubsection{Sentiment}
 
-In diesem Dienst wird für einen Text das Sentiment ermittelt. Um das Sentiment an das Backend zu übermitteln wurde eine Flask-REST-API entworfen. Diese weist einen Endpoint \texttt{\/sentiment} auf. An diesen Endpoint kann mittels eines Posts ein Text (JSON-Format) übertragen werden. Das Modul \textit{sentiment} ermittelt die Stimmungslage des Textes und gibt das Ergebnis in JSON-Format zurück. Die Ermittelung des Sentiments erfolgt zweifach, durch zwei regelbasierte Verfahren.  Das geschieht, um eine Absicherung der Richtigkeit des Wertes zu haben. Einerseits wird dafür \textit{Vader} \cite{vader}(Valence Aware Dictionary and Sentiment Reasoner) der Python-Bibliothek \textit{nltk} verwendet, zum anderen \textit{TextBlob} \cite{textblob}. 
+In diesem Dienst wird für einen Text das Sentiment ermittelt. Um das Sentiment an das Backend zu übermitteln wurde eine Flask-REST-API entworfen. Diese weist einen Endpoint \texttt{\/sentiment} auf. An diesen Endpoint kann mittels eines Posts ein Text (JSON-Format) übertragen werden. Das Modul \textit{sentiment} ermittelt die Stimmungslage des Textes und gibt das Ergebnis in JSON-Format zurück. Die Ermittelung des Sentiments erfolgt zweifach, durch zwei regelbasierte Verfahren.  Das geschieht, um eine Absicherung der Richtigkeit des Wertes zu haben. Einerseits wird dafür \textit{Vader} \cite{vader}(Valence Aware Dictionary and Sentiment Reasoner) der Python-Bibliothek \textit{nltk} verwendet, zum anderen \textit{TextBlob} \cite{textblob}.
 
 \subsubsection{Reddit Crawler}
 
@@ -100,7 +93,7 @@ Der Reddit-Crawler erhält in einem zeitlichen Intervall eine Liste von \textit{
 
 \subsubsection{Stock Market Crawler}
 
-Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können wurde eine weitere REST-API für Marktdaten erstellt. Diese weißt den Endpoint \texttt{/post} auf und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} geladen und zurückgegeben. 
+Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können wurde eine weitere REST-API für Marktdaten erstellt. Diese weißt den Endpoint \texttt{/post} auf und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} geladen und zurückgegeben.
 
 \subsection{Frontend} \label{sub:frontend}
 Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur. Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks SvelteKit \cite{sveltekit} realisiert. Das Frontend besteht aus zwei Bausteinen: 1) den Routen zur Navigation, und 2) der \textit{Library} für Komponenten und weitere Module.
@@ -132,9 +125,9 @@ Die Komponenten behandeln alle Eingaben und kommunizieren bei Bedarf mit dem Bac
 
 \section{Verteilungssicht} \label{s:verteilungssicht}
 Das Verteilungssicht beschreibt die Verteilung des Gesamtsystems, wichtige Begründungen für diese Verteilungsstruktur und die Zuordnung von Softwareartefakten zu Bestandteilen der Infrastruktur.
-Zentraler Bestandteile der Verteilungsstruktur sind „Docker“ \cite{docker} Container. 
-Damit das gesamte System, mit allen verteilten Komponenten möglichst unkompliziert und in der korrekten Reihenfolge gestartet wird, werden die Docker Container durch \glqq Docker-Compose\grqq \ verwaltet. Neben der unkomplizierten Bedienung finden zusätzlich zahlreiche weitere Vorteile Anwendung. 
-Diese sind für u.a. die Vergabe von Netzwerkkonfigurationen wie Hostnames an die Anwendungen der jeweiligen Docker-Container oder aber auch für das Konfigurieren von globalen, einfach von dem Nutzer anzupassende Environment-Variablen. Sensible Daten wie Zugangspasswörter werden durch sogenannten \glqq Docker-Secrets\grqq \ sicher zur Verfügung gestellt. 
+Zentraler Bestandteile der Verteilungsstruktur sind „Docker“ \cite{docker} Container.
+Damit das gesamte System, mit allen verteilten Komponenten möglichst unkompliziert und in der korrekten Reihenfolge gestartet wird, werden die Docker Container durch \glqq Docker-Compose\grqq \ verwaltet. Neben der unkomplizierten Bedienung finden zusätzlich zahlreiche weitere Vorteile Anwendung.
+Diese sind für u.a. die Vergabe von Netzwerkkonfigurationen wie Hostnames an die Anwendungen der jeweiligen Docker-Container oder aber auch für das Konfigurieren von globalen, einfach von dem Nutzer anzupassende Environment-Variablen. Sensible Daten wie Zugangspasswörter werden durch sogenannten \glqq Docker-Secrets\grqq \ sicher zur Verfügung gestellt.
 Dies wird im Folgenden Abschnitt \ref{s:secrets} genauer erläutert.
 
 \section{Entwicklungswerkzeuge} \label{s:entwicklungswerkzeuge}
@@ -162,13 +155,13 @@ Die Konfiguration findet sich dabei in der Datei \texttt{tsconfig.json}.
 \subsubsection{Frontend}
 Im Frontend ist Vite dafür zuständig, die Anwendung aus dem Quellcode zu erstellen. Dabei gibt es zwei Varianten:
 Für Entwicklungszwecke wird ein Vite-Dev-Server (mit Reload-Funktionalität) zum Bereitstellen der Anwendung verwendet,
-während für den Produktiveinsatz nur die benötigten Zieldateien unter Verwendung des \texttt{Static adapter} erstellt werden, die dann mit einer beliebigen Server-Software ausgeliefert werden können. 
+während für den Produktiveinsatz nur die benötigten Zieldateien unter Verwendung des \texttt{Static adapter} erstellt werden, die dann mit einer beliebigen Server-Software ausgeliefert werden können.
 
 Ferner sind Alias-Namen für häufig genutzte Verzeichnisse definiert, um Pfadangaben zu vereinfachen.
 
 \subsection{Unit Tests}
 
-Im Backend werden Unit-Tests anhand von „mocha“ \cite{mochajs} durchgeführt. Außerdem wird „nyc“ \cite{instanbuljs} für die Erzeugung der Test Abdeckung verwendet. 
+Im Backend werden Unit-Tests anhand von „mocha“ \cite{mochajs} durchgeführt. Außerdem wird „nyc“ \cite{instanbuljs} für die Erzeugung der Test Abdeckung verwendet.
 
 Im Frontend wird „Vitest“ \cite{vitest} verwendet. Für die Frontend-Komponenten wird zusätzlich die „svelte-testing-library“ \cite{stl} verwendet. Diese ermöglicht es, die Komponenten zu \textit{rendern} und Details über die verschiedenen Elemente innerhalb der Komponente zu erhalten.
 
@@ -178,7 +171,7 @@ Dieser Abschnitt beschreibt die angewendeten Sicherheitskonzepte, die für eine 
 
 \subsection{Secrets Verwaltung} \label{s:secrets}
 Die Anforderung sensible Daten jeder Anwendung individuell und zusätzlich einfach Konfigurierbar zur Verfügung zu stellen, lässt schnell auf den Einsatz von Environment-Variablen schließen. Dies hat jedoch einige sicherheitsrelevante Schwachstellen.
-Aus diesem Grund wurden die komponentenspezifischen Zugangsdaten mittels Docker-Secret zur Verfügung gestellt. Dabei werden im Gegenteil zu Environment-Variablen die Passwörter in einer Text-Datei gespeichert und in dem jeweiligen Docker gemountet bzw. zur Verfügung gestellt. 
+Aus diesem Grund wurden die komponentenspezifischen Zugangsdaten mittels Docker-Secret zur Verfügung gestellt. Dabei werden im Gegenteil zu Environment-Variablen die Passwörter in einer Text-Datei gespeichert und in dem jeweiligen Docker gemountet bzw. zur Verfügung gestellt.
 
 Ein weiteres zu beachtendes Kriterium in diesem Sicherheitskonzept ist der Zugriff auf die jeweiligen API-Schnittstellen der einzelnen Komponenten. Der Zugriff soll nur den berechtigten Anwendungen gestattet sein. Dafür wurde für jede Anwendung ein individueller  \glqq Access-Key\grqq \ erstellt. Der Zugriff wird durch Prüfen des Schlüssels bei jeder Abfrage gewährt bzw. unterbunden. Unberechtigte Dritte können dadurch die API-Schnittstelle nicht verwenden und ein Missbrauch wird dadurch unterbunden.
 Aufgrund zeitlicher Einschränkungen wurden die Access-Keys zwar zur Verfügung gestellt, aber die Implementierung noch nicht fertiggestellt.
