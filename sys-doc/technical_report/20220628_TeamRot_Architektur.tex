@@ -134,8 +134,8 @@ Die Komponenten behandeln alle Eingaben und kommunizieren bei Bedarf mit dem Bac
 Das Verteilungssicht beschreibt die Verteilung des Gesamtsystems, wichtige Begründungen für diese Verteilungsstruktur und die Zuordnung von Softwareartefakten zu Bestandteilen der Infrastruktur.
 Zentraler Bestandteile der Verteilungsstruktur sind „Docker“ \cite{docker} Container. 
 Damit das gesamte System, mit allen verteilten Komponenten möglichst unkompliziert und in der korrekten Reihenfolge gestartet wird, werden die Docker Container durch \glqq Docker-Compose\grqq \ verwaltet. Neben der unkomplizierten Bedienung finden zusätzlich zahlreiche weitere Vorteile Anwendung. 
-Diese sind für u.a. die Vergabe von Netzwerkkonfigurationen wie Hostnames an die Anwendungen der jeweiligen Docker-Container oder aber auch für das Konfigurieren von globalen, einfach von dem Nutzer anzupassende Environment-Variablen. Sensible Daten wie Zugangspasswörter werden durch sogenannten \glqq Docker-Compose-Secrets\grqq \ sicher zur Verfügung gestellt. 
-Dies wird im Folgenden Abschnitt genauer erläutert.
+Diese sind für u.a. die Vergabe von Netzwerkkonfigurationen wie Hostnames an die Anwendungen der jeweiligen Docker-Container oder aber auch für das Konfigurieren von globalen, einfach von dem Nutzer anzupassende Environment-Variablen. Sensible Daten wie Zugangspasswörter werden durch sogenannten \glqq Docker-Secrets\grqq \ sicher zur Verfügung gestellt. 
+Dies wird im Folgenden Abschnitt \ref{s:secrets} genauer erläutert.
 
 \section{Entwicklungswerkzeuge} \label{s:entwicklungswerkzeuge}
 
@@ -176,7 +176,12 @@ Im Frontend wird „Vitest“ \cite{vitest} verwendet. Für die Frontend-Kompone
 
 Dieser Abschnitt beschreibt die angewendeten Sicherheitskonzepte, die für eine sichere Entwicklungs- und Produktionsumgebung notwendig sind.
 
-\subsection{Secrets Verwaltung}
+\subsection{Secrets Verwaltung} \label{s:secrets}
+Die Anforderung sensible Daten jeder Anwendung individuell und zusätzlich einfach Konfigurierbar zur Verfügung zu stellen, lässt schnell auf den Einsatz von Environment-Variablen schließen. Dies hat jedoch einige sicherheitsrelevante Schwachstellen.
+Aus diesem Grund wurden die komponentenspezifischen Zugangsdaten mittels Docker-Secret zur Verfügung gestellt. Dabei werden im Gegenteil zu Environment-Variablen die Passwörter in einer Text-Datei gespeichert und in dem jeweiligen Docker gemountet bzw. zur Verfügung gestellt. 
+
+Ein weiteres zu beachtendes Kriterium in diesem Sicherheitskonzept ist der Zugriff auf die jeweiligen API-Schnittstellen der einzelnen Komponenten. Der Zugriff soll nur den berechtigten Anwendungen gestattet sein. Dafür wurde für jede Anwendung ein individueller  \glqq Access-Key\grqq \ erstellt. Der Zugriff wird durch Prüfen des Schlüssels bei jeder Abfrage gewährt bzw. unterbunden. Unberechtigte Dritte können dadurch die API-Schnittstelle nicht verwenden und ein Missbrauch wird dadurch unterbunden.
+Aufgrund zeitlicher Einschränkungen wurden die Access-Keys zwar zur Verfügung gestellt, aber die Implementierung noch nicht fertiggestellt.
 
 %TODO Fabian
 
