@@ -131,10 +131,11 @@ Die Komponenten behandeln alle Eingaben und kommunizieren bei Bedarf mit dem Bac
 
 
 \section{Verteilungssicht} \label{s:verteilungssicht}
-Das Verteilungssicht beschreibt die Verteilung des Gesamtsystems,  wichtige Begründungen für diese Verteilungsstruktur und die Zuordnung von Softwareartefakten zu Bestandteilen der Infrastruktur.
-Zentraler Bestandteile der Verteilungsstruktur sind „Docker“ \cite{docker} Container.
-
-%TODO Fabian
+Das Verteilungssicht beschreibt die Verteilung des Gesamtsystems, wichtige Begründungen für diese Verteilungsstruktur und die Zuordnung von Softwareartefakten zu Bestandteilen der Infrastruktur.
+Zentraler Bestandteile der Verteilungsstruktur sind „Docker“ \cite{docker} Container. 
+Damit das gesamte System, mit allen verteilten Komponenten möglichst unkompliziert und in der korrekten Reihenfolge gestartet wird, werden die Docker Container durch \glqq Docker-Compose\grqq \ verwaltet. Neben der unkomplizierten Bedienung finden zusätzlich zahlreiche weitere Vorteile Anwendung. 
+Diese sind für u.a. die Vergabe von Netzwerkkonfigurationen wie Hostnames an die Anwendungen der jeweiligen Docker-Container oder aber auch für das Konfigurieren von globalen, einfach von dem Nutzer anzupassende Environment-Variablen. Sensible Daten wie Zugangspasswörter werden durch sogenannten \glqq Docker-Compose-Secrets\grqq \ sicher zur Verfügung gestellt. 
+Dies wird im Folgenden Abschnitt genauer erläutert.
 
 \section{Entwicklungswerkzeuge} \label{s:entwicklungswerkzeuge}
 
