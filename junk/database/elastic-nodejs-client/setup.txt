@@ -1,0 +1,18 @@
+1. Einrichten des Projektes
+npm init
+tsc --init
+2.
+Erzeuge den Ordner "src" und setze in der tsconfig.json: "rootDir": "./src"
+3.
+Erzeuge die src/main.ts mit dem Inhalt "console.log('Hallo Welt')"
+Erzeuge in der package.json ein neues Script names "start": "ts-node src/main.ts"
+Starte das Programm mit dem Terminal --> npm start
+
+4. Installieren der Bibliotheken elastic und request
+npm install elastic request
+
+5. Installieren der Typen
+npm install @types/request
+
+
+

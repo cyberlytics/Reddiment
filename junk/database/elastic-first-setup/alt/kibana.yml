@@ -1,0 +1,15 @@
+# To allow connections from remote users, set this parameter to a non-loopback address.
+server.host: "0.0.0.0"
+# The URLs of the Elasticsearch instances to use for all your queries.
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+# If your Elasticsearch is protected with basic authentication, these settings provide
+# the username and password that the Kibana server uses to perform maintenance on the Kibana
+# index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
+# is proxied through the Kibana server.
+elasticsearch.username: "daniel"
+elasticsearch.password: "test"
+xpack.encryptedSavedObjects.encryptionKey: 3ff91ad1a7bfc6ec60c3e2825ede90cf
+xpack.reporting.encryptionKey: 163e731922b69665fe5e30528df4666f
+xpack.security.encryptionKey: 351b3a0961a402ff3ec3faaf23106d94
+
+
