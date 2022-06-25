@@ -69,7 +69,12 @@ Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggre
 \end{figure}
 
 \subsection{Backend} \label{sub:backend}
-Das Backend wurde als ein unter „Node.js“~\cite{node} laufender Server realisiert. Hierfür kam das Web"=Framework „Express“~\cite{express} zum Einsatz. Darauf aufbauend wurde eine GraphQL-Schnittstelle~\cite{graphql} mithilfe des Frameworks „Apollo Server“~\cite{apolloserver} implementiert.
+Das Backend wurde als ein unter „Node.js“~\cite{node} laufender Server realisiert. Hierfür kam das Web"=Framework „Express“~\cite{express} zum Einsatz. Darauf aufbauend wurde eine GraphQL-Schnittstelle~\cite{graphql} mithilfe des Frameworks „Apollo Server“~\cite{apolloserver} implementiert. Die GraphQL-API ist unter der Route \texttt{/graphql} verwendbar.
+
+Das Backend stellt die zentrale Kommunikations- und Verwaltungseinheit für die einzelnen Komponenten des Gesamtsystems Reddiment dar. So liefern die proaktiven Crawler (siehe Abschnitt~\ref{sub:services}) die Rohdaten über eine GraphQL-Mutation an das Backend. Diese Rohdaten werden anschließend weiterverarbeitet und im Falle von Reddit-Kommentaren durch Aufruf des Sentiment-Services um den Sentiment-Wert erweitert. Alle so erhaltenen Daten werden über die Anbindung zur Datenbank (siehe Abschnitt~\ref{sub:database}) persistiert.
+
+Stellt nun das Frontend eine Anfrage an das Backend, werden diese aus der Datenbank geladen und aufbereitet. Die Gruppierung und Aggregation von beispielsweise Reddit-Kommentaren sowie die Interpretation des Sentiment-Werts erfolgt im Backend. Dies ermöglicht es uns, zukünftig eine feinere oder auch gröbere Zusammenfassung von Sentiment-Daten ohne Datenverlust oder aufwendigen Transformationen vorzunehmen.
+
 
 %TODO Tobias
 
