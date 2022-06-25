@@ -47,18 +47,18 @@ Dieser Technical Report beschreibt die Architektur von Reddiment -- ein webbasie
 
 \section{Einführung und Ziele}
 
-\texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, ist ein Subreddit, in dem über Aktien- und Optionshandel spekuliert wird.  Der Subreddit ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden welches das Sentiment als auch die Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits über die Zeit und den Aktienverlauf gegenüberstellt.
+Der Subreddit \texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, in dem über Aktien- und Optionshandel spekuliert wird.  Er ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden, welches den zeitlichen Verlauf von Sentiment und Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenüberstellt.
 
-In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz auf die angewandten Sicherheitskonzepte in Abschnitt~\ref{s:sicherheitskonzepte} eingegangen und ein Fazit in Abschnitt~\ref{s:fazit} gegeben, gefolgt vom Literaturverzeichnis am Ende.
+In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz das Sicherheitskonzept in Abschnitt~\ref{s:secrets} vorgestellt und ein Fazit in Abschnitt~\ref{s:fazit} gegeben.
 
 \section{Bausteinsicht} \label{s:bausteinsicht}
 Diese Sicht zeigt die statische Zerlegung des Systems in Bausteine sowie deren Beziehungen.
 
 \subsection{Gesamtsystem}
-Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung \ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer. Die beiden Datenquellen von Reddiment sind
+Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung~\ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer. Die beiden Datenquellen für Reddiment sind
 \begin{itemize}
-  \item Reddit API für Subreddit Daten
-  \item Yahoo Finance für Aktienmarkt Daten
+  \item Reddit-API für Subreddit-Daten und
+  \item Yahoo Finance für Aktienmarkt-Daten.
 \end{itemize}
 
 \begin{figure}[ht]
@@ -83,25 +83,37 @@ Im Ordner \texttt{backend/src/util} befinden sich verschiedene Quellcodedateien 
 
 
 \subsection{Datenbank} \label{sub:database}
-In der NoSQL Datenbank „Elasticsearch“ \cite{elasticsearch} werden Daten in Form von Dokumenten gespeichert. Für dieses Projekt werden persistent Daten, welche der Stock-Crawler und der Reddit-Crawler inklusive der Sentimentanalyse generiert, als Dokumente in der Datenbank gespeichert. Die Reddit-Daten bestehen aus den Inhalten: Subredditname, Kommentar, Zeitstempel, KommentarID, UserID, ArtikelID, Upvotes, Downvotes und Sentiment. Die Aktien-Daten setzten sich aus Aktienname, Zeitstempel, Eröffnungskurs, Maximum, Minimum, Schlusswert, dividendenadjustierte Zeitreihe und den Volumen zusammen. Um die Daten, welche in Dokumenten gespeichert werden, schneller in der Datenbank zu finden, arbeitet Elasticsearch mit Indizes. Dies bedeutet, dass ähnliche Dokumente unter dem gleichen Index gespeichert werden. Um eine Trennung der Dokumente herbeizuführen, werden Reddit-Daten mit dem Präfix f\_ und Aktien-Daten mit dem Präfix f\_ in der Datenbank gespeichert. Aus dieser Konvention ergibt sich für die Reddit-Daten der Index \texttt{\/r\_subredditname} und für die Aktien-Daten \texttt{\/f\_aktienname}. Um einen zeitlichen Verlauf einer Aktie oder des Sentiments zu erzeugen, müssen lediglich alle Dokumente eines gleichen Index abgerufen werden. Dieses Vorgehen ermöglicht es, dass bei einer Suchanfrage nicht die gesamte Datenbank durchsucht werden muss. Vielmehr genügt es, wenn Elasticsearch den Index prüft und alle Dokumente unter dem Zielindex ausgibt. Zusätzlich verwendet Elasticsearch eine ID für jedes Dokument, diese ist ein eindeutiger Indikator für das jeweilige Dokument. Bei Dokumenten, welche Reddit-Daten enthalten, wird die ID des Dokumentes gleich der eindeutigen KommentarID, welche vom Reddit-Crawler kommt, vergeben. Den Dokumenten mit Aktien-Daten wird folgende ID zugewiesen \texttt{\/Aktienname\_Zeitstempel}. Mittels der Dokument ID können einzelne Dokumente eindeutig gesucht und ausgegeben werden.\\
-Für die Kommunikation mit dem Backend wurde der \textit{Node.js Client} für Elasticsearch implementiert. Der Client liefert eine persistente Verbindung zwischen der Datenbank und dem Backend.
+In der NoSQL-Datenbank „Elasticsearch“~\cite{elasticsearch} werden Daten in Form von Dokumenten gespeichert. Für dieses Projekt werden Daten, welche an das Backend gesendet werden als Dokumente persistent in der Datenbank gespeichert. Die Reddit-Daten bestehen aus den Inhalten
+%TODO Tabelle Subredditname, Kommentar, Zeitstempel, KommentarID, UserID, ArtikelID, Upvotes, Downvotes und Sentiment
+Die Aktien-Daten setzten sich aus Aktienname, Zeitstempel, Eröffnungskurs, Maximum, Minimum, Schlusswert, Dividenden-adjustierte Zeitreihe und den Volumen zusammen. 
+
+Um die Daten in der Datenbank zu organisieren, arbeitet Elasticsearch mit Indizes. Dies bedeutet, dass ähnlich strukturierte  Dokumente unter demselben Index gespeichert werden. Pro Subreddit gibt es einen Index, dessen Name mit \texttt{r\_} präfigiert ist, und pro Aktie gibt es einen Index mit Präfix \texttt{f\_}. Um einen zeitlichen Verlauf einer Aktie oder des Sentiments zu erzeugen, müssen alle Dokumente eines Index abgerufen werden. Dieses Vorgehen ermöglicht es, dass bei einer Suchanfrage nicht alle Dokumente aller Indices durchsucht werden müssen, sondern eine Vorauswahl auf eine Untermenge getroffen werden kann.  
+
+Elasticsearch verwendet eine global eindeutige ID für jedes Dokument. Bei Dokumenten, welche Reddit-Daten enthalten, wird die ID des Dokumentes gleich der eindeutigen \texttt{KommentarID} gesetzt. Den Dokumenten mit Aktien-Daten wird folgende ID zugewiesen: \texttt{Aktienname\_Zeitstempel}. Dokumente können auch anhand ihrer ID gesucht und ausgegeben werden. Dies wird beispielsweise bei der Aktualisierung von Dokumenten angewendet.
+
+Im Backend wird das Paket „Elasticsearch Node.js client“~\cite{elasticnode} verwendet.  Das Paket enthält einen Client, der eine Verbindung zur Datenbank herstellt. In der Datei \texttt{backend/src/services/database.ts} befindet sich der Quellcode zur Kommunikation mit der Datenbank.
 
 \subsection{Dienste} \label{sub:services}
 
-Dieser Abschnitt beschreibt die Dienste (engl. Services). Reddiment hat drei Dienste: Sentiment, Reddit Crawler und Stock Market Crawler.
+Dieser Abschnitt beschreibt die Dienste (engl. Services) des Gesamtsystems Reddiment. Es gibt drei Dienste: Sentiment, Reddit-Crawler und Stock-Market-Crawler.
 
 \subsubsection{Sentiment}
 
-In diesem Dienst wird für einen Text das Sentiment ermittelt. Um das Sentiment an das Backend zu übermitteln wurde eine Flask-REST-API entworfen. Diese weist einen Endpoint \texttt{\/sentiment} auf. An diesen Endpoint kann mittels eines Posts ein Text (JSON-Format) übertragen werden. Das Modul \textit{sentiment} ermittelt die Stimmungslage des Textes und gibt das Ergebnis in JSON-Format zurück. Die Ermittelung des Sentiments erfolgt zweifach, durch zwei regelbasierte Verfahren.  Das geschieht, um eine Absicherung der Richtigkeit des Wertes zu haben. Einerseits wird dafür \textit{Vader} \cite{vader}(Valence Aware Dictionary and Sentiment Reasoner) der Python-Bibliothek \textit{nltk} verwendet, zum anderen \textit{TextBlob} \cite{textblob}.
+Dieser Dienst ermittelt für einen Text das Sentiment. Es wurde eine REST-API mit dem Endpunkt \texttt{/sentiment} implementiert. An diesen Endpunkt kann mittels einer POST-Anfrage ein Text übertragen werden. Der Dienst ermittelt anschließend die Stimmungslage des Textes und gibt das Ergebnis im JSON-Format zurück. Die Ermittelung des Sentiments erfolgt durch zwei regelbasierte Verfahren, um eine höhere Aussagekraft zu haben. Das erste regelbasiertes Verfahren ist „vader“~\cite{vader} (Valence Aware Dictionary and Sentiment Reasoner) der Python-Bibliothek \textit{nltk}.  Das zweite Verfahren ist „TextBlob“~\cite{textblob}. Sind sich die beiden Verfahren in der Auswertung einig, wird der Sentiment-Wert von vader zurückgegeben. Andernfalls wird 0 (neutral) zurückgegeben.
 
-\subsubsection{Reddit Crawler}
+\subsubsection{Reddit-Crawler}
 
-Der Reddit Crawler verwendet „snoowrap“ \cite{snoowrap}, das eine JavaScript-Schnittstelle für den Zugriff auf jeden Reddit-API-Endpunkt bereitstellt. \textit{snoowrap} unterliegt den API-Regeln der Reddit-API, worin u.a. das Rate-Limit auf 60 Anfragen pro Minuten bzw. 600 Anfragen alle 10 Minuten festgelegt ist. Um die Reddit-API nutzen zu können, muss eine Applikation über die URL \textit{https://www.reddit.com/prefs/apps} angelegt und mit einem bestehenden Reddit-Konto verknüpft werden. Für die Applikation kann man zwischen drei verschiedenen Typen wählen: \textit{web app}, \textit{installed app} und \textit{script}. Für den Reddit Crawler wurde eine \textit{script}-Applikation angelegt und mit einem bestehenden Reddit-Konto verknüpft. Mit der Registrierung einer Applikation erhält man eine individuelle \textit{Client-ID} sowie ein individuelles \textit{Client-Secret}. Mit der ID und dem Secret, sowie den Anmeldedaten für das Reddit-Konto, kann eine Snoowrap-Instanz generiert werden, die als Requester für die Reddit-API fungiert.\\
-Der Reddit-Crawler erhält in einem zeitlichen Intervall eine Liste von \textit{Subreddits} vom Backend, die durchforstet und die \textit{Comments} gesammelt werden sollen. Das Sammeln der Comment-Einträge erfolgt ebenfalls in zeitlichen Intervallen, um das Rate-Limit nicht zu überschreiten und einen Fehlerstatuscode auszulösen. Nach dem Sammeln werden die Daten im json-Format an das Backend gesendet. Die verwendeten Funktionen aus \textit{snoowrap} sind unter https://not-an-aardvark.github.io/snoowrap/index.html zu finden.
+Der Reddit-Crawler verwendet „snoowrap“~\cite{snoowrap}, das JavaScript-Funktionen für den Zugriff auf die Reddit-API bereitstellt. „snoowrap“ unterliegt den API-Regeln von Reddit, worin u.a. das Rate-Limit auf 60 Anfragen pro Minute. Um die Reddit-API nutzen zu können, muss ein API-Key über das Benutzerkonto \footnote{\url{https://www.reddit.com/prefs/apps}} angefordert werden. Ein API-Key besteht aus den zwei Teilen: einer \textit{Client-ID} und einem \textit{Client-Secret}. 
 
-\subsubsection{Stock Market Crawler}
+Mit dem API-Key und den Anmeldedaten für das zugehörige Reddit-Konto, kann ein Objekt der Klasse \texttt{Snoowrap} erstellt werden.Mit diesem Objekt können Reddit-API-Aufrufe durchgeführt werden.
 
-Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können wurde eine weitere REST-API für Marktdaten erstellt. Diese weißt den Endpoint \texttt{/post} auf und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} geladen und zurückgegeben.
+Der Reddit-Crawler frägt in einem zeitlichen Intervall beim Backend an und erhält eine Liste mit Subreddit-Namen. Kommentare dieser Subreddits sollen von Reddit abgefragt und an das Backend gesendet werden.
+Das Sammeln der Kommentare erfolgt zyklisch, um das Rate-Limit nicht zu überschreiten. Pro Sammelzyklus werden die Kommentare an das Backend übermittelt.
+
+\subsubsection{Stock-Market-Crawler}
+
+Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können, 
+gibt es einen reaktiven Stock-Market-Crawler mit einer REST-API für Marktdaten. Dieser hat den Endpunkt \texttt{/post} und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} abgefragt und zurückgegeben.
 
 \subsection{Frontend} \label{sub:frontend}
 Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur. Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks SvelteKit \cite{sveltekit} realisiert. Das Frontend besteht aus zwei Bausteinen: 1) den Routen zur Navigation, und 2) der \textit{Library} für Komponenten und weitere Module.
@@ -129,22 +141,19 @@ Die \textit{Library} ist eine Sammlung von Frontend-Komponenten,  ...
 In diesem Modul sind die Svelte-Komponenten gesammelt, mit denen die eigentliche Anzeige im Webbrowser realisiert wird.
 Die Komponenten behandeln alle Eingaben und kommunizieren bei Bedarf mit dem Backend über die GraphQL API Schnittstelle.
 
-
-
 \section{Verteilungssicht} \label{s:verteilungssicht}
-Das Verteilungssicht beschreibt die Verteilung des Gesamtsystems, wichtige Begründungen für diese Verteilungsstruktur und die Zuordnung von Softwareartefakten zu Bestandteilen der Infrastruktur.
-Zentraler Bestandteile der Verteilungsstruktur sind „Docker“ \cite{docker} Container.
-Damit das gesamte System, mit allen verteilten Komponenten möglichst unkompliziert und in der korrekten Reihenfolge gestartet wird, werden die Docker Container durch \glqq Docker-Compose\grqq \ verwaltet. Neben der unkomplizierten Bedienung finden zusätzlich zahlreiche weitere Vorteile Anwendung.
-Diese sind für u.a. die Vergabe von Netzwerkkonfigurationen wie Hostnames an die Anwendungen der jeweiligen Docker-Container oder aber auch für das Konfigurieren von globalen, einfach von dem Nutzer anzupassende Environment-Variablen. Sensible Daten wie Zugangspasswörter werden durch sogenannten \glqq Docker-Secrets\grqq \ sicher zur Verfügung gestellt.
-Dies wird im Folgenden Abschnitt \ref{s:secrets} genauer erläutert.
+Zentraler Bestandteil der Verteilungsstruktur sind Docker-Container~\cite{docker}. Jeder Baustein von Reddiment ist für sich isoliert in einem eigenen Docker-Container untergebracht.
+Damit das gesamte System mit allen verteilten Komponenten in der korrekten Reihenfolge gestartet wird, werden die Docker-Container mit Docker Compose orchestriert. 
+Docker Compose übernimmt die Netzwerkkonfiguration und die Vergabe von Host-Namen an die jeweiligen Docker-Container. 
+Darüber hinaus können Umgebungsvariablen verwaltet werden. Sensible Daten, wie Zugangspasswörter, werden durch spezielle Mechanismen (siehe Abschnitt~\ref{s:secrets}) sicher zur Verfügung gestellt.
 
 \section{Entwicklungswerkzeuge} \label{s:entwicklungswerkzeuge}
 
-Im folgenden Abschnitt wird auf die verwendeten Entwicklungswerkzeuge eingegangen.
+In diesem Abschnitt wird auf die verwendeten Entwicklungswerkzeuge genauer eingegangen.
 
 \subsection{Paketverwaltung}
 
-Die Verwaltung der Abhängigkeiten erfolgt mit „npm“ \cite{npm}.
+Die Verwaltung der Abhängigkeiten erfolgt mit „npm“ \cite{npm} für auf „Node.js“ basierende Bausteine.  Für den Sentiment-Baustein wird „Pipenv“~\cite{pipenv} verwendet.
 
 \subsection{Linting}
 
@@ -155,36 +164,24 @@ Die Konfigurationen sind jeweils in den Dateien \texttt{eslintrc.js} und \texttt
 
 \subsubsection{Backend}
 
-Im Backend wird der Typescript Compiler „tsc“ verwendet, um die Dateien in ein Format zu überführen,
-welches mit \texttt{node} ausgeführt werden kann.
-
-Die Konfiguration findet sich dabei in der Datei \texttt{tsconfig.json}.
+Sowohl das Backend als auch die Crawler werden mit dem TypeScript Compiler „tsc“~\cite{typescript} in ein für „Node.js“ ausführbares Format überführt. Die Konfiguration befindet sich dabei in der Datei \texttt{tsconfig.json}.
 
 \subsubsection{Frontend}
 Im Frontend ist Vite dafür zuständig, die Anwendung aus dem Quellcode zu erstellen. Dabei gibt es zwei Varianten:
 Für Entwicklungszwecke wird ein Vite-Dev-Server (mit Reload-Funktionalität) zum Bereitstellen der Anwendung verwendet,
 während für den Produktiveinsatz nur die benötigten Zieldateien unter Verwendung des \texttt{Static adapter} erstellt werden, die dann mit einer beliebigen Server-Software ausgeliefert werden können.
 
-Ferner sind Alias-Namen für häufig genutzte Verzeichnisse definiert, um Pfadangaben zu vereinfachen.
+\subsection{Unit-Tests}
 
-\subsection{Unit Tests}
+Im Backend werden Unit-Tests mit „mocha“~\cite{mochajs} ausgeführt. Dabei wird „istanbul“ \cite{istanbuljs} für die Erzeugung der Test-Abdeckung verwendet.
 
-Im Backend werden Unit-Tests anhand von „mocha“ \cite{mochajs} durchgeführt. Außerdem wird „nyc“ \cite{instanbuljs} für die Erzeugung der Test Abdeckung verwendet.
+Im Frontend wird „Vitest“~\cite{vitest} verwendet. Für die Frontend-Komponenten wird zusätzlich die „svelte-testing-library“~ \cite{stl} eingesetzt. Diese ermöglicht es, die Komponenten zu \textit{rendern}, um Details über die verschiedenen Elemente innerhalb der Komponente zu erhalten.
 
-Im Frontend wird „Vitest“ \cite{vitest} verwendet. Für die Frontend-Komponenten wird zusätzlich die „svelte-testing-library“ \cite{stl} verwendet. Diese ermöglicht es, die Komponenten zu \textit{rendern} und Details über die verschiedenen Elemente innerhalb der Komponente zu erhalten.
+\section{Secrets-Verwaltung} \label{s:secrets}
 
-\section{Sicherheitskonzepte} \label{s:sicherheitskonzepte}
+Die Anforderung, sensible Daten jeder Anwendung individuell und zusätzlich einfach konfigurierbar zur Verfügung zu stellen, lässt schnell auf den Einsatz von Umgebungsvariablen schließen. Ein solches Vorgehen birgt jedoch einige sicherheitsrelevante Schwachstellen. Aus diesem Grund werden die komponentenspezifischen Zugangsdaten mittels dem Schlüsselwort \texttt{secrets} in der Docker-Compose-Konfigurationsdatei den Docker-Containern zur Verfügung gestellt. Dabei werden im Gegensatz zu Umgebungsvariablen die Passwörter in einer Text-Datei gespeichert und in dem jeweiligen Docker-Container eingebunden.
 
-Dieser Abschnitt beschreibt die angewendeten Sicherheitskonzepte, die für eine sichere Entwicklungs- und Produktionsumgebung notwendig sind.
-
-\subsection{Secrets Verwaltung} \label{s:secrets}
-Die Anforderung sensible Daten jeder Anwendung individuell und zusätzlich einfach Konfigurierbar zur Verfügung zu stellen, lässt schnell auf den Einsatz von Environment-Variablen schließen. Dies hat jedoch einige sicherheitsrelevante Schwachstellen.
-Aus diesem Grund wurden die komponentenspezifischen Zugangsdaten mittels Docker-Secret zur Verfügung gestellt. Dabei werden im Gegenteil zu Environment-Variablen die Passwörter in einer Text-Datei gespeichert und in dem jeweiligen Docker gemountet bzw. zur Verfügung gestellt.
-
-Ein weiteres zu beachtendes Kriterium in diesem Sicherheitskonzept ist der Zugriff auf die jeweiligen API-Schnittstellen der einzelnen Komponenten. Der Zugriff soll nur den berechtigten Anwendungen gestattet sein. Dafür wurde für jede Anwendung ein individueller  \glqq Access-Key\grqq \ erstellt. Der Zugriff wird durch Prüfen des Schlüssels bei jeder Abfrage gewährt bzw. unterbunden. Unberechtigte Dritte können dadurch die API-Schnittstelle nicht verwenden und ein Missbrauch wird dadurch unterbunden.
-Aufgrund zeitlicher Einschränkungen wurden die Access-Keys zwar zur Verfügung gestellt, aber die Implementierung noch nicht fertiggestellt.
-
-%TODO Fabian
+Ein weiteres zu beachtendes Kriterium in diesem Sicherheitskonzept ist der Zugriff auf die jeweiligen API der einzelnen Komponenten. Beispielsweise sollen nur die Crawler die GraphQL-Mutations des Backends verwenden dürfen. Dafür wurde für jede Anwendung ein individueller „Access-Key“ erstellt. Der Zugriff wird durch Prüfen des Schlüssels bei jeder Anfrage gewährt bzw. unterbunden. Unberechtigte Dritte können dadurch die API nicht verwenden und ein Missbrauch wird dadurch erschwert. Aufgrund zeitlicher Einschränkungen konnte das Sicherheitskonzept nicht vollständig implementiert werden.
 
 \section{Fazit und Ausblick} \label{s:fazit}
 
