@@ -10,22 +10,30 @@ const getRefreshedSubredditData = async (subreddit: Subreddit) => {
         console.log(`${refreshedSubreddit.display_name} Refreshed`);
 
         // get new comments
-        const rawComments = await refreshedSubreddit.getNewComments();
-        console.log(`Got new comments: ${rawComments.length}`);
-
-        const fetchedComments = await rawComments.fetchMore({ amount: 100 });
+        let fetchedComments = await refreshedSubreddit.getNewComments({});
         console.log(`Fetched Comments: ${fetchedComments.length}`);
         for (let i = 0; i < fetchedComments.length; i++) {
             await transmitComment(fetchedComments[i]);
         }
         console.log(`Done transmitting comments`);
+        try {
+            while (fetchedComments?.length > 0) {
+                fetchedComments = await fetchedComments.fetchMore({ amount: 100, skipReplies: true, append: false });
+
+                console.log(`Fetched Comments: ${fetchedComments.length}`);
+                for (let i = 0; i < fetchedComments.length; i++) {
+                    await transmitComment(fetchedComments[i]);
+                }
+                console.log(`Done transmitting comments`);
+            }
+        } catch { }
+        if (fetchedComments.length === 0) {
+            setTimeout(doWork, 10 * 1000); // Try again in 10 seconds
+        }
     });
 }
 
-/**
- * Get all Comments of Subreddit and their Submissions
- */
-setInterval(async () => {
+const doWork = async () => {
     try {
         const subreddit = subredditQueue.pop();
         if (subreddit) {
@@ -41,4 +49,9 @@ setInterval(async () => {
     } catch (error) {
         console.log('error', error);
     }
-}, 60 * 1000); // every 60 seconds
+};
+
+/**
+ * Get all Comments of Subreddit and their Submissions
+ */
+setTimeout(doWork, 60 * 1000); // First Delay: 60 Seconds
