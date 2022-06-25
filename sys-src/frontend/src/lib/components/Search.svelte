@@ -1,7 +1,11 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import { browser } from '$app/env'
-    import { KQL_Subreddit } from '$lib/graphql/_kitql/graphqlStores'
-    import { KQL_Stock} from "$lib/graphql/_kitql/graphqlStores";
+    import {
+        KQL_Subreddit,
+        KQL_Subreddits,
+        KQL_Stock
+    } from '$lib/graphql/_kitql/graphqlStores'
     import Tags from 'svelte-tags-input'
 
     let subreddit: string
@@ -17,7 +21,7 @@
         // Query subreddit data
         browser && KQL_Subreddit.query({
             variables: {
-                nameOrUrl: `r/${subreddit}`,
+                nameOrUrl: subreddit,
                 keywords: keywords,
                 from: date_from?.toISOString(),
                 to: date_to?.toISOString(),
@@ -33,17 +37,24 @@
             }
         })
     }
+
+    onMount(async () => {
+        browser && await KQL_Subreddits.query({})
+    });
 </script>
 
 <div class="flex justify-around m-4 pt-4 pb-4 bg-white rounded-lg">
 
-    <input
-        type="text"
-        class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5"
-        placeholder="Subreddit"
+    <select
+        id="subreddits"
+        class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-1/6 p-2.5"
         bind:value={subreddit}
-        required
     >
+        <option selected>Subreddit</option>
+        {#each $KQL_Subreddits.data?.subreddits ?? [] as subreddit}
+            <option value={subreddit}>{subreddit}</option>
+        {/each}
+    </select>
 
     <div class="custom">
         <Tags on:tags={addTagInput} placeholder="Schlüsselwörter" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
@@ -97,7 +108,6 @@
     .custom :global(.svelte-tags-input-tag-remove) {
         margin-left: 1px;
         font-size: large;
-
     }
 
     .custom :global(.svelte-tags-input-tag:hover) {
@@ -108,7 +118,6 @@
         padding: 0;
         border-width: 0;
         align-items: center;
-
     }
 
     .custom :global(.svelte-tags-input-layout:hover) {
@@ -127,7 +136,7 @@
         margin-top: 0;
         padding: 0.5rem;
         border-radius: 0.5rem;
-        border: 1px solid rgb(203 209 219)
+        border: 1px solid rgb(203 209 219);
     }
 
 </style>
