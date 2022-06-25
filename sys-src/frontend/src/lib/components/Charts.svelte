@@ -1,47 +1,42 @@
 <script lang="ts">
     import Chart from "../shared/Chart.svelte";
-    import { mentions } from "../mocks/mentionsMock";
     import { sentimentChart } from "../config/sentimentChart";
     import { mentionsChart} from "../config/mentionsChart";
     import { KQL_Stock } from "../graphql/_kitql/graphqlStores";
     import { KQL_Subreddit } from "../graphql/_kitql/graphqlStores";
 
-    let sentimentChartOptions = {
+    $: sentimentChartOptions = {
         series: [
             {
                 name: "Positiv",
-                data: $KQL_Subreddit.data?.subreddit?.sentiment.map(s => [Date.parse(s["time"]), s["positive"]]) ?? []
+                data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["positive"]]) ?? []
             },
             {
                 name: "Negativ",
-                data: $KQL_Subreddit.data?.subreddit?.sentiment.map(s => [Date.parse(s["time"]), s["negative"]]) ?? []
+                data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["negative"]]) ?? []
             },
             {
                 name: "Neutral",
-                data: $KQL_Subreddit.data?.subreddit?.sentiment.map(s => [Date.parse(s["time"]), s["neutral"]]) ?? []
+                data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["neutral"]]) ?? []
             },
         ],
         ...sentimentChart
     };
 
-    let mentionsChartOptions = {
-        series: mentions,
-        ...mentionsChart
-    };
-
-    $: {
-        let myData = [
+    $: mentionsChartOptions = {
+        series: [
             {
                 name: "Erwähnungen",
-                data: []
+                data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["sum"]]) ?? []
             },
             {
                 name: "Aktienpreis",
                 data: $KQL_Stock.data?.stock?.values?.map(v => [Date.parse(v["time"]), v["close"]]) ?? []
             }
-        ]
-        console.log(myData)
-    }
+        ],
+        ...mentionsChart
+    };
+
 </script>
 
 <div class="grid grid-cols-2 gap-4">
