@@ -47,9 +47,9 @@ Dieser Technical Report beschreibt die Architektur von Reddiment -- ein webbasie
 
 \section{Einführung und Ziele}
 
-Der Subreddit \texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, in dem über Aktien- und Optionshandel spekuliert wird.  Er ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden, welches den zeitlichen Verlauf von Sentiment und Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenüberstellt.
+Beim Subreddit \texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, wird über Aktien- und Optionshandel spekuliert.  Er wurde durch seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen, bekannt. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden, welches den zeitlichen Verlauf von Sentiment und Erwähnungen darstellt. Hier können bestimmte Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenübergestellt werden.
 
-In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz das Sicherheitskonzept in Abschnitt~\ref{s:secrets} vorgestellt und ein Fazit in Abschnitt~\ref{s:fazit} gegeben.
+In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im Nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz das Sicherheitskonzept in Abschnitt~\ref{s:secrets} vorgestellt und ein Fazit in Abschnitt~\ref{s:fazit} gegeben.
 
 \section{Bausteinsicht} \label{s:bausteinsicht}
 Diese Sicht zeigt die statische Zerlegung des Systems in Bausteine sowie deren Beziehungen.
@@ -83,7 +83,7 @@ Im Ordner \texttt{backend/src/util} befinden sich verschiedene Quellcodedateien 
 
 
 \subsection{Datenbank} \label{sub:database}
-In der NoSQL-Datenbank „Elasticsearch“~\cite{elasticsearch} werden Daten in Form von Dokumenten gespeichert. Für dieses Projekt werden Daten, welche an das Backend gesendet werden als Dokumente persistent in der Datenbank gespeichert. Die Reddit-Daten bestehen aus den neun Feldern in Tabelle~\ref{tab:reddit}.
+In der NoSQL-Datenbank „Elasticsearch“~\cite{elasticsearch} werden Daten in Form von Dokumenten gespeichert. Für dieses Projekt sind Daten, welche an das Backend gesendet werden, als Dokumente persistent in der Datenbank gespeichert. Die Reddit-Daten bestehen aus den neun Feldern in Tabelle~\ref{tab:reddit}.
 \begin{table}[h!]  
 \begin{center}  
 \caption{Reddit-Daten}  
@@ -91,15 +91,15 @@ In der NoSQL-Datenbank „Elasticsearch“~\cite{elasticsearch} werden Daten in 
 \begin{tabular}{|l|l|}  
 \textbf{Feld} & \textbf{Beschreibung}\\  
 \hline  
-Subredditname & Der Name des Subreddits\\  
-Kommentar & Text\\  
-Zeitstempel & Text\\ 
-KommentarID & Text\\  
-UserID & Text\\  
-ArtikelID & Text\\ 
-Upvotes & Text\\  
-Downvotes & Text\\  
-Sentiment & Text\\ 
+Subredditname & Name des Subreddits\\  
+Kommentar & User Kommentar \\  
+Zeitstempel & Datum- \& Zeitstempel des Kommentars\\ 
+KommentarID & Reddit-Kommentar-ID\\  
+UserID & Reddit-User-ID\\  
+ArtikelID & Eindeutige ID des Artikels\\ 
+Upvotes & Anzahl Postiv-Bewertung in Reddit\\  
+Downvotes & Anzahl Negativ-Berwertung in Reddit \\  
+Sentiment & Ausgabe der Analyse\\ 
 \end{tabular}  
 \end{center}  
 \end{table}  
@@ -114,18 +114,18 @@ Die Aktien-Daten setzten sich aus den acht Feldern in Tabelle~\ref{tab:stock} zu
 \textbf{Feld} & \textbf{Beschreibung}\\  
 \hline  
 Aktienname & Name der Aktie\\    
-Zeitstempel & Text\\ 
-Eröffnungskurs & Text\\  
-Maximum & Text\\  
-Minimum & Text\\ 
-Schlusswert & Text\\  
-Dividenden-adjustierte Werte & Text\\  
-Volumen & Text\\ 
+Zeitstempel & Datum- \& Zeitstempel der Aktie\\ 
+Eröffnungskurs & Eröffnungswert\\  
+Maximum & Tages-Maximum-Wert\\  
+Minimum & Tages-Minimum-Wert\\ 
+Schlusswert & Tagesabschluss-Wert\\  
+Dividenden-adjustierte Werte & Zurückrechnungswert der Aktie\\
+Volumen & Anzahl der gehandelten Aktien\\ 
 \end{tabular}  
 \end{center}  
 \end{table} 
 
-Um die Daten in der Datenbank zu organisieren, arbeitet Elasticsearch mit Indizes. Dies bedeutet, dass ähnlich strukturierte  Dokumente unter demselben Index gespeichert werden. Pro Subreddit gibt es einen Index, dessen Name mit \texttt{r\_} präfigiert ist, und pro Aktie gibt es einen Index mit Präfix \texttt{f\_}. Um einen zeitlichen Verlauf einer Aktie oder des Sentiments zu erzeugen, müssen alle Dokumente eines Index abgerufen werden. Dieses Vorgehen ermöglicht es, dass bei einer Suchanfrage nicht alle Dokumente aller Indices durchsucht werden müssen, sondern eine Vorauswahl auf eine Untermenge getroffen werden kann.  
+Um die Daten in der Datenbank zu organisieren, arbeitet Elasticsearch mit Indizes. Dies bedeutet, dass ähnlich strukturierte  Dokumente unter demselben Index gespeichert werden. Pro Subreddit gibt es einen Index, dessen Name mit \texttt{r\_} präfigiert ist, und pro Aktie gibt es einen Index mit Präfix \texttt{f\_}. Um einen zeitlichen Verlauf einer Aktie oder des Sentiments zu erzeugen, müssen alle Dokumente eines Indizes abgerufen werden. Dieses Vorgehen ermöglicht es, dass bei einer Suchanfrage nicht alle Dokumente aller Indizes durchsucht werden müssen, sondern eine Vorauswahl auf eine Untermenge getroffen werden kann.  
 
 Elasticsearch verwendet eine global eindeutige ID für jedes Dokument. Bei Dokumenten, welche Reddit-Daten enthalten, wird die ID des Dokumentes gleich der eindeutigen \texttt{KommentarID} gesetzt. Den Dokumenten mit Aktien-Daten wird folgende ID zugewiesen: \texttt{Aktienname\_Zeitstempel}. Dokumente können auch anhand ihrer ID gesucht und ausgegeben werden. Dies wird beispielsweise bei der Aktualisierung von Dokumenten angewendet.
 
@@ -141,11 +141,11 @@ Dieser Dienst ermittelt für einen Text das Sentiment. Es wurde eine REST-API mi
 
 \subsubsection{Reddit-Crawler}
 
-Der Reddit-Crawler verwendet „snoowrap“~\cite{snoowrap}, das JavaScript-Funktionen für den Zugriff auf die Reddit-API bereitstellt. „snoowrap“ unterliegt den API-Regeln von Reddit, worin u.a. das Rate-Limit auf 60 Anfragen pro Minute. Um die Reddit-API nutzen zu können, muss ein API-Key über das Benutzerkonto \footnote{\url{https://www.reddit.com/prefs/apps}} angefordert werden. Ein API-Key besteht aus den zwei Teilen: einer \textit{Client-ID} und einem \textit{Client-Secret}. 
+Der Reddit-Crawler verwendet „snoowrap“~\cite{snoowrap}, das JavaScript-Funktionen für den Zugriff auf die Reddit-API bereitstellt. „snoowrap“ unterliegt den API-Regeln von Reddit, worin u.a. das Rate-Limit auf 60 Anfragen pro Minute begrenzt ist. Um die Reddit-API nutzen zu können, muss ein API-Key über das Benutzerkonto \footnote{\url{https://www.reddit.com/prefs/apps}} angefordert werden. Ein API-Key besteht aus den zwei Teilen: einer \textit{Client-ID} und einem \textit{Client-Secret}. 
 
-Mit dem API-Key und den Anmeldedaten für das zugehörige Reddit-Konto, kann ein Objekt der Klasse \texttt{Snoowrap} erstellt werden.Mit diesem Objekt können Reddit-API-Aufrufe durchgeführt werden.
+Mit dem API-Key und den Anmeldedaten für das zugehörige Reddit-Konto kann ein Objekt der Klasse \texttt{Snoowrap} erstellt werden.Mit diesem Objekt können Reddit-API-Aufrufe durchgeführt werden.
 
-Der Reddit-Crawler frägt in einem zeitlichen Intervall beim Backend an und erhält eine Liste mit Subreddit-Namen. Kommentare dieser Subreddits sollen von Reddit abgefragt und an das Backend gesendet werden.
+Der Reddit-Crawler sendet in einem zeitlichen Intervall eine Anfrage an das Backend und erhält eine Liste mit Subreddit-Namen. Kommentare dieser Subreddits sollen von Reddit abgefragt und an das Backend gesendet werden.
 Das Sammeln der Kommentare erfolgt zyklisch, um das Rate-Limit nicht zu überschreiten. Pro Sammelzyklus werden die Kommentare an das Backend übermittelt.
 
 \begin{figure*}[ht]
@@ -183,7 +183,7 @@ In diesem Abschnitt wird auf die verwendeten Entwicklungswerkzeuge genauer einge
 
 \subsection{Paketverwaltung}
 
-Die Verwaltung der Abhängigkeiten erfolgt mit „npm“ \cite{npm} für auf „Node.js“ basierende Bausteine.  Für den Sentiment-Baustein wird „Pipenv“~\cite{pipenv} verwendet.
+Die Verwaltung der Abhängigkeiten erfolgt mit „npm“ \cite{npm} auf „Node.js“ basierende Bausteine.  Für den Sentiment-Baustein wird „Pipenv“~\cite{pipenv} verwendet.
 
 \subsection{Linting}
 
@@ -197,8 +197,7 @@ Sowohl das Backend als auch die Crawler werden mit dem TypeScript Compiler „ts
 
 \subsubsection{Frontend}
 Im Frontend ist Vite dafür zuständig, die Anwendung aus dem Quellcode zu erstellen. Dabei gibt es zwei Varianten:
-Für Entwicklungszwecke wird ein Vite-Dev-Server (mit Reload-Funktionalität) zum Bereitstellen der Anwendung verwendet,
-während für den Produktiveinsatz nur die benötigten Zieldateien unter Verwendung des \texttt{Static adapter} erstellt werden, die dann mit einer beliebigen Server-Software ausgeliefert werden können.
+Für Entwicklungszwecke wird ein Vite-Dev-Server (mit Reload-Funktionalität) zum Bereitstellen der Anwendung verwendet. Für den Produktiveinsatz werden nur die benötigten Zieldateien unter Verwendung des \texttt{Static adapter} erstellt, die dann mit einer beliebigen Server-Software ausgeliefert werden können.
 
 \subsection{Unit-Tests}
 
@@ -214,7 +213,7 @@ Ein weiteres zu beachtendes Kriterium in diesem Sicherheitskonzept ist der Zugri
 
 \section{Fazit und Ausblick} \label{s:fazit}
 
-Reddiment ist ein webbasiertes Dashboard, welches den zeitlichen Verlauf von Sentiment und Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenüberstellt. Durch die Auswahl eines Subreddits und eines oder mehrere Schlüsselwörter werden die Diagramme automatisch mit den vorhandenen Daten befüllt.
+Reddiment ist ein webbasiertes Dashboard, welches den zeitlichen Verlauf von Sentiment und Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenüberstellt. Durch die Auswahl eines Subreddits und eines oder mehrere Schlüsselwörter werden die Diagramme automatisiert mit den vorhandenen Daten befüllt.
 Durch die strikte Trennung von Front- und Backend besteht die Möglichkeit, verwendete APIs zu ersetzen oder Weitere einzubinden. 
 
 \printbibliography
