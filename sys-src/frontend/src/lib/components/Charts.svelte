@@ -8,10 +8,6 @@
     $: sentimentChartOptions = {
         series: [
             {
-                name: "Positiv",
-                data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["positive"]]) ?? []
-            },
-            {
                 name: "Negativ",
                 data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["negative"]]) ?? []
             },
@@ -19,6 +15,10 @@
                 name: "Neutral",
                 data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["neutral"]]) ?? []
             },
+            {
+                name: "Positiv",
+                data: $KQL_Subreddit.data?.subreddit?.sentiment?.map(s => [Date.parse(s["time"]), s["positive"]]) ?? []
+            }
         ],
         ...sentimentChart
     };

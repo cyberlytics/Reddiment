@@ -40,7 +40,7 @@ export const sentimentChart = {
             format: 'dd MMM yyyy'
         }
     },
-    colors:['#00b159', '#d11141', '#ffc425'],
+    colors:[ '#d11141', '#ffc425', '#00b159'],
     title: {
         text: "Sentiment",
         align: "center"
