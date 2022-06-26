@@ -83,9 +83,47 @@ Im Ordner \texttt{backend/src/util} befinden sich verschiedene Quellcodedateien 
 
 
 \subsection{Datenbank} \label{sub:database}
-In der NoSQL-Datenbank „Elasticsearch“~\cite{elasticsearch} werden Daten in Form von Dokumenten gespeichert. Für dieses Projekt werden Daten, welche an das Backend gesendet werden als Dokumente persistent in der Datenbank gespeichert. Die Reddit-Daten bestehen aus den Inhalten
-%TODO Tabelle Subredditname, Kommentar, Zeitstempel, KommentarID, UserID, ArtikelID, Upvotes, Downvotes und Sentiment
-Die Aktien-Daten setzten sich aus Aktienname, Zeitstempel, Eröffnungskurs, Maximum, Minimum, Schlusswert, Dividenden-adjustierte Zeitreihe und den Volumen zusammen. 
+In der NoSQL-Datenbank „Elasticsearch“~\cite{elasticsearch} werden Daten in Form von Dokumenten gespeichert. Für dieses Projekt werden Daten, welche an das Backend gesendet werden als Dokumente persistent in der Datenbank gespeichert. Die Reddit-Daten bestehen aus den neun Feldern in Tabelle~\ref{tab:reddit}.
+\begin{table}[h!]  
+\begin{center}  
+\caption{Reddit-Daten}  
+\label{tab:reddit}  
+\begin{tabular}{|l|l|}  
+\textbf{Feld} & \textbf{Beschreibung}\\  
+\hline  
+Subredditname & Der Name des Subreddits\\  
+Kommentar & Text\\  
+Zeitstempel & Text\\ 
+KommentarID & Text\\  
+UserID & Text\\  
+ArtikelID & Text\\ 
+Upvotes & Text\\  
+Downvotes & Text\\  
+Sentiment & Text\\ 
+\end{tabular}  
+\end{center}  
+\end{table}  
+
+Die Aktien-Daten setzten sich aus den acht Feldern in Tabelle~\ref{tab:stock} zusammen.
+
+\begin{table}[h!]  
+\begin{center}  
+\caption{Reddit-Daten}  
+\label{tab:stock}  
+\begin{tabular}{|l|l|}  
+\textbf{Feld} & \textbf{Beschreibung}\\  
+\hline  
+Aktienname & Name der Aktie\\    
+Zeitstempel & Text\\ 
+Eröffnungskurs & Text\\  
+Maximum & Text\\  
+Minimum & Text\\ 
+Schlusswert & Text\\  
+Dividenden-adjustierte Werte & Text\\  
+Volumen & Text\\ 
+\end{tabular}  
+\end{center}  
+\end{table} 
 
 Um die Daten in der Datenbank zu organisieren, arbeitet Elasticsearch mit Indizes. Dies bedeutet, dass ähnlich strukturierte  Dokumente unter demselben Index gespeichert werden. Pro Subreddit gibt es einen Index, dessen Name mit \texttt{r\_} präfigiert ist, und pro Aktie gibt es einen Index mit Präfix \texttt{f\_}. Um einen zeitlichen Verlauf einer Aktie oder des Sentiments zu erzeugen, müssen alle Dokumente eines Index abgerufen werden. Dieses Vorgehen ermöglicht es, dass bei einer Suchanfrage nicht alle Dokumente aller Indices durchsucht werden müssen, sondern eine Vorauswahl auf eine Untermenge getroffen werden kann.  
 
@@ -110,25 +148,6 @@ Mit dem API-Key und den Anmeldedaten für das zugehörige Reddit-Konto, kann ein
 Der Reddit-Crawler frägt in einem zeitlichen Intervall beim Backend an und erhält eine Liste mit Subreddit-Namen. Kommentare dieser Subreddits sollen von Reddit abgefragt und an das Backend gesendet werden.
 Das Sammeln der Kommentare erfolgt zyklisch, um das Rate-Limit nicht zu überschreiten. Pro Sammelzyklus werden die Kommentare an das Backend übermittelt.
 
-\subsubsection{Stock-Market-Crawler}
-
-Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können, 
-gibt es einen reaktiven Stock-Market-Crawler mit einer REST-API für Marktdaten. Dieser hat den Endpunkt \texttt{/post} und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} abgefragt und zurückgegeben.
-
-\subsection{Frontend} \label{sub:frontend}
-Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur. Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks SvelteKit \cite{sveltekit} realisiert. Das Frontend besteht aus zwei Bausteinen: 1) den Routen zur Navigation, und 2) der \textit{Library} für Komponenten und weitere Module.
-
-Die Routen zur Navigation sind selbst in zwei Unter-Bausteine zerlegt und befinden sich im Ordner \texttt{routes}
-
-\subsubsection{Layout}
-
-Es gibt Elemente, die auf jeder Seite sichtbar sind, z. B. die Navigationsleiste oder eine Fußzeile. Anstatt sie auf jeder Seite zu wiederholen,  wird eine Layout-Komponente namens \texttt{src/routes/\_\_layout.svelte} verwendet.
-
-\subsubsection{Route}
-
-
-Die \textit{Library} ist eine Sammlung von Frontend-Komponenten,  ...
-
 \begin{figure*}[ht]
 	\centering
 	\includegraphics[width=\linewidth]{architecture}
@@ -136,10 +155,21 @@ Die \textit{Library} ist eine Sammlung von Frontend-Komponenten,  ...
 	\label{fig:architecture}
 \end{figure*}
 
-\subsubsection{Components}
+\subsubsection{Stock-Market-Crawler}
 
-In diesem Modul sind die Svelte-Komponenten gesammelt, mit denen die eigentliche Anzeige im Webbrowser realisiert wird.
-Die Komponenten behandeln alle Eingaben und kommunizieren bei Bedarf mit dem Backend über die GraphQL API Schnittstelle.
+Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können, 
+gibt es einen reaktiven Stock-Market-Crawler mit einer REST-API für Marktdaten. Dieser hat den Endpunkt \texttt{/post} und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} abgefragt und zurückgegeben.
+
+\subsection{Frontend} \label{sub:frontend}
+Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur. Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks „SvelteKit“~\cite{sveltekit} realisiert. Das Frontend besteht aus zwei Bausteinen: 1) den Routen zur Navigation, und 2) der \textit{Library} für Komponenten und weitere Module.
+
+\subsubsection{Routen}
+
+Die Routen zur Navigation sind durch Svelte-Kompontenen in \texttt{src/routes} festgelegt. Es gibt Elemente, die auf jeder Seite sichtbar sind, z. B. die Navigationsleiste oder eine Fußzeile. Anstatt diese für jede Seite neu zu definieren,  wird eine Layout-Komponente namens \texttt{src/routes/\_\_layout.svelte} verwendet.
+
+\subsubsection{Library}
+
+Die \textit{Library} (\texttt{src/lib}) ist eine Sammlung von Frontend-Komponenten,  mit denen die eigentliche Anzeige im Webbrowser realisiert wird. Die Komponenten behandeln alle Eingaben und kommunizieren bei Bedarf mit dem Backend über die GraphQL API. Für die Kommunikation mit der GraphQL API wird im Frontend „KitQL“~\cite{kitql} verwendet, das einen client-seitigen GraphQL Client bereitstellt.
 
 \section{Verteilungssicht} \label{s:verteilungssicht}
 Zentraler Bestandteil der Verteilungsstruktur sind Docker-Container~\cite{docker}. Jeder Baustein von Reddiment ist für sich isoliert in einem eigenen Docker-Container untergebracht.
@@ -157,8 +187,7 @@ Die Verwaltung der Abhängigkeiten erfolgt mit „npm“ \cite{npm} für auf „
 
 \subsection{Linting}
 
-Im Frontend wird „eslint“ in Verbindung mit „prettier“ verwendet,um die Einhaltung der Codierrichtlinien zu gewährleisten.
-Die Konfigurationen sind jeweils in den Dateien \texttt{eslintrc.js} und \texttt{prettierrc.js} hinterlegt.
+Im Frontend wird „eslint“~\cite{eslint} in Verbindung mit „prettier“~\cite{prettier} verwendet,um die Einhaltung der Codierrichtlinien zu gewährleisten. Die Konfigurationen sind jeweils in den Dateien \texttt{eslintrc.js} und \texttt{prettierrc.js} hinterlegt.
 
 \subsection{Build-Tools}
 
@@ -185,7 +214,8 @@ Ein weiteres zu beachtendes Kriterium in diesem Sicherheitskonzept ist der Zugri
 
 \section{Fazit und Ausblick} \label{s:fazit}
 
-%TODO Philipp
+Reddiment ist ein webbasiertes Dashboard, welches den zeitlichen Verlauf von Sentiment und Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenüberstellt. Durch die Auswahl eines Subreddits und eines oder mehrere Schlüsselwörter werden die Diagramme automatisch mit den vorhandenen Daten befüllt.
+Durch die strikte Trennung von Front- und Backend besteht die Möglichkeit, verwendete APIs zu ersetzen oder Weitere einzubinden. 
 
 \printbibliography
 
