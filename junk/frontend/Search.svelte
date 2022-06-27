@@ -45,7 +45,8 @@
         <Tags class="" on:tags={onTagInput} placeholder="Tags"/>
 
     </div>
-
+    
+    <!-- Without Tailwind - using two separate Date-Picker -->
     <div class="w-1/2 pl-2 justify-start">
         <div class="flex">
             <div class="mr-1"><DateInput bind:value={date_from} format="yyyy-MM-dd" placeholder="Start-Datum"/></div>
@@ -55,6 +56,7 @@
     </div>
     
     
+    <!-- With Tailwind Date-Range Picker -->
     <!--<div class="w-1/2 pl-2 justify-start">
         <div date-rangepicker class="flex items-center" bind:this={datepicker} >
             <div class="relative">
