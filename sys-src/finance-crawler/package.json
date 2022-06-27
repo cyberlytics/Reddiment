@@ -14,7 +14,7 @@
     "nodemon": "^2.0.16",
     "yahoo-finance2": "^2.3.3"
   },
-  "main": "build/fetch_data.js",
+  "main": "build/src/fetch_data.js",
   "scripts": {
     "dev": "nodemon source/fetch_data.ts",
     "prebuild": "",

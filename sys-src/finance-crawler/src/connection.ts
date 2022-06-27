@@ -11,29 +11,31 @@ export let tickerJobs: tickerJob[] = [];
 
 
 // fill in format of tickerResult and send it to backend
-export async function deliverTickerData(ticker: tickerResult) {
+export async function deliverTickerData(results: tickerResult[]) {
     try {
-        const resp = await fetch(BackendURL, {
-            method: 'POST',
-            body: JSON.stringify({
-                query: "mutation AddTicker($ticker: Ticker!) {addTicker(ticker: $ticker)}",
-                variables: {
-                    ticker: {
-                        name: ticker.name,
-                        date: ticker.date,
-                        open: ticker.open,
-                        high: ticker.high,
-                        low: ticker.low,
-                        close: ticker.close,
-                        volume: ticker.volume
-                    }
-                },
-                operationName: 'addTicker'
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
+        for (const i in results) {
+            const resp = await fetch(BackendURL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    query: "mutation AddTicker($ticker: Ticker!) {addTicker(ticker: $ticker)}",
+                    variables: {
+                        ticker: {
+                            name: results[i].name,
+                            date: results[i].date,
+                            open: results[i].open,
+                            high: results[i].high,
+                            low: results[i].low,
+                            close: results[i].close,
+                            volume: results[i].volume
+                        }
+                    },
+                    operationName: 'addTicker'
+                }),
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        };
 
     } catch (error) {
         console.log(error);

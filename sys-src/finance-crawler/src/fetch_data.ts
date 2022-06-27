@@ -3,7 +3,7 @@ import yahooFinance from 'yahoo-finance2';
 import { formatDate } from './utils';
 import { verifyTicker } from './utils';
 import { deliverTickerData, tickerJobs } from './connection';
-import { tickerJob } from './types';
+import { tickerJob, tickerResult } from './types';
 
 const getStockData = async (ticker: tickerJob) => {
     // get daily values between startDate and endDate of given ticker
@@ -37,16 +37,30 @@ const getStockData = async (ticker: tickerJob) => {
     else {
 
     }
-    if (verifyTicker(ticker)) {
+    if (verifyTicker(ticker.name)) {
         // options for api call
         const options: any = { period1: startDate, period2: endDate, interval: '1d' };
-        const results = await yahooFinance.historical(ticker, options);
-        // return response to backend
-        deliverTickerData(results);
-    };
+        const results = await yahooFinance.historical(ticker.name, options);
+        console.log(results);
+        // fill in tickerResults for each day in results
+        const tickerResults: tickerResult[] = [];
+        for (const i in results) {
+            const tickerResult: tickerResult = {
+                name: ticker.name,
+                date: formatDate(results[i].date),
+                open: results[i].open,
+                high: results[i].high,
+                low: results[i].low,
+                close: results[i].close,
+                volume: results[i].volume
+            }
+            // return response to backend
+            deliverTickerData(tickerResults);
+        };
 
 
-}
+    }
+};
 
 const crawlStocks = async () => {
     try {
