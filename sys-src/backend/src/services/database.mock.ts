@@ -1,8 +1,8 @@
 import { SimpleCache } from "../util/cache";
-import { distinct } from "../util/list";
+import { aggregate, distinct, groupby } from "../util/list";
 import { HealthCallback } from "./serviceinterface";
-import { DbComment, IDatabase, DbFinance } from "./database";
-import { date } from "../util/time";
+import { DbComment, IDatabase, DbFinance, TimeSentiment } from "./database";
+import { date, daynumber, MillisecondsPerDay } from "../util/time";
 
 
 
@@ -48,13 +48,33 @@ class DbMock implements IDatabase {
         });
     }
 
-    public getSentiments(subreddit: string, from: Date, to: Date, keywords: Array<string>): Promise<Array<{ time: Date, sentiment: number }>> {
+    public getSentiments(subreddit: string, from: Date, to: Date, keywords: Array<string>): Promise<Array<TimeSentiment>> {
         return new Promise((r) => {
             const commentsOfSubreddit = this.comments().filter(c => c.subreddit == subreddit);
             const filtered = commentsOfSubreddit.filter(c => c.timestamp >= from &&
                 c.timestamp <= to &&
                 (keywords.length == 0 || keywords.some(kw => c.text.includes(kw))));
-            r(filtered.map(c => { return { time: c.timestamp, sentiment: c.sentiment }; }));
+
+
+            const grouped = groupby(filtered, s => daynumber(s.timestamp));
+            const agg = aggregate(grouped,
+                (s, k) => {
+                    return {
+                        time: new Date(k * MillisecondsPerDay),
+                        positive: 0,
+                        negative: 0,
+                        neutral: 0
+                    };
+                },
+                (prev, current) => {
+                    return {
+                        time: prev.time,
+                        positive: prev.positive + (current.sentiment > 0.01 ? 1 : 0),
+                        negative: prev.negative + (current.sentiment < -0.01 ? 1 : 0),
+                        neutral: prev.neutral + (current.sentiment >= -0.01 && current.sentiment <= 0.01 ? 1 : 0),
+                    };
+                });
+            r([...agg.values()]);
         });
     }
 
