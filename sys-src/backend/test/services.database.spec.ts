@@ -25,18 +25,19 @@ describe("Elastic Database", () => {
     it("Should retrun Array with Strings with subreddit names", async () => {
         const db = new ElasticDb(s => null);
         const result = await db.getSubreddits();
-        assert.deepStrictEqual(result, ["r/123testsubreddit123"])
+        const res = result.filter(element => element === "r/123testsubreddit123");
+        assert.deepStrictEqual(res, ["r/123testsubreddit123"])
     })
 
     it("Should retrun Array with TimeSentiments", async () => {
         const db = new ElasticDb(s => null);
         const result = await db.getSentiments('r/123testsubreddit123', new Date(Date.UTC(2022, 5, 13, 10, 0, 0, 0)), new Date(Date.UTC(2022, 5, 13, 11, 0, 0, 0)), ['fox']);
-        assert.deepStrictEqual(result, [{ time: '2022-06-13T10:30:00.000Z', sentiment: 0.123 }])
+        assert.deepStrictEqual(result, [{ time: new Date(Date.UTC(2022, 5, 13, 0, 0, 0, 0)), positive: 1, negative: 0, neutral: 0 }])
     })
 
     it("should retrun true if the Comment was successfully deleted", async () => {
         const db = new ElasticDb(s => null);
-        const result = await db.deleteComment('r/123testsubreddit123')
+        const result = await db.deleteComment('r/123testsubreddit123');
         assert.deepStrictEqual(result, true);
     })
 
@@ -57,13 +58,14 @@ describe("Elastic Database", () => {
     it("Should retrun Array with Strings with stock names", async () => {
         const db = new ElasticDb(s => null);
         const result = await db.getStocks();
-        assert.deepStrictEqual(result, ["123testaktie123"])
+        const res = result.filter(element => element === "123testaktie123");
+        assert.deepStrictEqual(res, ["123testaktie123"])
     })
 
     it("Should retrun Array with TimeFinance", async () => {
         const db = new ElasticDb(s => null);
         const result = await db.getFinance('123testaktie123', new Date(Date.UTC(2022, 5, 17, 11, 0, 0, 0)), new Date(Date.UTC(2022, 5, 17, 12, 0, 0, 0)));
-        assert.deepStrictEqual(result, [{ time: '2022-06-17T11:30:00.000Z', close: 0 }])
+        assert.deepStrictEqual(result, [{ time: new Date(Date.UTC(2022, 5, 17, 11, 30, 0, 0)), close: 0 }])
     })
 
     it("should return true, if the financial data was successfully deleted", async () => {
