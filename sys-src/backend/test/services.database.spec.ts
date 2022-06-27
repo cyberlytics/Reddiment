@@ -25,7 +25,8 @@ describe("Elastic Database", () => {
     it("Should retrun Array with Strings with subreddit names", async () => {
         const db = new ElasticDb(s => null);
         const result = await db.getSubreddits();
-        assert.deepStrictEqual(result, ["r/123testsubreddit123", "r/wallstreetbets"])
+        const res = result.filter(element => element === "r/123testsubreddit123");
+        assert.deepStrictEqual(res, ["r/123testsubreddit123"])
     })
 
     it("Should retrun Array with TimeSentiments", async () => {
@@ -36,7 +37,7 @@ describe("Elastic Database", () => {
 
     it("should retrun true if the Comment was successfully deleted", async () => {
         const db = new ElasticDb(s => null);
-        const result = await db.deleteComment('r/123testsubreddit123')
+        const result = await db.deleteComment('r/123testsubreddit123');
         assert.deepStrictEqual(result, true);
     })
 
@@ -57,7 +58,8 @@ describe("Elastic Database", () => {
     it("Should retrun Array with Strings with stock names", async () => {
         const db = new ElasticDb(s => null);
         const result = await db.getStocks();
-        assert.deepStrictEqual(result, ["123testaktie123"])
+        const res = result.filter(element => element === "123testaktie123");
+        assert.deepStrictEqual(res, ["123testaktie123"])
     })
 
     it("Should retrun Array with TimeFinance", async () => {
