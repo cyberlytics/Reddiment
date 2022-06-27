@@ -23,25 +23,7 @@ const SubredditResolver = {
         const to = args.to ?? date("9999-12-31Z");
         const from = args.from ?? date("0000-01-01Z");
         const sentiments = await context.db.getSentiments(parent.name, from, to, args.keywords);
-        const grouped = groupby(sentiments, s => daynumber(s.time));
-        const agg = aggregate(grouped,
-            (s, k) => {
-                return {
-                    time: new Date(k * MillisecondsPerDay),
-                    positive: 0,
-                    negative: 0,
-                    neutral: 0
-                };
-            },
-            (prev, current) => {
-                return {
-                    time: prev.time,
-                    positive: prev.positive + (current.sentiment > 0.01 ? 1 : 0),
-                    negative: prev.negative + (current.sentiment < -0.01 ? 1 : 0),
-                    neutral: prev.neutral + (current.sentiment >= -0.01 && current.sentiment <= 0.01 ? 1 : 0),
-                };
-            });
-        return agg.values();
+        return sentiments;
     }
 };
 
