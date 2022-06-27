@@ -28,7 +28,7 @@ const getRefreshedSubredditData = async (subreddit: Subreddit) => {
             }
         } catch { }
         if (fetchedComments.length === 0) {
-            setTimeout(doWork, 10 * 1000); // Try again in 10 seconds
+            setTimeout(doWork, 10 * 60 * 1000); // Try again in 10 minutes (this API does only return "new" comments, approx 1000. So fetching every few seconds does not help)
         }
     });
 }
