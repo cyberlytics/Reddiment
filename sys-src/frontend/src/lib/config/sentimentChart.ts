@@ -46,4 +46,4 @@ export const sentimentChart = {
         align: "center"
     },
 
-}
+};
