@@ -1,21 +1,26 @@
 <script lang="ts">
+    import { get } from "svelte/store";
     import { onMount } from "svelte";
-    import { browser } from '$app/env'
+    import { browser } from '$app/env';
     import {
         KQL_Subreddit,
         KQL_Subreddits,
         KQL_Stock
-    } from '$lib/graphql/_kitql/graphqlStores'
-    import Tags from 'svelte-tags-input'
+    } from '$lib/graphql/_kitql/graphqlStores';
+    import Tags from 'svelte-tags-input';
+    import { storedKeywords, storedSubreddit } from "$lib/stores/searchStore";
 
-    let subreddit: string
-    let keywords: string[]
+    let subreddit = get(storedSubreddit);
+    let keywords = get(storedKeywords);
     let date_from: Date;
     let date_to: Date;
 
     const changeStartDate = evt => date_from = evt.detail.date;
     const changeEndDate = evt => date_to = evt.detail.date;
-    const addTagInput = evt => keywords = [...evt.detail.tags];
+    const addTagInput = evt => {
+        keywords = [...evt.detail.tags];
+        storedKeywords.set(keywords);
+    }
 
     const handleSearch = () => {
         // Query subreddit data
@@ -26,7 +31,7 @@
                 from: date_from?.toISOString(),
                 to: date_to?.toISOString(),
             }
-        })
+        });
 
         // Query stock data
         browser && KQL_Stock.query({
@@ -35,11 +40,11 @@
                 from: date_from?.toISOString(),
                 to: date_to?.toISOString(),
             }
-        })
-    }
+        });
+    };
 
     onMount(async () => {
-        browser && await KQL_Subreddits.query({})
+        browser && await KQL_Subreddits.query({});
     });
 </script>
 
@@ -49,15 +54,16 @@
         id="subreddits"
         class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-1/6 p-2.5"
         bind:value={subreddit}
+        on:change={() => storedSubreddit.set(subreddit)}
     >
-        <option selected>Subreddit</option>
+        <option selected>{subreddit}</option>
         {#each $KQL_Subreddits.data?.subreddits ?? [] as subreddit}
             <option value={subreddit}>{subreddit}</option>
         {/each}
     </select>
 
     <div class="custom">
-        <Tags on:tags={addTagInput} placeholder="Schlüsselwörter" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
+        <Tags tags={keywords} on:tags={addTagInput} placeholder="Schlüsselwörter" addKeys={[13, 32, 39]} removeKeys={[8, 37]}/>
     </div>
 
     <div date-rangepicker class="flex items-center">
