@@ -6,7 +6,7 @@ describe("List.distinct", () => {
         const list1 = ['first', 'second', 'third'];
         const list2 = ['first', 'second', 'third', 'second', 'second', 'third'];
 
-        assert.deepStrictEqual(list1, distinct(list2));
+        assert.deepStrictEqual(distinct(list2), list1);
     });
 });
 
@@ -34,7 +34,7 @@ describe("List.groupby", () => {
             { p: 2, s: "5" }
         ]);
 
-        assert.deepStrictEqual(map, groupby(list, l => l.p));
+        assert.deepStrictEqual(groupby(list, l => l.p), map);
     });
 
     it("should group by the whole object", () => {
@@ -44,7 +44,7 @@ describe("List.groupby", () => {
         map.set('second', ['second', 'second', 'second']);
         map.set('third', ['third', 'third']);
 
-        assert.deepStrictEqual(map, groupby(list, l => l));
+        assert.deepStrictEqual(groupby(list, l => l), map);
     });
 });
 
@@ -53,7 +53,7 @@ describe("List.aggregate", () => {
         const data = new Map<number, number[]>();
         data.set(0, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
-        assert.deepStrictEqual(55, aggregate(data, n => 0, (p, c) => p + c).get(0));
+        assert.deepStrictEqual(aggregate(data, _ => 0, (p, c) => p + c).get(0), 55);
     });
 
     it("should aggregate multiple groups", () => {
@@ -62,8 +62,8 @@ describe("List.aggregate", () => {
         data.set(1, [-1, 2, -3, 4, -5, 6, -7, 8, -9, 10]);
 
         const agg = aggregate(data, n => 0, (p, c) => p + c);
-        assert.deepStrictEqual(55, agg.get(0));
-        assert.deepStrictEqual(5, agg.get(1));
+        assert.deepStrictEqual(agg.get(0), 55);
+        assert.deepStrictEqual(agg.get(1), 5);
     });
 
     it("should ignore a group containing of no elements", () => {
@@ -73,8 +73,8 @@ describe("List.aggregate", () => {
         data.set(2, []); // Empty!
 
         const agg = aggregate(data, n => 0, (p, c) => p + c);
-        assert.deepStrictEqual(55, agg.get(0));
-        assert.deepStrictEqual(5, agg.get(1));
-        assert.deepStrictEqual(false, agg.has(2));
+        assert.deepStrictEqual(agg.get(0), 55);
+        assert.deepStrictEqual(agg.get(1), 5);
+        assert.deepStrictEqual(agg.has(2), false);
     });
 });

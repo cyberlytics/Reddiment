@@ -8,19 +8,19 @@ describe("SimpleCache", () => {
     it("should store an item", () => {
         const c = new SimpleCache();
         c.set(defaultKey, defaultData);
-        assert.deepStrictEqual(defaultData, c.get<any>(defaultKey));
+        assert.deepStrictEqual(c.get<any>(defaultKey), defaultData);
     });
     it("should return undefined for any other key", () => {
         const c = new SimpleCache();
         c.set(defaultKey, defaultData);
-        assert.deepStrictEqual(undefined, c.get<any>("some other key"));
+        assert.deepStrictEqual(c.get<any>("some other key"), undefined);
     });
     it("should overwrite data already stored with the same key", () => {
         const c = new SimpleCache();
         const otherData = { test: "test!!!" };
         c.set(defaultKey, defaultData);
-        assert.deepStrictEqual(defaultData, c.get<any>(defaultKey));
+        assert.deepStrictEqual(c.get<any>(defaultKey), defaultData);
         c.set(defaultKey, otherData);
-        assert.deepStrictEqual(otherData, c.get<any>(defaultKey));
+        assert.deepStrictEqual(c.get<any>(defaultKey), otherData);
     });
 });
