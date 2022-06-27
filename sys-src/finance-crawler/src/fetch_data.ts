@@ -42,6 +42,7 @@ const getStockData = async (ticker: tickerJob) => {
         const options: any = { period1: startDate, period2: endDate, interval: '1d' };
         const results = await yahooFinance.historical(ticker.name, options);
         console.log(results);
+
         // fill in tickerResults for each day in results
         const tickerResults: tickerResult[] = [];
         for (const i in results) {
@@ -55,7 +56,7 @@ const getStockData = async (ticker: tickerJob) => {
                 volume: results[i].volume
             }
             // return response to backend
-            deliverTickerData(tickerResults);
+            await deliverTickerData(tickerResults);
         };
 
 
@@ -66,11 +67,23 @@ const crawlStocks = async () => {
     try {
         // get ticker names from backend
         const ticker = tickerJobs.pop();
-        if (ticker) {
-            await getStockData(ticker);
+        console.log("found ticker: %d", ticker);
+
+        if (!ticker) {
+            console.log("no ticker")
+            return
         }
+        let exists = Object.values(ticker).includes("name");
+        if (!exists) {
+            console.log("no name")
+            return
+        }
+
+        await getStockData(ticker);
+
     } catch (error) {
-        console.log(error);
+
+        console.log("catched error: %d", error);
     }
 }
 
