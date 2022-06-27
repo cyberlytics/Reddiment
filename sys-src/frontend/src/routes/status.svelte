@@ -2,7 +2,6 @@
     import { onMount } from "svelte";
     import { browser } from '$app/env';
     import { KQL_Health } from '../lib/graphql/_kitql/graphqlStores.js';
-    import { services } from "../lib/mocks/healthMock";
 
     onMount(async () => {
         browser && await KQL_Health.query({})
@@ -27,7 +26,7 @@
             </tr>
             </thead>
             <tbody>
-            {#each services as service}
+            {#each $KQL_Health.data?.health ?? [] as service}
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                         {service.name}
