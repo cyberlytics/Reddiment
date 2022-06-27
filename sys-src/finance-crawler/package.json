@@ -14,13 +14,14 @@
     "nodemon": "^2.0.16",
     "yahoo-finance2": "^2.3.3"
   },
-  "main": "build/server.js",
+  "main": "build/fetch_data.js",
   "scripts": {
-    "dev": "nodemon source/server.ts",
+    "dev": "nodemon source/fetch_data.ts",
     "prebuild": "",
     "build": "tsc",
     "prestart": "npm run build",
     "start": "node . ",
-    "test": "jest"
+    "test": "jest",
+    "start-node": "set \"BACKEND_ADDR=http://localhost:3000\" && ts-node src/fetch_data.ts"
   }
 }
