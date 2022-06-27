@@ -1,5 +1,5 @@
 import elasticsearch from '@elastic/elasticsearch';
-import esb, { BucketAggregationBase, Script } from 'elastic-builder'
+import esb from 'elastic-builder';
 import getSecret from '../util/secrets';
 import { date } from '../util/time';
 import { HealthCallback } from './serviceinterface';
@@ -206,7 +206,7 @@ class ElasticDb implements IDatabase {
                         .agg(
                             esb.histogramAggregation('sentimentagg', 'sentiment.interpretation', 1)
                         )
-                )
+                );
 
             const requestBodyObj = requestBody.toJSON();
             (requestBodyObj as any).runtime_mappings = {
