@@ -1,5 +1,5 @@
 import elasticsearch from '@elastic/elasticsearch';
-import esb from 'elastic-builder'
+import esb, { BucketAggregationBase, Script } from 'elastic-builder'
 import getSecret from '../util/secrets';
 import { date } from '../util/time';
 import { HealthCallback } from './serviceinterface';
@@ -30,7 +30,9 @@ type DbComment = {
 
 type TimeSentiment = {
     time: Date,
-    sentiment: number,
+    positive: number,
+    negative: number,
+    neutral: number,
 };
 
 //Types Finance
@@ -199,33 +201,41 @@ class ElasticDb implements IDatabase {
                     //gte = Greater-than or equal to
                     //lte = Less-than or equal to
                 )
+                .agg(
+                    esb.dateHistogramAggregation('dayagg', 'timestamp').fixedInterval('1d')
+                        .agg(
+                            esb.histogramAggregation('sentimentagg', 'sentiment.interpretation', 1)
+                        )
+                )
 
-            //log request body
-            //const util = require('util')
-            //console.log(util.inspect(requestBody.toJSON(), {showHidden: false, depth: null, colors: true}))
+            const requestBodyObj = requestBody.toJSON();
+            (requestBodyObj as any).runtime_mappings = {
+                "sentiment.interpretation": {
+                    "type": "double",
+                    "script": 'double v = Double.parseDouble(doc[\'sentiment.keyword\'].value); if (v < -0.01) { emit(0); } else if (v > 0.01) { emit(2); } else { emit(1); }'
+                }
+            };
 
             //Get Data from elastic and save response to respArray
-            const respArray = new Array<elasticsearch.estypes.SearchHit<unknown>>();
             const resp = await this.client.search({
                 index: idx,
-                size: 10000,
-                body: requestBody.toJSON(),
-                fields: ['timestamp', 'sentiment'],
+                size: 0, // No hits because we use aggregations
+                body: requestBodyObj,
+                fields: [], // No fields needed because of aggregations
                 _source: false,
             });
 
-            for (let i = 0; i < resp.hits.hits.length; i++) {
-                respArray.push(resp.hits.hits[i]);
-            }
-
-            // Create Array from type TimeSentiment
+            //Write resopnse Data in Array of type TimeSentiment
             const timeSentiment: Array<TimeSentiment> = [];
-            respArray.forEach(r => {
+            const response: any = resp;
+            response.aggregations.dayagg?.buckets.forEach((element: any) => {
                 timeSentiment.push({
-                    time: date(r.fields?.timestamp[0]),
-                    sentiment: parseFloat(r.fields?.sentiment[0]),
+                    time: date(element.key_as_string),
+                    positive: element.sentimentagg.buckets?.find((b: any) => b.key === 2)?.doc_count ?? 0,
+                    neutral: element.sentimentagg.buckets?.find((b: any) => b.key === 1)?.doc_count ?? 0,
+                    negative: element.sentimentagg.buckets?.find((b: any) => b.key === 0)?.doc_count ?? 0,
                 });
-            })
+            });
 
             this.healthCallback('UP');
             return timeSentiment;
