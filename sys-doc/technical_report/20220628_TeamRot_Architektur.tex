@@ -55,11 +55,13 @@ In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht 
 Diese Sicht zeigt die statische Zerlegung des Systems in Bausteine sowie deren Beziehungen.
 
 \subsection{Gesamtsystem}
-Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung~\ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer. Die beiden Datenquellen für Reddiment sind
+Reddiment bezieht Daten aus mehreren Quellen und stellt diese dem Benutzer aggregiert bereit. Die folgende Abbildung~\ref{fig:context} zeigt die Interaktionen des Systems mit Fremdsystemen und dem Benutzer. Die Datenquellen für Reddiment sind
 \begin{itemize}
   \item Reddit-API für Subreddit-Daten und
   \item Yahoo Finance für Aktienmarkt-Daten.
 \end{itemize}
+
+Ein genauerer Überblick über die Architektur von Reddiment findet sich in Abbildung~\ref{fig:architecture}.
 
 \begin{figure}[ht]
 	\centering
@@ -104,11 +106,11 @@ In der NoSQL-Datenbank „Elasticsearch“~\cite{elasticsearch} werden Daten in 
 \end{center}
 \end{table}
 
-Die Aktien-Daten setzten sich aus den acht Feldern in Tabelle~\ref{tab:stock} zusammen.
+Die Aktienmarkt-Daten setzen sich aus den acht Feldern in Tabelle~\ref{tab:stock} zusammen.
 
 \begin{table}[h!]
 \begin{center}
-\caption{Reddit-Daten}
+\caption{Aktienmarkt-Daten}
 \label{tab:stock}
 \begin{tabular}{|l|l|}
 \textbf{Feld} & \textbf{Beschreibung}\\
@@ -131,6 +133,14 @@ Elasticsearch verwendet eine global eindeutige ID für jedes Dokument. Bei Dokum
 
 Im Backend wird das Paket „Elasticsearch Node.js client“~\cite{elasticnode} verwendet. Das Paket enthält einen Client, der eine Verbindung zur Datenbank herstellt. In der TypeScript-Datei \texttt{backend/src/services/database.ts} befindet sich der Quellcode zur Kommunikation mit der Datenbank.
 
+\begin{figure*}[ht]
+	\centering
+	\includegraphics[width=\linewidth]{architecture}
+	\caption{Überblick über die Architektur von Reddiment. Die Architektur besteht aus vier Teilen: Das Frontend bietet dem Nutzer ein graphisches Dashboard zur Visualisierung der Metriken (Abschnitt~\ref{sub:frontend}),  das Backend stellt (Abschnitt~\ref{sub:backend}) die GraphQL-API bereit, die Datenbank (Abschnitt~\ref{sub:database}) speichert persistent Reddit- und Aktienmarkt-Daten, und die Dienste (Abschnitt~\ref{sub:services}) führen die Sentiment-Analyse aus und beschaffen die Rohdaten.}
+	\label{fig:architecture}
+\end{figure*}
+
+
 \subsection{Dienste} \label{sub:services}
 
 Dieser Abschnitt beschreibt die Dienste (engl. Services) des Gesamtsystems Reddiment. Es gibt drei Dienste: Sentiment, Reddit-Crawler und Stock-Market-Crawler.
@@ -147,13 +157,6 @@ Mit dem API-Key und den Anmeldedaten für das zugehörige Reddit-Konto kann ein 
 
 Der Reddit-Crawler stellt in einem zeitlichen Intervall eine Anfrage an das Backend und erhält eine Liste mit Subreddit-Namen. Kommentare dieser Subreddits sollen von Reddit abgefragt und an das Backend gesendet werden.
 Das Sammeln der Kommentare erfolgt zyklisch, um das Rate-Limit nicht zu überschreiten. Pro Sammelzyklus werden die Kommentare an das Backend übermittelt.
-
-\begin{figure*}[ht]
-	\centering
-	\includegraphics[width=\linewidth]{architecture}
-	\caption{Überblick über die Architektur von Reddiment. Die Architektur besteht aus vier Teilen: Das Frontend bietet dem Nutzer ein graphisches Dashboard zur Visualisierung der Metriken (Abschnitt \ref{sub:frontend}),  das Backend stellt (Abschnitt \ref{sub:backend}) die GraphQL API bereit,  die Datenbank (Abschnitt \ref{sub:database}) speichert persistent Reddit und Aktienmarkt Daten,  und den Diensten (Abschnitt \ref{sub:services}) zur Sentiment Analyse als auch zum crawlen der Daten von APIs.}
-	\label{fig:architecture}
-\end{figure*}
 
 \subsubsection{Stock-Market-Crawler}
 
