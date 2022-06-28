@@ -57,8 +57,10 @@
         on:change={() => storedSubreddit.set(subreddit)}
     >
         <option selected>{subreddit}</option>
-        {#each $KQL_Subreddits.data?.subreddits ?? [] as subreddit}
-            <option value={subreddit}>{subreddit}</option>
+        {#each $KQL_Subreddits.data?.subreddits ?? [] as _subreddit}
+            {#if _subreddit !== subreddit}
+                <option value={_subreddit}>{_subreddit}</option>
+            {/if}
         {/each}
     </select>
 
