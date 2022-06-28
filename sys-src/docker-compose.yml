@@ -48,13 +48,13 @@ services:
       - reddit_login_password
       - reddit_client_secret
 
-#  shares_crawler:
-#    build: ./shares_crawler
-#    restart: always
-#    container_name: shares_crawler
-#    hostname: shares_crawler
-#    secrets:
-#      - backend_access_key
+  finance_cralwer:
+    build: ./finance_cralwer
+    restart: always
+    container_name: finance_cralwer
+    hostname: finance_cralwer
+    secrets:
+      - backend_access_key
 
   elasticsearch:
     container_name: elasticsearch

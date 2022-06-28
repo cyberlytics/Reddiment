@@ -101,7 +101,7 @@ class DbMock implements IDatabase {
         return new Promise((s) => s(true));
     }
 
-    private addFinanceRaW(stock: string, timestamp: Date, open: number, high: number, low: number, close: number, adjClose: number, volume: number): void {
+    private addFinanceRaW(stock: string, timestamp: Date, open: number, high: number, low: number, close: number, volume: number): void {
         this.addFinance({
             stock: stock,
             timestamp: timestamp,
@@ -109,7 +109,6 @@ class DbMock implements IDatabase {
             high: high,
             low: low,
             close: close,
-            adjClose: adjClose,
             volume: volume,
         });
     }
@@ -152,12 +151,12 @@ class DbMock implements IDatabase {
         this.addCommentRaw("r/place", "the black fox jumps over the small dog", date("2022-05-28Z"), 0.04);
 
 
-        this.addFinanceRaW('VW', date("2022-05-28Z"), 100, 150, 40, 112, 113, 464732)
-        this.addFinanceRaW('VW', date("2022-06-28Z"), 120, 180, 50, 145, 110, 461232)
-        this.addFinanceRaW('VW', date("2022-07-28Z"), 10, 170, 60, 160, 111, 465782)
-        this.addFinanceRaW('VW', date("2022-08-28Z"), 140, 140, 70, 130, 112, 465452)
-        this.addFinanceRaW('VW', date("2022-09-28Z"), 170, 170, 80, 160, 113, 465122)
-        this.addFinanceRaW('VW', date("2022-10-28Z"), 30, 160, 90, 150, 114, 4651452)
+        this.addFinanceRaW('VW', date("2022-05-28Z"), 100, 150, 40, 112, 113)
+        this.addFinanceRaW('VW', date("2022-06-28Z"), 120, 180, 50, 145, 110)
+        this.addFinanceRaW('VW', date("2022-07-28Z"), 10, 170, 60, 160, 111)
+        this.addFinanceRaW('VW', date("2022-08-28Z"), 140, 140, 70, 130, 112)
+        this.addFinanceRaW('VW', date("2022-09-28Z"), 170, 170, 80, 160, 113)
+        this.addFinanceRaW('VW', date("2022-10-28Z"), 30, 160, 90, 150, 114)
     }
 }
 
