@@ -40,14 +40,27 @@ const getRefreshedSubredditData = async (subreddit: Subreddit) => {
                 let newlyFetchedSubmissions = 1; // Dummy value
                 try {
                     while (newlyFetchedSubmissions > 0) {
-                        fetchedSubmissions = await fetchedSubmissions.fetchMore({ amount: 100, skipReplies: false, append: false });
+                        try {
+                            fetchedSubmissions = await fetchedSubmissions.fetchMore({ amount: 100, skipReplies: false, append: false });
+                        }
+                        catch (e: any) {
+                            console.log('Error while fetching submissions [trying again]', e);
+                            newlyFetchedSubmissions = 1; // Dummy value
+                            continue;
+                        }
                         newlyFetchedSubmissions = fetchedSubmissions.length;
                         console.log(`Fetched another ${fetchedSubmissions.length} Submissions`);
 
                         for (let i = 0; i < fetchedSubmissions.length; i++) {
-                            const comments = await fetchedSubmissions[i].comments.fetchAll();
-                            for (let j = 0; j < comments.length; j++) {
-                                await transmitComment(comments[j]);
+                            try {
+                                const comments = await fetchedSubmissions[i].comments.fetchAll();
+                                for (let j = 0; j < comments.length; j++) {
+                                    await transmitComment(comments[j]);
+                                }
+                                console.log(`Transmitted another ${comments.length} comments`);
+                            } catch (e: any) {
+                                console.log('Error while fetching comments of submission [trying again]', e);
+                                i--;
                             }
                         }
                         console.log(`Done transmitting comments`);
