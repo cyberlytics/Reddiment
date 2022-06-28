@@ -48,11 +48,11 @@ services:
       - reddit_login_password
       - reddit_client_secret
 
-  finance_cralwer:
-    build: ./finance-cralwer
+  finance_crawler:
+    build: ./finance-crawler
     restart: always
-    container_name: finance_cralwer
-    hostname: finance_cralwer
+    container_name: finance_crawler
+    hostname: finance_crawler
     secrets:
       - backend_access_key
 
