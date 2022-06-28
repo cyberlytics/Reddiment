@@ -161,7 +161,7 @@ Das Sammeln der Kommentare erfolgt zyklisch, um das Rate-Limit nicht zu übersch
 \subsubsection{Stock-Market-Crawler}
 
 Um den Verlauf des Sentiments in der Vergangenheit auch mit der tatsächlichen Marktlage vergleichen zu können,
-gibt es einen reaktiven Stock-Market-Crawler mit einer REST-API für Marktdaten. Dieser hat den Endpunkt \texttt{/post} und erwartet ein valides \textit{Tickersymbol}(Aktienkürzel) einer Aktie. Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} abgefragt und zurückgegeben.
+gibt es einen proaktiven Stock-Market-Crawler. Dieser stellt, wie der Reddit-Crawler, in einem zeitlichen Intervall eine Anfrage an das Backend und erhält eine Liste mit  \textit{Tickersymbolen}(Aktienkürzel). Der zugehörige Aktienkurs wird von \textit{Yahoo-Finance} abgefragt und zurückgegeben.
 
 \subsection{Frontend} \label{sub:frontend}
 Dieser Abschnitt beschreibt die client-seitige Frontend-Architektur. Das Frontend wird unter Zuhilfenahme des Frontend-Frameworks „SvelteKit“~\cite{sveltekit} realisiert. Das Frontend besteht aus zwei Bausteinen: 1) den Routen zur Navigation, und 2) der \textit{Library} für Komponenten und weitere Module.
