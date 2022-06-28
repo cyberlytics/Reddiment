@@ -43,7 +43,6 @@ type DbFinance = {
     high: number,
     low: number,
     close: number,
-    adjClose: number,
     volume: number,
 };
 
@@ -341,7 +340,7 @@ class ElasticDb implements IDatabase {
             // Noch nicht fertig -> genaue Daten fehlen
             const prefix: string = "f_";
             const teilen: string = "_";
-            const fidx = prefix.concat(finance.stock);
+            const fidx = prefix.concat(finance.stock.toLowerCase());
             //console.log(finance.stock.concat(teilen, finance.timestamp.toDateString()))
             //Check if the stock already exists --> id
             const stockExist = await this.client.exists({
@@ -362,7 +361,6 @@ class ElasticDb implements IDatabase {
                             high: finance.high.toFixed(2),
                             low: finance.low.toFixed(2),
                             close: finance.close.toFixed(2),
-                            adjClose: finance.adjClose.toFixed(2),
                             volume: finance.volume.toFixed(2),
                         },
                         doc_as_upsert: true
@@ -372,7 +370,7 @@ class ElasticDb implements IDatabase {
                 //refresh Index
                 await this.client.indices.refresh({ index: fidx });
                 this.healthCallback('UP');
-                if (stockRes.result === 'updated') {
+                if (stockRes.result === 'updated' || stockRes.result === 'noop') {
                     return true;
                 } else {
                     return false;
@@ -390,7 +388,6 @@ class ElasticDb implements IDatabase {
                         high: finance.high.toFixed(2),
                         low: finance.low.toFixed(2),
                         close: finance.close.toFixed(2),
-                        adjClose: finance.adjClose.toFixed(2),
                         volume: finance.volume.toFixed(2),
                     }
                 });
@@ -421,7 +418,7 @@ class ElasticDb implements IDatabase {
     public async getFinance(stock: string, from: Date, to: Date,): Promise<Array<TimeFinance>> {
         try {
             //create Index with prefix
-            const fidx = "f_" + stock;
+            const fidx = "f_" + stock.toLowerCase();
             //create query
             const queryFBody = new esb.RequestBodySearch()
                 .query(esb.boolQuery()

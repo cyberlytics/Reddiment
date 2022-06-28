@@ -54,7 +54,6 @@ const typeDefs = gql`
         date: Date!
         open: Float
         close: Float!
-        adjClose: Float
         volume: Float
         high: Float
         low: Float

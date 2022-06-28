@@ -23,6 +23,6 @@
     "prestart": "npm run build",
     "start": "node . ",
     "test": "jest",
-    "start-node": "set \"BACKEND_ADDR=http://localhost:3000\" && ts-node src/fetch_data.ts"
+    "start-node": "set \"BACKEND_ADDR=localhost:4000\" && ts-node src/fetch_data.ts"
   }
 }

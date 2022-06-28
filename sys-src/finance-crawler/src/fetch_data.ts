@@ -1,6 +1,5 @@
 
 import yahooFinance from 'yahoo-finance2';
-import { formatDate } from './utils';
 import { verifyTicker } from './utils';
 import { deliverTickerData, tickerJobs, addTicker } from './connection';
 import { tickerJob, tickerResult } from './types';
@@ -22,24 +21,10 @@ const getStockData = async (ticker: tickerJob) => {
             error: 'Start date is not set'
         }
     }
-    // set startDate to the current date minus one day
-    let startDate: string = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
-    // set startdate if given from ticker
-    if (ticker.startDate) {
-        startDate = ticker.startDate;
-    }
-    // set endDate to the current date
-    let endDate: string = formatDate(new Date());
-    // set endDate if given from ticker
-    if (ticker.endDate) {
-        endDate = ticker.endDate;
-    }
-    else {
 
-    }
     if (verifyTicker(ticker.name)) {
         // options for api call
-        const options: any = { period1: startDate, period2: endDate, interval: '1d' };
+        const options: any = { period1: ticker.startDate, period2: ticker.endDate, interval: '1d' };
         const results = await yahooFinance.historical(ticker.name, options);
 
         // fill in tickerResults for each day in results
@@ -47,19 +32,16 @@ const getStockData = async (ticker: tickerJob) => {
         for (const i in results) {
             const tickerResult: tickerResult = {
                 name: ticker.name,
-                date: formatDate(results[i].date),
+                date: results[i].date.toISOString(),
                 open: results[i].open,
                 high: results[i].high,
                 low: results[i].low,
                 close: results[i].close,
                 volume: results[i].volume
-            }
-            // return response to backend
-            console.log(tickerResult);
-            await deliverTickerData(tickerResults);
+            };
+            tickerResults.push(tickerResult);
         };
-
-
+        await deliverTickerData(tickerResults);
     }
 };
 
@@ -77,9 +59,8 @@ const crawlStocks = async () => {
                 const ticker = tickerJobs.pop();
 
                 if (ticker) {
-                    console.log("found ticker: %d", ticker.name);
-                    let exists = Object.values(ticker).includes("name");
-                    if (exists) {
+                    console.log("found ticker:", ticker?.name);
+                    if (typeof ticker?.name !== 'undefined') {
                         await getStockData(ticker);
                     }
                 }
@@ -87,11 +68,10 @@ const crawlStocks = async () => {
         }
 
     } catch (error) {
-
-        console.log("catched error: %d", error);
+        console.log("catched error:", error);
     };
 };
 
-//24 * 60 * 60 * 1000
 
-setInterval(crawlStocks, 60 * 1000);
+setTimeout(crawlStocks, 10 * 1000); // Start in 10 Seconds
+setInterval(crawlStocks, 10 * 60 * 1000); // Every 10 minutes

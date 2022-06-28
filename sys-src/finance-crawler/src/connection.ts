@@ -1,29 +1,31 @@
 
 import { tickerJob, tickerResult } from "./types";
-import { formatDate } from "./utils";
 
 
 // backendurl to get the tickers and send the reuslts to.
 const BackendURL = `http://${process.env.BACKEND_ADDR}/graphql`;
 
+const startDate = new Date(Date.parse("2020-01-01T00:00:00Z")).toISOString();
+const endDate = new Date().toISOString();
+
 const dailyTickers = [
-    { name: 'AAPL', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'MSFT', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'AMZN', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'GOOG', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'FB', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'TWTR', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'TSLA', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'NFLX', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'BABA', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'NVDA', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'AMD', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'INTC', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'CSCO', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'CMCSA', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'TXN', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'PYPL', startDate: formatDate(new Date()), endDate: formatDate(new Date()) },
-    { name: 'QCOM', startDate: formatDate(new Date()), endDate: formatDate(new Date()) }
+    { name: 'AAPL', startDate: startDate, endDate: endDate },
+    { name: 'MSFT', startDate: startDate, endDate: endDate },
+    { name: 'AMZN', startDate: startDate, endDate: endDate },
+    { name: 'GOOG', startDate: startDate, endDate: endDate },
+    { name: 'FB', startDate: startDate, endDate: endDate },
+    { name: 'TWTR', startDate: startDate, endDate: endDate },
+    { name: 'TSLA', startDate: startDate, endDate: endDate },
+    { name: 'NFLX', startDate: startDate, endDate: endDate },
+    { name: 'BABA', startDate: startDate, endDate: endDate },
+    { name: 'NVDA', startDate: startDate, endDate: endDate },
+    { name: 'AMD', startDate: startDate, endDate: endDate },
+    { name: 'INTC', startDate: startDate, endDate: endDate },
+    { name: 'CSCO', startDate: startDate, endDate: endDate },
+    { name: 'CMCSA', startDate: startDate, endDate: endDate },
+    { name: 'TXN', startDate: startDate, endDate: endDate },
+    { name: 'PYPL', startDate: startDate, endDate: endDate },
+    { name: 'QCOM', startDate: startDate, endDate: endDate }
 ];
 
 // define a variable to store the current tickers as a list of tickerJob
@@ -34,27 +36,34 @@ export let tickerJobs: tickerJob[] = [];
 export async function deliverTickerData(results: tickerResult[]) {
     try {
         for (const i in results) {
-            const resp = await fetch(BackendURL, {
+            const response = await fetch(BackendURL, {
                 method: 'POST',
                 body: JSON.stringify({
-                    query: "mutation AddTicker($ticker: Ticker!) {addTicker(ticker: $ticker)}",
+                    query: "mutation AddStock($stock: RawStock!) { addStock(stock: $stock) }",
                     variables: {
-                        ticker: {
-                            name: results[i].name,
+                        stock: {
+                            stockName: results[i].name,
                             date: results[i].date,
                             open: results[i].open,
                             high: results[i].high,
                             low: results[i].low,
                             close: results[i].close,
-                            volume: results[i].volume
+                            volume: results[i].volume,
                         }
                     },
-                    operationName: 'addTicker'
+                    operationName: 'AddStock'
                 }),
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
+            const result = await response.json();
+            if (result?.data?.addComment === true) {
+                // Do nothing as everything worked perfectly
+            }
+            else {
+                console.log(result);
+            }
         };
 
     } catch (error) {
@@ -65,31 +74,12 @@ export async function deliverTickerData(results: tickerResult[]) {
 // funciton to add a ticker to the list of tickers
 export async function addTicker() {
     try {
-
-        // add tickers to the list of tickers from backend
-        // fetch backendurl and get tickerjobs
-        // const resp = await fetch(BackendURL, {
-        //     method: 'POST',
-        //     body: JSON.stringify({
-        //         query: "query GetTickers {getTickers}",
-        //         operationName: 'getTickers'
-        //     }),
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     }
-        // });
-        // const data = await resp.json();
-        // tickerJobs = data.data.getTickers;
-
-        // ...
         if (tickerJobs.length === 0) {
             tickerJobs = dailyTickers;
         }
 
 
-        // additional tickers that should be monitored anyway
-
-
+        // tickers that should be monitored
         for (const i in tickerJobs) {
             const currentTicker: tickerJob = {
                 name: tickerJobs[i].name,
@@ -106,4 +96,5 @@ export async function addTicker() {
 }
 
 
-//setTimeout(addTicker, 24 * 60 * 60 * 1000); // every day
+addTicker();    // Run now
+setInterval(addTicker, 10 * 60 * 1000); // every 10 Minutes

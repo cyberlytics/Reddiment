@@ -50,7 +50,6 @@ const MutationResolver = {
     addStock: async (parent: {}, args: { stock: RawStock }, context: Context, info: Info): Promise<boolean> => {
         return await context.db.addFinance({
             timestamp: new Date(daynumber(args.stock.date) * MillisecondsPerDay),
-            adjClose: args.stock.adjClose ?? 0,
             stock: args.stock.stockName,
             close: args.stock.close,
             high: args.stock.high ?? 0,
