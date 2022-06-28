@@ -1,9 +1,12 @@
+# Define some variables
 
-## Dockerfile modified from Backend!
+ARG image=node:18-alpine
 
+# Modified from source: https://towardsdev.com/writing-a-docker-file-for-your-node-js-typescript-micro-service-c5170b957893
 
-FROM image=node:18-alpine
-
+FROM $image as builder
+# The following ARG-lines are needed to pass arguments from "before the FROM-line" to "after the FROM-line"
+ARG image
 
 # Create folders for node_modules
 RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
@@ -28,6 +31,11 @@ COPY --chown=node:node src/ .
 RUN npm run build
 
 
+#################
+
+FROM $image
+# The following ARG-lines are needed to pass arguments from "before the FROM-line" to "after the FROM-line"
+ARG image
 
 RUN mkdir -p /app/node_modules && chown -R node:node /app
 WORKDIR /app
@@ -37,5 +45,7 @@ USER node
 RUN npm install --omit=dev
 COPY --from=builder /home/node/app/build ./build
 
+ENV PRODUCTION=true
+EXPOSE $port
 
-CMD [ "node", "build/src/fetch_data.js" ]
+CMD [ "node", "build/fetch_data.js" ]
