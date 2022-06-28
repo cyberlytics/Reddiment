@@ -15,7 +15,7 @@ export let subredditQueue = new Array<Snoowrap.Subreddit>();
  */
 export async function transmitComment(comment: Snoowrap.Comment) {
     try {
-        const response =  await fetch(BackendURL, {
+        const response = await fetch(BackendURL, {
             method: 'post',
             body: JSON.stringify({
                 query: "mutation AddComment($comment: Comment!) {addComment(comment: $comment)}",
@@ -37,7 +37,13 @@ export async function transmitComment(comment: Snoowrap.Comment) {
                 'Content-Type': 'application/json',
             },
         });
-        console.log(await response.json());
+        const result = await response.json();
+        if (result?.data?.addComment === true) {
+            // Do nothing as everything worked perfectly
+        }
+        else {
+            console.log(result);
+        }
     } catch (error) {
         console.log('error', error);
     }
