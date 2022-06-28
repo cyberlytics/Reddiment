@@ -2,8 +2,10 @@
  * Reddit Crawler
  */
 
-import { Subreddit } from "snoowrap";
+import { Submission, Subreddit } from "snoowrap";
 import { transmitComment, subredditQueue } from "./backendConnection";
+
+const submissionsAlreadyFetched = new Array<string>();
 
 const getRefreshedSubredditData = async (subreddit: Subreddit) => {
     subreddit.refresh().then(async refreshedSubreddit => {
@@ -26,8 +28,51 @@ const getRefreshedSubredditData = async (subreddit: Subreddit) => {
                 }
                 console.log(`Done transmitting comments`);
             }
-        } catch { }
+        }
+        catch (e: any) {
+            console.log('error', e);
+            process.exit(); // Exit process (Docker Compose will restart automatically)
+        }
         if (fetchedComments.length === 0) {
+            if (typeof submissionsAlreadyFetched.find(s => s === subreddit.name) === 'undefined') {
+                // get new submissions
+                let fetchedSubmissions = await refreshedSubreddit.getNew({});
+                let newlyFetchedSubmissions = 1; // Dummy value
+                try {
+                    while (newlyFetchedSubmissions > 0) {
+                        try {
+                            fetchedSubmissions = await fetchedSubmissions.fetchMore({ amount: 100, skipReplies: false, append: false });
+                        }
+                        catch (e: any) {
+                            console.log('Error while fetching submissions [trying again]', e);
+                            newlyFetchedSubmissions = 1; // Dummy value
+                            continue;
+                        }
+                        newlyFetchedSubmissions = fetchedSubmissions.length;
+                        console.log(`Fetched another ${fetchedSubmissions.length} Submissions`);
+
+                        for (let i = 0; i < fetchedSubmissions.length; i++) {
+                            try {
+                                const comments = await fetchedSubmissions[i].comments.fetchAll();
+                                for (let j = 0; j < comments.length; j++) {
+                                    await transmitComment(comments[j]);
+                                }
+                                console.log(`Transmitted another ${comments.length} comments`);
+                            } catch (e: any) {
+                                console.log('Error while fetching comments of submission [trying again]', e);
+                                i--;
+                            }
+                        }
+                        console.log(`Done transmitting comments`);
+                    }
+                }
+                catch (e: any) {
+                    console.log('error', e);
+                    process.exit(); // Exit process (Docker Compose will restart automatically)
+                }
+
+                submissionsAlreadyFetched.push(subreddit.name);
+            }
             setTimeout(doWork, 10 * 60 * 1000); // Try again in 10 minutes (this API does only return "new" comments, approx 1000. So fetching every few seconds does not help)
         }
     });
