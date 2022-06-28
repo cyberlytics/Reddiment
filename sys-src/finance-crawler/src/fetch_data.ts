@@ -2,7 +2,7 @@
 import yahooFinance from 'yahoo-finance2';
 import { formatDate } from './utils';
 import { verifyTicker } from './utils';
-import { deliverTickerData, tickerJobs } from './connection';
+import { deliverTickerData, tickerJobs, addTicker } from './connection';
 import { tickerJob, tickerResult } from './types';
 
 const getStockData = async (ticker: tickerJob) => {
@@ -41,7 +41,6 @@ const getStockData = async (ticker: tickerJob) => {
         // options for api call
         const options: any = { period1: startDate, period2: endDate, interval: '1d' };
         const results = await yahooFinance.historical(ticker.name, options);
-        console.log(results);
 
         // fill in tickerResults for each day in results
         const tickerResults: tickerResult[] = [];
@@ -56,6 +55,7 @@ const getStockData = async (ticker: tickerJob) => {
                 volume: results[i].volume
             }
             // return response to backend
+            console.log(tickerResult);
             await deliverTickerData(tickerResults);
         };
 
@@ -65,27 +65,33 @@ const getStockData = async (ticker: tickerJob) => {
 
 const crawlStocks = async () => {
     try {
-        // get ticker names from backend
-        const ticker = tickerJobs.pop();
-        console.log("found ticker: %d", ticker);
-
-        if (!ticker) {
-            console.log("no ticker")
-            return
+        console.log('crawling stocks');
+        console.log(tickerJobs);
+        // check if there are tickers to crawl
+        if (tickerJobs.length === 0) {
+            addTicker();
         }
-        let exists = Object.values(ticker).includes("name");
-        if (!exists) {
-            console.log("no name")
-            return
-        }
+        if (tickerJobs.length > 0) {
+            for (const i in tickerJobs) {
+                // get ticker names from backend
+                const ticker = tickerJobs.pop();
 
-        await getStockData(ticker);
+                if (ticker) {
+                    console.log("found ticker: %d", ticker.name);
+                    let exists = Object.values(ticker).includes("name");
+                    if (exists) {
+                        await getStockData(ticker);
+                    }
+                }
+            }
+        }
 
     } catch (error) {
 
         console.log("catched error: %d", error);
-    }
-}
+    };
+};
 
+//24 * 60 * 60 * 1000
 
-setTimeout(crawlStocks, 60 * 60 * 1000); // every 60 minutes
+setInterval(crawlStocks, 60 * 1000);
