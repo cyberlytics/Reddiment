@@ -155,7 +155,7 @@ Der Reddit-Crawler verwendet das Paket „snoowrap“~\cite{snoowrap}, das JavaS
 
 Mit dem API-Key und den Anmeldedaten für das zugehörige Reddit-Konto kann ein Objekt der Klasse \texttt{Snoowrap} erstellt werden. Mit diesem Objekt können Reddit-API-Aufrufe durchgeführt werden.
 
-Der Reddit-Crawler stellt in einem zeitlichen Intervall eine Anfrage an das Backend und erhält eine Liste mit Subreddit-Namen. Kommentare dieser Subreddits sollen von Reddit abgefragt und an das Backend gesendet werden.
+Der Reddit-Crawler stellt in einem zeitlichen Intervall eine Anfrage an das Backend und erhält eine Liste mit Subreddit-Namen. Kommentare, sowie Submission-Kommentare, dieser Subreddits sollen von Reddit abgefragt und an das Backend gesendet werden.
 Das Sammeln der Kommentare erfolgt zyklisch, um das Rate-Limit nicht zu überschreiten. Pro Sammelzyklus werden die Kommentare an das Backend übermittelt.
 
 \subsubsection{Stock-Market-Crawler}
