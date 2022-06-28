@@ -49,7 +49,7 @@ Dieser Technical Report beschreibt die Architektur von Reddiment -- ein webbasie
 
 In dem Subreddit \texttt{r/wallstreetbets}, auch bekannt als WallStreetBets oder WSB, wird über Aktien- und Optionshandel spekuliert. Er ist bekannt für seine profane Art und die Vorwürfe, dass Nutzer/innen Wertpapiere manipulieren und volatile Kursbewegungen auslösen. Anhand von Sentiment-Analyse sollen nun Subreddits in Bezug auf Aktienkursverläufe analysiert werden. Dazu soll ein webbasiertes Dashboard entwickelt werden, welches den zeitlichen Verlauf von Sentiment und Erwähnungen benutzerdefinierter Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenüberstellt.
 
-In den weiteren Abschnitten des Technical Reports wird zuerst die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im Nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz das Sicherheitskonzept in Abschnitt~\ref{s:secrets} vorgestellt und ein Fazit in Abschnitt~\ref{s:fazit} gegeben.
+In den weiteren Abschnitten des Technical Reports wird zuerst auf die Bausteinsicht des Gesamtsystems in Abschnitt~\ref{s:bausteinsicht} eingegangen. Im Nächsten Abschnitt~\ref{s:verteilungssicht} wird die Verteilungssicht der Anwendung beschrieben. In Abschnitt~\ref{s:entwicklungswerkzeuge} werden die angewandten Werkzeuge zur Entwicklung der Anwendung vorgestellt. Abschließend wird kurz das Sicherheitskonzept in Abschnitt~\ref{s:secrets} vorgestellt und ein Fazit in Abschnitt~\ref{s:fazit} gegeben.
 
 \section{Bausteinsicht} \label{s:bausteinsicht}
 Diese Sicht zeigt die statische Zerlegung des Systems in Bausteine sowie deren Beziehungen.
@@ -121,7 +121,6 @@ Die Aktienmarkt-Daten setzen sich aus den acht Feldern in Tabelle~\ref{tab:stock
 \texttt{high}		& Maximaler Tages-Wert\\
 \texttt{low}		& Minimaler Tages-Wert\\
 \texttt{close}		& Wert bei Tagesabschluss\\
-\texttt{adjClose}	& Dividenden-adjustierter Tagesabschluss-Wert\\
 \texttt{volume}		& Marktvolumen der gehandelten Aktie\\
 \end{tabular}
 \end{center}
@@ -216,7 +215,9 @@ Ein weiteres zu beachtendes Kriterium in diesem Sicherheitskonzept ist der Zugri
 \section{Fazit und Ausblick} \label{s:fazit}
 
 Reddiment ist ein webbasiertes Dashboard, welches den zeitlichen Verlauf von Sentiment und Erwähnungen bestimmter Schlüsselwörter in ausgewählten Subreddits dem Aktienverlauf gegenüberstellt. Durch die Auswahl eines Subreddits und eines oder mehrere Schlüsselwörter werden die Diagramme automatisiert mit den vorhandenen Daten befüllt.
-Durch die strikte Trennung von Front- und Backend besteht die Möglichkeit, verwendete APIs zu ersetzen oder Weitere einzubinden.
+Der Reddit-Crawler, zur kontinuierlichen Beschaffung von Reddit-Daten, hat bei der Umsetzung die meiste Zeit in Anspruch genommen. Gründe dafür waren zum Einen fehlende Vorkenntnisse in der Programmiersprache Typescript, aufgrund heterogener Vorkenntnisse der Team-Mitglieder, als auch Probleme mit der Dokumentation des verwendeten Moduls „snoowrap“. 
+
+Aufgrund der strikten Trennung von Front- und Backend  besteht die Möglichkeit, verwendete APIs zu ersetzen oder Weitere einzubinden. So ist es beispielsweise denkbar, neben den Aktienmarkt-Daten, Kursdaten für Kryptowährungen anzubinden. Dadurch könnte eine Vergleich von Sentiment und Erwähnungen gegenüber dem Kursverlauf einer Kryptowährung wie z.B. Bitcoin durchgeführt werden.
 
 \printbibliography
 
