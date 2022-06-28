@@ -425,6 +425,9 @@ class ElasticDb implements IDatabase {
                     .must(new esb.RangeQuery('timestamp')
                         .gte(from.toISOString().slice(0, -1))
                         .lte(to.toISOString().slice(0, -1)))
+                )
+                .sort(
+                    esb.sort('timestamp', 'asc')
                 );
 
             //Get Data from elastic and save response

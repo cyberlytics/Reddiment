@@ -5,7 +5,7 @@ import { tickerJob, tickerResult } from "./types";
 // backendurl to get the tickers and send the reuslts to.
 const BackendURL = `http://${process.env.BACKEND_ADDR}/graphql`;
 
-const startDate = new Date(Date.parse("2020-01-01T00:00:00Z")).toISOString();
+const startDate = new Date(Date.parse("2022-06-01T00:00:00Z")).toISOString();
 const endDate = new Date().toISOString();
 
 const dailyTickers = [
@@ -58,7 +58,7 @@ export async function deliverTickerData(results: tickerResult[]) {
                 }
             });
             const result = await response.json();
-            if (result?.data?.addComment === true) {
+            if (result?.data?.addStock === true) {
                 // Do nothing as everything worked perfectly
             }
             else {
