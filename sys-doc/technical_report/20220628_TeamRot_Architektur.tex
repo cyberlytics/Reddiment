@@ -16,6 +16,7 @@
 \usepackage{graphicx}
 \usepackage[ngerman]{babel}
 \usepackage[style=ieee]{biblatex}
+\usepackage{rotating}
 
 \addbibresource{references.bib}
 
@@ -219,7 +220,18 @@ Der Reddit-Crawler, zur kontinuierlichen Beschaffung von Reddit-Daten, hat bei d
 
 Aufgrund der strikten Trennung von Front- und Backend  besteht die Möglichkeit, verwendete APIs zu ersetzen oder Weitere einzubinden. So ist es beispielsweise denkbar, neben den Aktienmarkt-Daten, Kursdaten für Kryptowährungen anzubinden. Dadurch könnte eine Vergleich von Sentiment und Erwähnungen gegenüber dem Kursverlauf einer Kryptowährung wie z.B. Bitcoin durchgeführt werden.
 
+\newpage
+
 \printbibliography
+
+\newpage
+
+\begin{sidewaysfigure*}
+  \includegraphics[page=1, width=\columnwidth]{Reddiment_Overview}
+  \caption{Das Reddiment Dashboard. Die abgebildeten Suchanfrage enthält keine Schlüsselwörter, daher werden Sentiment und Erwähnungen aller Einträge in \texttt{r/wallstreetbets} angezeigt.}
+  \label{fig:extended_layers}
+  \end{sidewaysfigure*}
+
 
 \end{document}
 
