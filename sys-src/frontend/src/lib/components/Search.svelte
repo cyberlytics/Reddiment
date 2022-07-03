@@ -5,7 +5,8 @@
     import {
         KQL_Subreddit,
         KQL_Subreddits,
-        KQL_Stock
+        KQL_Stock,
+        KQL_Stocks
     } from '$lib/graphql/_kitql/graphqlStores';
     import Tags from 'svelte-tags-input';
     import { storedKeywords, storedSubreddit } from "$lib/stores/searchStore";
@@ -34,9 +35,12 @@
         });
 
         // Query stock data
-        browser && KQL_Stock.query({
+        browser &&
+        keywords?.length &&
+        $KQL_Stocks?.data?.stocks.includes(keywords[0].toLowerCase()) &&
+        KQL_Stock.query({
             variables: {
-                name: keywords[0],
+                name: keywords[0].toLowerCase(),
                 from: date_from?.toISOString(),
                 to: date_to?.toISOString(),
             }
@@ -45,7 +49,9 @@
 
     onMount(async () => {
         browser && await KQL_Subreddits.query({});
+        browser && await KQL_Stocks.query();
     });
+
 </script>
 
 <div class="flex justify-around m-4 pt-4 pb-4 bg-white rounded-lg">
