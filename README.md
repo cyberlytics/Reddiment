@@ -2,6 +2,9 @@
 
 Reddiment ist eine Webanwendung zur Sentiment Analyse von Reddit Posts.
 
+[Build & Run](#build-und-run)
+
+
 ## Workflow
 
 Im Folgenden werden nur die grundlegenden Schritte beschrieben, Informationen zu weiteren Vorgängen (Rebase, Amend Commits, etc.) sind beispielsweise hier zu finden: [https://git-scm.com/docs](https://git-scm.com/docs)
@@ -19,7 +22,7 @@ Im Folgenden werden nur die grundlegenden Schritte beschrieben, Informationen zu
 2. Wechseln ins Arbeitsverzeichnis:
    `cd reddiment`
 3. Setzen der Benutzer-Einstellungen:
-   `git config user.name "Max Mustermann"`  
+   `git config user.name "Max Mustermann"`
    `git config user.email "m.mustermann@oth-aw.de"`
 
 Das Arbeitsverzeichnis kann nun in der gewünschten IDE geöffnet werden.
@@ -45,7 +48,25 @@ Das Arbeitsverzeichnis kann nun in der gewünschten IDE geöffnet werden.
 
 1. Die vorgeschlagene Änderung sollte im Merge Request (MR) gut erklärt werden. Falls der MR eine offene Aufgabe schließt, sollte dies in der Beschreibung oder in der Commit Message mittels `Closes #<Issue-Nummer>` (z.B. `Closes #42`) erkennbar gemacht werden. Damit wird beim Mergen des MRs automatisch das entsprechende Issue geschlossen.
 2. Jeder MR muss von mindestens einem anderen Teammitglied begutachtet und approved werden.
-3. Merge Requests werden nur von einem Verantwortlichen pro Modul gemergt. Eigene MRs darf man nicht selbst mergen. 
+3. Merge Requests werden nur von einem Verantwortlichen pro Modul gemergt. Eigene MRs darf man nicht selbst mergen.
 4. Vor dem Mergen müssen Diskussionen abgeschlossen sein.
 5. Änderungsvorschläge dürfen ohne Absprache nicht direkt in die Zweige anderer Teammitglieder (erkennbar am Kürzel) gepusht werden, stattdessen kann beispielsweise die GitLab-Suggestion-Funktionalität verwendet werden.
 6. Niemand darf direkt in den `main`-Zweig pushen.
+
+---
+---
+
+## Build und Run
+
+Benötigte Software
+- Docker
+- Docker Compose
+
+1. In den Quellcode-Ordner wechseln
+   - `cd sys-src`
+2. Build (in Docker-Containern)
+   - `docker compose build`
+3. Run (in Docker-Containern)
+   - `docker compose up`
+4. Aufrufen der Website
+   - `http://localhost`
